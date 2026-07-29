@@ -5,6 +5,11 @@ const router = Router();
 
 const controller = new ChatController();
 
-router.post("/", controller.sendMessage);
+
+router.post(
+    "/",
+    controller.sendMessage.bind(controller)
+);
+
 
 export default router;

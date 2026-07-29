@@ -9,10 +9,12 @@ export class ChatController {
 
         const { game, question } = req.body;
 
-        const response = service.getAnswer(game, question);
+        const response = service.getAnswer(
+            game,
+            question
+        );
 
         res.json(response);
 
     }
-
 }
