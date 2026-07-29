@@ -4,6 +4,10 @@ import cors from "cors";
 import chatRoutes from "./routes/chat.routes";
 import gamesRoutes from "./routes/games.routes";
 
+import dotenv from "dotenv";
+
+dotenv.config();
+
 const app = express();
 
 app.use(cors());

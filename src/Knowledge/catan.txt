@@ -1,0 +1,23 @@
+# Construcción
+
+Para construir una carretera, el jugador debe gastar:
+
+- 1 madera
+- 1 arcilla
+
+Las carreteras deben conectarse a una carretera, asentamiento o ciudad propia.
+
+# Asentamientos
+
+Un asentamiento solo puede construirse en una intersección libre.
+
+Debe respetarse la regla de distancia de dos caminos.
+
+# Ciudades
+
+Una ciudad mejora un asentamiento existente.
+
+Cuesta:
+
+- 3 mineral
+- 2 trigo
