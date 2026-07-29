@@ -7,12 +7,9 @@ export class ChatController {
 
     sendMessage(req: Request, res: Response) {
 
-        const { game, question } = req.body;
+        const { gameId, question } = req.body;
 
-        const response = service.getAnswer(
-            game,
-            question
-        );
+        const response = service.getAnswer(gameId, question);
 
         res.json(response);
 
