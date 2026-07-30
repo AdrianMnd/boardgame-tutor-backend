@@ -1,5 +1,9 @@
-import { loadKnowledge } from "./knowlegde.service";
-import { findRelevantContext } from "./rag.service";
+import { loadKnowledge } from "./rag/knowledge.service";
+import { findRelevantContext } from "./rag/rag.service";
+
+import {
+    createProvider
+} from "./providers/provider.factory";
 
 export async function generateAnswer(
     gameId: number,
@@ -15,17 +19,12 @@ export async function generateAnswer(
             question
         );
 
-    return `
-=== CONTEXTO ENCONTRADO ===
+    const provider =
+        createProvider();
 
-${context}
-
-===========================
-
-Pregunta:
-${question}
-
-(De momento todavía no estamos usando IA.)
-`;
+    return await provider.ask(
+        question,
+        context
+    );
 
 }
