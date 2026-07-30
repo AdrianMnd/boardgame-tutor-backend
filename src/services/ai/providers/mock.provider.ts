@@ -1,4 +1,6 @@
 import type { AIProvider } from "./ai-provider";
+import type { AIResponse } from "../../../types/AIResponse";
+
 
 export class MockProvider
     implements AIProvider {
@@ -6,25 +8,29 @@ export class MockProvider
     async ask(
         question: string,
         context: string
-    ): Promise<string> {
+    ): Promise<AIResponse> {
 
-        return `
-=== RESPUESTA MOCK ===
+        return {
 
-Pregunta:
+    answer: `...`,
 
-${question}
+    provider: "mock",
 
--------------------------
+    model: "mock",
 
-Contexto encontrado:
+    durationMs: 1,
 
-${context}
+    usage: {
 
--------------------------
+        inputTokens: 0,
 
-Aquí respondería la IA real.
-`;
+        outputTokens: 0,
+
+        totalTokens: 0
+
+    }
+
+};
 
     }
 

@@ -45,10 +45,11 @@ export async function askQuestion(
 
 
 
-    return res.json({
+    const response = await generateAnswer(
+        gameId,
+        question
+    );
 
-        answer
-
-    });
+    res.json(response);
 
 }

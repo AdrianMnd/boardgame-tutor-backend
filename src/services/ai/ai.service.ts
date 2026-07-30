@@ -1,5 +1,6 @@
 import { loadKnowledge } from "./rag/knowledge.service";
 import { findRelevantContext } from "./rag/rag.service";
+import type { AIResponse } from "../../types/AIResponse";
 
 import {
     createProvider
@@ -8,7 +9,7 @@ import {
 export async function generateAnswer(
     gameId: number,
     question: string
-): Promise<string> {
+): Promise<AIResponse> {
 
     const knowledge =
         await loadKnowledge(gameId);

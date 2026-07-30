@@ -2,9 +2,15 @@ import { GoogleGenAI } from "@google/genai";
 
 import type { AIProvider } from "./ai-provider";
 
+import { BaseAIProvider } from "./base-ai.provider";
+
 import { SYSTEM_PROMPT } from "../prompts/system.prompt";
 
-export class GeminiProvider implements AIProvider {
+import type { AIResponse } from "../../../types/AIResponse";
+
+export class GeminiProvider
+    extends BaseAIProvider
+    implements AIProvider {
 
     private client: GoogleGenAI;
 
@@ -12,57 +18,84 @@ export class GeminiProvider implements AIProvider {
 
     constructor() {
 
-        const apiKey = process.env.GEMINI_API_KEY;
-
-        if (!apiKey) {
-
-            throw new Error(
-                "La variable GEMINI_API_KEY no está definida."
-            );
-
-        }
+        super();
 
         this.client = new GoogleGenAI({
-            apiKey
+
+            apiKey: this.getEnv(
+                "GEMINI_API_KEY"
+            )
+
         });
 
-        this.model =
-            process.env.GEMINI_MODEL ??
-            "gemini-2.5-flash";
+        this.model = this.getOptionalEnv(
+
+            "GEMINI_MODEL",
+
+            "gemini-2.5-flash"
+
+        );
 
     }
 
     async ask(
         question: string,
         context: string
-    ): Promise<string> {
+    ): Promise<AIResponse> {
 
-        const prompt = `
-${SYSTEM_PROMPT}
+        const {
 
-------------------------------------
+            result,
 
-CONTEXTO
+            durationMs
 
-${context}
+        } = await this.measure(async () =>
 
-------------------------------------
-
-PREGUNTA
-
-${question}
-`;
-
-        const response =
-            await this.client.models.generateContent({
+            this.client.models.generateContent({
 
                 model: this.model,
 
-                contents: prompt
+                config: {
 
-            });
+                    systemInstruction:
 
-        return response.text ?? "No se obtuvo respuesta.";
+                        SYSTEM_PROMPT
+
+                },
+
+                contents: `
+
+Contexto:
+
+${context}
+
+Pregunta:
+
+${question}
+
+`
+
+            })
+
+        );
+
+        return {
+
+            answer:
+
+                result.text ?? "",
+
+            provider:
+
+                "gemini",
+
+            model:
+
+                this.model,
+
+            durationMs
+
+        };
 
     }
 

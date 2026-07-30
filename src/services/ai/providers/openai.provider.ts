@@ -2,7 +2,15 @@ import OpenAI from "openai";
 
 import type { AIProvider } from "./ai-provider";
 
-export class OpenAIProvider implements AIProvider {
+import { BaseAIProvider } from "./base-ai.provider";
+
+import { SYSTEM_PROMPT } from "../prompts/system.prompt";
+
+import type { AIResponse } from "../../../types/AIResponse";
+
+export class OpenAIProvider
+    extends BaseAIProvider
+    implements AIProvider {
 
     private client: OpenAI;
 
@@ -10,57 +18,59 @@ export class OpenAIProvider implements AIProvider {
 
     constructor() {
 
-        const apiKey = process.env.OPENAI_API_KEY;
-
-        if (!apiKey) {
-
-            throw new Error(
-                "La variable OPENAI_API_KEY no está definida."
-            );
-
-        }
+        super();
 
         this.client = new OpenAI({
-            apiKey
+
+            apiKey: this.getEnv(
+                "OPENAI_API_KEY"
+            )
+
         });
 
-        this.model =
-            process.env.OPENAI_MODEL ?? "gpt-5-mini";
+        this.model = this.getOptionalEnv(
+
+            "OPENAI_MODEL",
+
+            "gpt-5-mini"
+
+        );
 
     }
 
     async ask(
         question: string,
         context: string
-    ): Promise<string> {
+    ): Promise<AIResponse> {
 
-        const response =
-            await this.client.responses.create({
+        const {
+
+            result,
+
+            durationMs
+
+        } = await this.measure(async () =>
+
+            this.client.responses.create({
 
                 model: this.model,
 
                 input: [
 
                     {
+
                         role: "system",
 
-                        content: `
-Eres un experto en reglas de juegos de mesa.
+                        content: SYSTEM_PROMPT
 
-Responde ÚNICAMENTE utilizando el contexto proporcionado.
-
-Si el contexto no contiene la respuesta, responde exactamente:
-
-"No he encontrado esa información en el reglamento disponible."
-
-Nunca inventes reglas.
-`
                     },
 
                     {
+
                         role: "user",
 
                         content: `
+
 Contexto:
 
 ${context}
@@ -68,14 +78,50 @@ ${context}
 Pregunta:
 
 ${question}
+
 `
+
                     }
 
                 ]
 
-            });
+            })
 
-        return response.output_text;
+        );
+
+        return {
+
+            answer:
+
+                result.output_text,
+
+            provider:
+
+                "openai",
+
+            model:
+
+                this.model,
+
+            durationMs,
+
+            usage: {
+
+                inputTokens:
+
+                    result.usage?.input_tokens,
+
+                outputTokens:
+
+                    result.usage?.output_tokens,
+
+                totalTokens:
+
+                    result.usage?.total_tokens
+
+            }
+
+        };
 
     }
 
