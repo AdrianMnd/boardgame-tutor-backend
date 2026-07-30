@@ -1,4 +1,4 @@
-import { ChatResponse } from "../types/chat";
+import { ChatResponse } from "../types/chat/Chat";
 
 export class ChatService {
 

@@ -1,4 +1,4 @@
-import type { AIResponse } from "../../../types/AIResponse";
+import type { AIResponse } from "../../../types/ai/AIResponse";
 
 export abstract class BaseAIProvider {
 

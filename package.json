@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx watch src/index.ts"
+    "dev": "tsx watch src/index.ts",
+    "import-game": "tsx src/application/commands/import-game.ts"
   },
   "keywords": [],
   "author": "",

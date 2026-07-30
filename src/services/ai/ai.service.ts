@@ -1,6 +1,6 @@
 import { loadKnowledge } from "./rag/knowledge.service";
 import { findRelevantContext } from "./rag/rag.service";
-import type { AIResponse } from "../../types/AIResponse";
+import type { AIResponse } from "../../types/ai/AIResponse";
 
 import {
     createProvider

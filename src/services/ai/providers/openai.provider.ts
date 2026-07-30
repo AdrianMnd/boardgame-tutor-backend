@@ -6,7 +6,7 @@ import { BaseAIProvider } from "./base-ai.provider";
 
 import { SYSTEM_PROMPT } from "../prompts/system.prompt";
 
-import type { AIResponse } from "../../../types/AIResponse";
+import type { AIResponse } from "../../../types/ai/AIResponse";
 
 export class OpenAIProvider
     extends BaseAIProvider

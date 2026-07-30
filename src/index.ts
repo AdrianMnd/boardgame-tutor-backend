@@ -4,8 +4,8 @@ console.log("OPENAI:", process.env.OPENAI_API_KEY);
 import express from "express";
 import cors from "cors";
 
-import chatRoutes from "./routes/chat.routes";
-import gamesRoutes from "./routes/games.routes";
+import chatRoutes from "./presentation/routes/chat.routes";
+import gamesRoutes from "./presentation/routes/games.routes";
 
 
 const app = express();

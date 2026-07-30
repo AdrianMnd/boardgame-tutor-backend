@@ -1,5 +1,5 @@
 import type { AIProvider } from "./ai-provider";
-import type { AIResponse } from "../../../types/AIResponse";
+import type { AIResponse } from "../../../types/ai/AIResponse";
 
 
 export class MockProvider
