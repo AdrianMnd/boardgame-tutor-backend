@@ -1,6 +1,6 @@
 import { promises as fs } from "fs";
 import path from "path";
-import { IFileSystem } from "./IFileSystem";
+import { IFileSystem } from "../../shared/contracts/IFileSystem";
 
 export class FileSystemService implements IFileSystem{
 

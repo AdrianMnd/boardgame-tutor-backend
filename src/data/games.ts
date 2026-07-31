@@ -1,4 +1,4 @@
-import { Game } from "../domain/game/Game";
+import { Game } from "../domain/game/types/Game";
 
 
 export const games: Game[] = [
