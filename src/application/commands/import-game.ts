@@ -7,6 +7,7 @@ import { TextCleaner } from "../../infrastructure/importer/textCleaner/textClean
 import { ImportGameUseCase } from "../use-cases/import-game/import-game.use-case";
 import { FakeEmbeddingProvider } from "../../domain/embeddings/fakeEmbeddingProvider";
 import { Pdf2JsonExtractor } from "../../infrastructure/importer/pdf/Pdf2JsonExtractor";
+import { ConsoleImportLogger } from "../logger/ConsoleimportLogger";
 
 async function main() {
 
@@ -28,11 +29,15 @@ async function main() {
 
     }
 
-    console.log("");
+    const logger =
+        new ConsoleImportLogger();
 
-    console.log(`Importando juego "${gameId}"...`);
+    logger.info(
 
-    console.log("");
+            `Importando juego "${gameId}"...`
+
+        );
+
 
     const fileSystem =
         new NodeFileSystem();
@@ -67,6 +72,8 @@ async function main() {
     const importer =
         new ImportGameUseCase(
 
+            logger,
+
             validator,
 
             extractor,
@@ -83,11 +90,11 @@ async function main() {
 
     await importer.execute(gameId);
 
-    console.log("");
+    logger.info(
 
-    console.log("Importación finalizada correctamente.");
+            "Importación finalizada con éxito."
 
-    console.log("");
+        );
 
 }
 

@@ -8,6 +8,7 @@ import {
 } from "./Pdf2JsonDocument";
 
 import { PdfTextMapper } from "./PdfTextMapper";
+import { ConsoleOutputSuppressor } from "../../../application/logger/ConsoleOutputSuppressor";
 
 export class Pdf2JsonExtractor
     implements IPDFExtractor {
@@ -20,7 +21,11 @@ export class Pdf2JsonExtractor
     ): Promise<ExtractedDocument> {
 
         const pdf =
-            await this.parse(pdfPath);
+        await ConsoleOutputSuppressor.run(
+
+            () => this.parse(pdfPath)
+
+        );
 
         return this.mapper.map(pdf);
 

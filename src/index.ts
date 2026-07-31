@@ -1,14 +1,15 @@
 import dotenv from "dotenv";
 dotenv.config();
-console.log("OPENAI:", process.env.OPENAI_API_KEY);
 import express from "express";
 import cors from "cors";
 
 import chatRoutes from "./presentation/routes/chat.routes";
 import gamesRoutes from "./presentation/routes/games.routes";
+import { ConsoleImportLogger } from "./application/logger/ConsoleimportLogger";
 
 
 const app = express();
+
 
 app.use(cors());
 app.use(express.json());
@@ -26,5 +27,10 @@ app.use("/api/chat", chatRoutes);
 const PORT = 3000;
 
 app.listen(PORT, () => {
-    console.log(`Servidor iniciado en http://localhost:${PORT}`);
+    const logger = new ConsoleImportLogger();
+    logger.info(
+
+            (`Servidor iniciado en http://localhost:${PORT}`)
+
+        );
 });

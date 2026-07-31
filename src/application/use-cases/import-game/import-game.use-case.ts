@@ -4,60 +4,89 @@ import { EmbeddingGenerator } from "../../../infrastructure/importer/embeddingGe
 import { KnowledgeWriter } from "../../../infrastructure/importer/knowledgeWriter/knowledgeWriter";
 import { TextCleaner } from "../../../infrastructure/importer/textCleaner/textCleaner";
 import type { IPDFExtractor } from "../../../shared/contracts/IPDFExtractor";
+import { IImportLogger } from "../../logger/IImportLogger";
 
 export class ImportGameUseCase {
 
     constructor(
 
-        private readonly validator: GameValidator,
+    private readonly logger: IImportLogger,
 
-        private readonly extractor: IPDFExtractor,
+    private readonly validator: GameValidator,
 
-        private readonly cleaner: TextCleaner,
+    private readonly extractor: IPDFExtractor,
 
-        private readonly chunkGenerator: ChunkGenerator,
+    private readonly cleaner: TextCleaner,
 
-        private readonly embeddingGenerator: EmbeddingGenerator,
+    private readonly chunkGenerator: ChunkGenerator,
 
-        private readonly knowledgeWriter: KnowledgeWriter
+    private readonly embeddingGenerator: EmbeddingGenerator,
 
-    ) {}
+    private readonly knowledgeWriter: KnowledgeWriter
+
+) {}
 
     async execute(
         gameId: string
     ): Promise<void> {
 
-        console.log("");
-        console.log("==================================");
-        console.log(`Importando juego: ${gameId}`);
-        console.log("==================================");
+        const start =
+            Date.now();
 
-        console.log("1. Validando juego...");
+        this.logger.header(gameId);
+
+        this.logger.step(
+
+            "1.Validando juego..."
+
+        );
 
         const game =
             await this.validator.validate(gameId);
 
-        console.log("✔ Juego validado");
+        this.logger.success(
 
-        console.log("2. Extrayendo PDF...");
+            "Juego validado"
+
+        );
+
+        this.logger.step(
+
+            "2.Extrayendo PDF..."
+
+        );
 
         const document =
             await this.extractor.extract(
                 game.paths.rulebook
             );
 
-        console.log(
-            `✔ ${document.totalPages} páginas extraídas`
+        this.logger.success(
+
+            `${document.totalPages} páginas extraídas`
+
         );
 
-        console.log("3. Limpiando texto...");
+        this.logger.step(
+
+            "3.Limpiando texto..."
+
+        );
 
         const cleaned =
             this.cleaner.clean(document);
 
-        console.log("✔ Texto limpio");
+        this.logger.success(
 
-        console.log("4. Generando chunks...");
+            "Texto limpio"
+
+        );
+
+        this.logger.step(
+
+            "4.Generando chunks..."
+
+        );
 
         const chunks =
             this.chunkGenerator.generate(
@@ -65,27 +94,51 @@ export class ImportGameUseCase {
                 cleaned
             );
 
-        console.log(
-            `✔ ${chunks.length} chunks generados`
+        this.logger.success(
+
+            `${chunks.length} chunks generados`
+
         );
 
-        console.log("5. Generando embeddings...");
+        this.logger.step(
+
+            "5.Generando embeddings..."
+
+        );
 
         const knowledge =
             await this.embeddingGenerator.generate(
                 chunks
             );
 
-        console.log("✔ Embeddings generados");
+        this.logger.success(
 
-        console.log("6. Guardando conocimiento...");
+            "Embeddings generados"
+
+        );
+
+        this.logger.step(
+
+            "6.Guardando conocimiento..."
+
+        );
 
         await this.knowledgeWriter.write(
             game.metadata.id,
             knowledge
         );
 
-        console.log("✔ Importación finalizada");
+        this.logger.success(
+
+            "Conocimiento guardado"
+
+        );
+
+        this.logger.footer(
+
+            Date.now() - start
+
+        );
     }
 
 }
