@@ -2,9 +2,8 @@ import { GameValidator } from "../../../domain/game/services/game-validator.serv
 import { ChunkGenerator } from "../../../infrastructure/importer/chunkGenerator/chunkGenerator";
 import { EmbeddingGenerator } from "../../../infrastructure/importer/embeddingGenerator/embeddingGenerator";
 import { KnowledgeWriter } from "../../../infrastructure/importer/knowledgeWriter/knowledgeWriter";
-import { PdfJsExtractor } from "../../../infrastructure/importer/pdfjs/pdfjs-extractor";
 import { TextCleaner } from "../../../infrastructure/importer/textCleaner/textCleaner";
-
+import type { IPDFExtractor } from "../../../shared/contracts/IPDFExtractor";
 
 export class ImportGameUseCase {
 
@@ -12,7 +11,7 @@ export class ImportGameUseCase {
 
         private readonly validator: GameValidator,
 
-        private readonly extractor: PdfJsExtractor,
+        private readonly extractor: IPDFExtractor,
 
         private readonly cleaner: TextCleaner,
 
@@ -22,47 +21,71 @@ export class ImportGameUseCase {
 
         private readonly knowledgeWriter: KnowledgeWriter
 
-    ) { }
+    ) {}
 
     async execute(
         gameId: string
     ): Promise<void> {
 
-        // 1. Validar el juego
+        console.log("");
+        console.log("==================================");
+        console.log(`Importando juego: ${gameId}`);
+        console.log("==================================");
+
+        console.log("1. Validando juego...");
+
         const game =
             await this.validator.validate(gameId);
 
-        // 2. Extraer el PDF
-        const extractedDocument =
+        console.log("✔ Juego validado");
+
+        console.log("2. Extrayendo PDF...");
+
+        const document =
             await this.extractor.extract(
                 game.paths.rulebook
             );
 
-        // 3. Limpiar el texto
-        const cleanedDocument =
-            this.cleaner.clean(
-                extractedDocument
-            );
+        console.log(
+            `✔ ${document.totalPages} páginas extraídas`
+        );
 
-        // 4. Generar chunks
+        console.log("3. Limpiando texto...");
+
+        const cleaned =
+            this.cleaner.clean(document);
+
+        console.log("✔ Texto limpio");
+
+        console.log("4. Generando chunks...");
+
         const chunks =
             this.chunkGenerator.generate(
                 game.metadata.id,
-                cleanedDocument
+                cleaned
             );
 
-        // 5. Generar embeddings
-        const embeddedChunks =
+        console.log(
+            `✔ ${chunks.length} chunks generados`
+        );
+
+        console.log("5. Generando embeddings...");
+
+        const knowledge =
             await this.embeddingGenerator.generate(
                 chunks
             );
 
-        // 6. Guardar el índice
+        console.log("✔ Embeddings generados");
+
+        console.log("6. Guardando conocimiento...");
+
         await this.knowledgeWriter.write(
             game.metadata.id,
-            embeddedChunks
+            knowledge
         );
 
+        console.log("✔ Importación finalizada");
     }
 
 }

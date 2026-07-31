@@ -1,0 +1,1136 @@
+{
+  "gameId": "catan",
+  "createdAt": "2026-07-31T15:42:49.271Z",
+  "totalChunks": 94,
+  "embeddingModel": "unknown",
+  "chunks": [
+    {
+      "id": "catan-p1-c1",
+      "gameId": "catan",
+      "page": 1,
+      "index": 1,
+      "text": "¡Bienvenido al mundo de Catán! Con Catan Plus podrás disfrutar de la gran variedad que ofrece el mundo de Catán , aprendiendo primero el juego básico ( Catan - El juego ) y pasando más adelante a probar alguno de los escenarios o expansiones incluidos. Todos ellos se pueden combinar con la ampliación para 5 y 6 jugadores para que la partida pueda llegar a incluir de 3 a 6 jugadores. Al final del reglamento sobre el juego básico encontrarás una lista con todos los componentes para la ampliación 5-6 jugadores y para las otras dos miniexpansiones y escenarios, así como las reglas especiales para",
+      "embedding": [
+        599,
+        105,
+        1
+      ]
+    },
+    {
+      "id": "catan-p1-c2",
+      "gameId": "catan",
+      "page": 1,
+      "index": 2,
+      "text": "-6 jugadores y para las otras dos miniexpansiones y escenarios, así como las reglas especiales para cada uno. Para que resulte más sencillo aprender el juego básico, tenemos un sistema especial de reglas compuesto de varias secciones. Lee primero el resumen del juego que hay en las páginas 2 y 3. Después lee las instrucciones que hay a partir de la página 4 y empieza de inmediato una partida. Si durante la partida surge cualquier duda o pregunta, consulta el manual adjunto. ¡Y ahora, pon rumbo a Catán! ÍNDICE Catan - El juego (juego básico) .....................................................",
+      "embedding": [
+        600,
+        96,
+        1
+      ]
+    },
+    {
+      "id": "catan-p1-c3",
+      "gameId": "catan",
+      "page": 1,
+      "index": 3,
+      "text": "Catán! ÍNDICE Catan - El juego (juego básico) ...................................................... 2 Ampliación 5-6 jugadores ............................................................. 7 Miniexpansión Entre amigos ....................................................... 8 Escenario Nueva York ................................................................... 10 Escenario Mallorca ...................................................................... 11 Miniexpansión Los ayudantes ................................................... 12 Créditos .............................................",
+      "embedding": [
+        599,
+        36,
+        1
+      ]
+    },
+    {
+      "id": "catan-p1-c4",
+      "gameId": "catan",
+      "page": 1,
+      "index": 4,
+      "text": ".......................................... 12 Créditos ........................................................................................ 12 REGLAMENTO",
+      "embedding": [
+        157,
+        6,
+        1
+      ]
+    },
+    {
+      "id": "catan-p2-c1",
+      "gameId": "catan",
+      "page": 2,
+      "index": 1,
+      "text": "2 3 4 5 6 . 8 9 . 1 0 1 1 12 Disposición inicial para principiantes A B C Encrucijada Camino Puerto 2 CATAN - Juego básico Frente a ti se encuentra la isla de Catán. Se compone de 19 hexágonos de terreno, rodeados por el mar. Tu objetivo es colonizar la isla. En Catán hay un desierto y cinco tipos diferentes de terreno, cada uno de los cuales produce una materia prima diferente. Empiezas la partida con 2 poblados y 2 carreteras. Cada poblado vale 1 punto de victoria, así que ya empiezas con un total de 2 puntos de victoria. El primer jugador que consiga 10 puntos de victoria, ganará la partida",
+      "embedding": [
+        600,
+        116,
+        1
+      ]
+    },
+    {
+      "id": "catan-p2-c2",
+      "gameId": "catan",
+      "page": 2,
+      "index": 2,
+      "text": "otal de 2 puntos de victoria. El primer jugador que consiga 10 puntos de victoria, ganará la partida. Para conseguir más puntos de victoria tendrás que construir nuevas carreteras y poblados, y ampliar tus poblados a ciudades (una ciudad vale 2 puntos de victoria). Pero, para construir, necesitarás materias primas. ¿Cómo consigues las materias primas? Muy sencillo: en cada turno se determina el terreno que va a producir. Esto se hace tirando dos dados. En cada terreno hay una ficha numerada redonda. Si, por ejemplo, la suma de los dados es un “3”, todos los terrenos marcados con un “3” produci",
+      "embedding": [
+        600,
+        101,
+        1
+      ]
+    },
+    {
+      "id": "catan-p2-c3",
+      "gameId": "catan",
+      "page": 2,
+      "index": 3,
+      "text": "nda. Si, por ejemplo, la suma de los dados es un “3”, todos los terrenos marcados con un “3” producirán. En la ilustración de la derecha serían el bosque (que produciría madera) y la montaña (que produciría minerales). Los bosques producen madera Los sembrados producen cereales Los cerros producen arcilla Los pastos producen lana Las montañas producen minerales El desierto no produce nada Resumen del juego 19 hexágonos de terreno Bosques (4) Pastos (4) Sembrados (4) Cerros (3) Montañas (3) Desierto (1) 6 piezas de marco con 9 puertos 18 fichas numeradas 95 cartas de materias primas (19 de cada",
+      "embedding": [
+        600,
+        100,
+        1
+      ]
+    },
+    {
+      "id": "catan-p2-c4",
+      "gameId": "catan",
+      "page": 2,
+      "index": 4,
+      "text": "rto (1) 6 piezas de marco con 9 puertos 18 fichas numeradas 95 cartas de materias primas (19 de cada): Madera = troncos = del bosque Lana = oveja = del pasto Cereal = gavilla de trigo = del sembrado Arcilla = ladrillos = del cerro Mineral = roca = de la montaña Componentes 25 cartas de desarrollo Caballero (14) Progreso (6) Puntos de victoria (5) (1) (2) (2) (2) (2) (2) (2) (2) (2) (1)",
+      "embedding": [
+        388,
+        76,
+        1
+      ]
+    },
+    {
+      "id": "catan-p3-c1",
+      "gameId": "catan",
+      "page": 3,
+      "index": 1,
+      "text": "Disposición inicial para principiantes C D Ladrón Carretera Poblado Ficha numerada 3 Sólo conseguirán materias primas los jugadores que tengan un poblado o una ciudad adyacentes a estos terrenos. En la ilustración, el poblado blanco (D) está adyacente a un bosque y los poblados azul (B) y naranja (C) a una montaña. Si el resultado de la tirada es un 3, el jugador rojo recibiría 1 madera y los jugadores azul y naranja recibirían 1 mineral cada uno. Lo ideal es que la mayoría de los poblados estén adyacentes a varios terrenos (el máximo posible es 3). De esta forma, podrán conseguir, según el re",
+      "embedding": [
+        600,
+        105,
+        1
+      ]
+    },
+    {
+      "id": "catan-p3-c2",
+      "gameId": "catan",
+      "page": 3,
+      "index": 2,
+      "text": "adyacentes a varios terrenos (el máximo posible es 3). De esta forma, podrán conseguir, según el resultado de los dados, diferentes materias primas. En la ilustración, el poblado B está adyacente a 3 terrenos: bosque, montaña y cerro. No puedes tener poblados adyacentes a todos los terrenos y a todas las fichas numeradas, así que algunas de las materias primas te serán imposibles o muy difíciles de conseguir. Pero, para construir, necesitarás diferentes combinaciones de materias primas. Por este motivo tienes que comerciar con el resto de jugadores. Haz una oferta o escucha las ofertas que te",
+      "embedding": [
+        599,
+        97,
+        1
+      ]
+    },
+    {
+      "id": "catan-p3-c3",
+      "gameId": "catan",
+      "page": 3,
+      "index": 3,
+      "text": "e motivo tienes que comerciar con el resto de jugadores. Haz una oferta o escucha las ofertas que te hagan y, si llegáis a un acuerdo, podrás conseguir la carta que te hace falta para construir un nuevo poblado. Podrás construir un poblado nuevo en una encrucijada que esté libre, con la condición de que una de tus propias carreteras lleve hasta ella y que el poblado más cercano esté, como mínimo, a dos encrucijadas de distancia. Pero también deberás pensar bien dónde construyes los poblados. Los valores de las fichas numeradas tienen tamaños diferentes. Esto indica que los números de mayor tam",
+      "embedding": [
+        600,
+        103,
+        1
+      ]
+    },
+    {
+      "id": "catan-p3-c4",
+      "gameId": "catan",
+      "page": 3,
+      "index": 4,
+      "text": "valores de las fichas numeradas tienen tamaños diferentes. Esto indica que los números de mayor tamaño salen con más frecuencia en la tirada de dados que los números más pequeños. Los números 6 y 8 son los más grandes y están impresos de color rojo, para indicar que son los que salen con mayor frecuencia. En definitiva, cuantas más veces salga un número, más veces conseguirás materias primas del terreno que tenga ese número. 2 tarjetas especiales 1 figura de ladrón 2 dados 2 portacartas 4 tablas de costes de construcción Figuras de juego (en 4 colores) 16 ciudades 20 poblados 60 carreteras “M",
+      "embedding": [
+        599,
+        104,
+        1
+      ]
+    },
+    {
+      "id": "catan-p3-c5",
+      "gameId": "catan",
+      "page": 3,
+      "index": 5,
+      "text": "s de costes de construcción Figuras de juego (en 4 colores) 16 ciudades 20 poblados 60 carreteras “Mayor ruta comercial” “Mayor ejército” Carretera Poblado Ciudad",
+      "embedding": [
+        162,
+        25,
+        1
+      ]
+    },
+    {
+      "id": "catan-p4-c1",
+      "gameId": "catan",
+      "page": 4,
+      "index": 1,
+      "text": "4 CATAN - Juego básico En este reglamento encontrarás toda la información que necesitas para jugar. Si durante la partida tienes alguna duda sobre una regla, consulta la palabra clave (indicada con una flecha ➔ ) en el manual. Disposición inicial para principiantes Te recomendamos que en las primeras partidas dispongas el tablero de juego siguiendo la ilustración que figura en las páginas 2 y 3. En primer lugar encaja el marco formado por las 6 piezas de mar. A continuación, rellena el marco con los hexágonos de terreno y coloca sobre ellos las fichas numeradas. Asegúrate de colocar correctame",
+      "embedding": [
+        600,
+        100,
+        1
+      ]
+    },
+    {
+      "id": "catan-p4-c2",
+      "gameId": "catan",
+      "page": 4,
+      "index": 2,
+      "text": "los hexágonos de terreno y coloca sobre ellos las fichas numeradas. Asegúrate de colocar correctamente los puertos. Disposición inicial para jugadores expertos Después de una o dos partidas, ya podrás disponer el tablero al azar. Encontrarás toda la información en el apartado del manual “Disposición variable” ( ➔ ). PREPARATIVOS Disposición inicial para principiantes • Cada jugador recibe una tabla de costes de construcción y todas las figuras de un color: 5 poblados ( ➔ ) , 4 ciudades ( ➔ ) y 15 carreteras ( ➔ ) . Cada jugador coloca 2 carreteras y 2 poblados en el tablero según indica la il",
+      "embedding": [
+        599,
+        104,
+        1
+      ]
+    },
+    {
+      "id": "catan-p4-c3",
+      "gameId": "catan",
+      "page": 4,
+      "index": 3,
+      "text": "15 carreteras ( ➔ ) . Cada jugador coloca 2 carreteras y 2 poblados en el tablero según indica la ilustración. Cada jugador coloca el resto de sus figuras frente a él. Si sólo juegan 3 jugadores, se retiran del juego las figuras de color rojo. • Las tarjetas especiales “Mayor ruta comercial” ( ➔ ) y “Mayor ejército” ( ➔ ) se dejan a un lado del tablero de juego, así como los 2 dados. • Las cartas de materia prima se separan en 5 pilas según tipo y se colocan boca arriba en los compartimentos de los portacartas. Los dos portacartas se dejan a un lado del tablero de juego. • Las cartas de desarr",
+      "embedding": [
+        600,
+        117,
+        1
+      ]
+    },
+    {
+      "id": "catan-p4-c4",
+      "gameId": "catan",
+      "page": 4,
+      "index": 4,
+      "text": "los portacartas. Los dos portacartas se dejan a un lado del tablero de juego. • Las cartas de desarrollo ( ➔ ) se mezclan y se colocan boca abajo en el compartimento libre que habrá quedado en un portacartas. • Por último, cada jugador recibe por su poblado marcado con una letra (ver páginas 2 y 3) sus primeras cartas de materia prima: por cada hexágono de terreno que limite con ese poblado el jugador toma una carta de la materia prima correspondiente de la pila . Ejemplo : el jugador azul recibe por su poblado “B” una carta de madera, una de mineral y una de arcilla, mientras que el jugador n",
+      "embedding": [
+        600,
+        113,
+        1
+      ]
+    },
+    {
+      "id": "catan-p4-c5",
+      "gameId": "catan",
+      "page": 4,
+      "index": 5,
+      "text": "e por su poblado “B” una carta de madera, una de mineral y una de arcilla, mientras que el jugador naranja obtiene 1 mineral y 2 cereales. • Los jugadores deben mantener en todo momento las cartas de materia prima ocultas en su mano. RESUMEN DEL JUEGO Empieza la partida el jugador de más edad. El turno de un jugador se divide en las fases siguientes, que deberá resolver en el orden indicado: 1. Tirar los dados para determinar la producción de materias primas del turno (el resultado se aplica a todos los jugadores). 2. Puede comerciar ( ➔ ): intercambiar materias primas, con el banco o con el r",
+      "embedding": [
+        600,
+        110,
+        1
+      ]
+    },
+    {
+      "id": "catan-p4-c6",
+      "gameId": "catan",
+      "page": 4,
+      "index": 6,
+      "text": "odos los jugadores). 2. Puede comerciar ( ➔ ): intercambiar materias primas, con el banco o con el resto de jugadores. 3. Puede construir ( ➔ ): carreteras ( ➔ ), poblados ( ➔ ), ciudades ( ➔ ) y comprar cartas de desarrollo ( ➔ ). Además, en cualquier momento de su turno (también antes de tirar los dados) puede jugar una de sus cartas de desarrollo ( ➔ ). Después, el turno pasa al siguiente jugador situado a su izquierda, que empieza de nuevo desde la fase 1. DESARROLLO DE LA PARTIDA 1. Producción de materias primas El jugador empieza su turno tirando los dos dados: la suma de los resultados",
+      "embedding": [
+        599,
+        113,
+        1
+      ]
+    },
+    {
+      "id": "catan-p4-c7",
+      "gameId": "catan",
+      "page": 4,
+      "index": 7,
+      "text": "ión de materias primas El jugador empieza su turno tirando los dos dados: la suma de los resultados indica los terrenos que van a producir materias primas. • Cada jugador que tenga un poblado adyacente a un terreno en el que haya una ficha numerada con el resultado de los dados, obtendrá por ese poblado una carta de materia prima del tipo producido por el terreno. Si un jugador tiene 2 o 3 poblados adyacentes a un mismo terreno cuyo número haya salido en los dados, obtendrá por cada poblado una carta de materia prima. Si un jugador tiene una ciudad adyacente a un terreno que haya salido en los",
+      "embedding": [
+        600,
+        110,
+        1
+      ]
+    },
+    {
+      "id": "catan-p4-c8",
+      "gameId": "catan",
+      "page": 4,
+      "index": 8,
+      "text": "carta de materia prima. Si un jugador tiene una ciudad adyacente a un terreno que haya salido en los dados, recibirá por esa ciudad 2 cartas de materia prima. Ejemplo: si en los dados saliera un “8”, el jugador rojo recibiría 2 minerales por sus dos poblados y el jugador blanco recibiría 1 mineral. Si la tirada hubiera sido un “10”, entonces el jugador blanco recibiría 1 lana. Si el poblado blanco fuera una ciudad, entonces el jugador blanco hubiera recibido 2 cartas de lana con un “10”. 2. Comercio Ahora, el jugador puede comerciar para conseguir las cartas de materia prima que necesite. Hay",
+      "embedding": [
+        599,
+        105,
+        1
+      ]
+    },
+    {
+      "id": "catan-p4-c9",
+      "gameId": "catan",
+      "page": 4,
+      "index": 9,
+      "text": "rcio Ahora, el jugador puede comerciar para conseguir las cartas de materia prima que necesite. Hay dos tipos de comercio: a) Comercio interior (comercio con los otros jugadores) ( ➔ ) El jugador podrá intercambiar cartas de materia prima con todos los jugadores. Puede anunciar las materias primas que necesita y las que está dispuesto a dar a cambio. También puede escuchar las ofertas del resto de jugadores y ofrecer a cambio alguna de las cartas de materia prima que tenga. Importante: los otros jugadores sólo podrán comerciar con el jugador que tiene el turno. Los otros jugadores no podrán co",
+      "embedding": [
+        600,
+        101,
+        1
+      ]
+    },
+    {
+      "id": "catan-p4-c10",
+      "gameId": "catan",
+      "page": 4,
+      "index": 10,
+      "text": "jugadores sólo podrán comerciar con el jugador que tiene el turno. Los otros jugadores no podrán comerciar entre ellos.",
+      "embedding": [
+        119,
+        19,
+        1
+      ]
+    },
+    {
+      "id": "catan-p5-c1",
+      "gameId": "catan",
+      "page": 5,
+      "index": 1,
+      "text": "+ = 5 b) Comercio marítimo (comercio con el banco) ( ➔ ) El jugador también puede intercambiar sin necesidad de hacerlo con ningún otro jugador. • Siempre puede intercambiar 4:1, devolviendo 4 cartas iguales de materia prima a la pila correspondiente y tomando a cambio una carta de materia prima a su elección. • Si ha construido un poblado en un puerto ( ➔ ) puede intercambiar de forma más favorable: en un puerto 3:1 se cambian tres cartas iguales de materia prima por una carta de materia prima a su elección, y en un puerto especial se cambian 2 cartas de la materia prima que indique el puerto",
+      "embedding": [
+        600,
+        110,
+        1
+      ]
+    },
+    {
+      "id": "catan-p5-c2",
+      "gameId": "catan",
+      "page": 5,
+      "index": 2,
+      "text": "a su elección, y en un puerto especial se cambian 2 cartas de la materia prima que indique el puerto por una carta de materia prima a su elección. 3. Construcción Por último, el jugador podrá construir para aumentar sus posibilidades de obtener materias primas y sus puntos de victoria ( ➔ ). • Para construir, el jugador tiene que pagar de su mano una combina - ción concreta de cartas de materia prima (ver la tabla de costes de construcción), tomar de su reserva las carreteras, poblados o ciudades correspondientes y colocarlos en el tablero de juego. Las cartas de materia prima empleadas se dev",
+      "embedding": [
+        600,
+        106,
+        1
+      ]
+    },
+    {
+      "id": "catan-p5-c3",
+      "gameId": "catan",
+      "page": 5,
+      "index": 3,
+      "text": "s correspondientes y colocarlos en el tablero de juego. Las cartas de materia prima empleadas se devuelven a sus pilas correspondientes. a) Carretera ( ➔ ): se necesita arcilla + madera • Las carreteras se construyen sobre los caminos. En cada camino ( ➔ ) sólo se puede construir 1 carretera. • Una carretera sólo se puede colocar adyacente a una encrucijada que sea, a su vez, adyacente a una carretera propia, un poblado propio o una ciudad propia, y en la que no haya un poblado o ciudad de otro jugador. El jugador naranja podría construir una nueva carretera en los caminos marcados en azul, pe",
+      "embedding": [
+        600,
+        107,
+        1
+      ]
+    },
+    {
+      "id": "catan-p5-c4",
+      "gameId": "catan",
+      "page": 5,
+      "index": 4,
+      "text": "jugador. El jugador naranja podría construir una nueva carretera en los caminos marcados en azul, pero no en el camino marcado en rojo. • En cuanto un jugador consiga tener una ruta consecutiva (las bifurcaciones no cuentan) de como mínimo 5 carreteras independientes que no esté interrumpida por un poblado o una ciudad de otro jugador, conseguirá la tarjeta especial “Mayor ruta comercial” ( ➔ ). Si algún otro jugador consigue construir una ruta más larga que la del propietario actual de la tarjeta especial, conseguirá de forma inmediata, dicha tarjeta. Tener la mayor ruta comercial vale por 2",
+      "embedding": [
+        599,
+        99,
+        1
+      ]
+    },
+    {
+      "id": "catan-p5-c5",
+      "gameId": "catan",
+      "page": 5,
+      "index": 5,
+      "text": "ta especial, conseguirá de forma inmediata, dicha tarjeta. Tener la mayor ruta comercial vale por 2 puntos de victoria. El jugador rojo tiene una ruta consecutiva compuesta por 6 carreteras (la bifurcación no cuenta) y esto le da la mayor ruta comercial. Las 7 carreteras del jugador naranja están separadas por el poblado rojo en una ruta de 2 carreteras consecutivas y en otra ruta de 5 carreteras consecutivas. b) Poblado ( ➔ ): se necesita arcilla + madera + lana + cereales • El poblado se debe construir en una encrucijada a la que, como mínimo, llegue una carretera propia. Se debe tener en cu",
+      "embedding": [
+        600,
+        106,
+        1
+      ]
+    },
+    {
+      "id": "catan-p5-c6",
+      "gameId": "catan",
+      "page": 5,
+      "index": 6,
+      "text": "construir en una encrucijada a la que, como mínimo, llegue una carretera propia. Se debe tener en cuenta la regla de la distancia. • Regla de la distancia : sólo se puede construir un poblado en una encrucijada ( ➔ ) cuando las tres encrucijadas adyacentes NO estén ocupadas por poblados o ciudades, sin importar a qué jugador pertenezcan. El jugador naranja podría construir un poblado en la encrucijada marcada en azul, pero por la regla de la distancia no podría hacerlo en las encrucijadas marcadas en rojo. • Por cada poblado construido, el jugador podrá obtener materias primas de los terrenos",
+      "embedding": [
+        599,
+        102,
+        1
+      ]
+    },
+    {
+      "id": "catan-p5-c7",
+      "gameId": "catan",
+      "page": 5,
+      "index": 7,
+      "text": "as en rojo. • Por cada poblado construido, el jugador podrá obtener materias primas de los terrenos adyacentes: cada vez que salga el número del terreno en los dados obtendrá 1 carta de materia prima. • Cada poblado vale 1 punto de victoria. Comercio marítimo sin puerto (4:1) Comercio marítimo en un puerto 3:1 Comercio marítimo 2:1 en un puerto especial",
+      "embedding": [
+        355,
+        61,
+        1
+      ]
+    },
+    {
+      "id": "catan-p6-c1",
+      "gameId": "catan",
+      "page": 6,
+      "index": 1,
+      "text": "6 CATAN - Juego básico c) Ciudad ( ➔ ): se necesitan 3 minerales + 2 cereales ¡Sólo se puede construir una nueva ciudad ampliando un poblado ya construido! • Si el jugador amplía uno de sus poblados a ciudad, retira el poblado del tablero, lo devuelve a su reserva y lo sustituye por una ciudad. • Por cada ciudad construida, el jugador podrá obtener el doble de materias primas de los terrenos adyacentes: cada vez que salga el número del terreno en los dados obtendrá 2 cartas de materia prima. • Cada ciudad vale 2 puntos de victoria. d) Comprar carta de desarrollo ( ➔ ): se necesita mineral + la",
+      "embedding": [
+        600,
+        112,
+        1
+      ]
+    },
+    {
+      "id": "catan-p6-c2",
+      "gameId": "catan",
+      "page": 6,
+      "index": 2,
+      "text": "ada ciudad vale 2 puntos de victoria. d) Comprar carta de desarrollo ( ➔ ): se necesita mineral + lana + cereales • Cuando un jugador compra una carta de desarrollo, toma la carta superior de la pila de cartas de desarrollo. • Hay tres tipos de cartas de desarrollo, y cada uno tiene un efecto diferente: Caballero ( ➔ ); Progreso ( ➔ ); Puntos de victoria ( ➔ ). • Las cartas de desarrollo que se compran se han de mantener en secreto hasta su uso. 4. Casos especiales a) Con un “7” se activa el ladrón ( ➔ ) • Si en la tirada de producción el jugador obtiene un “7”, entonces ningún jugador recibir",
+      "embedding": [
+        600,
+        118,
+        1
+      ]
+    },
+    {
+      "id": "catan-p6-c3",
+      "gameId": "catan",
+      "page": 6,
+      "index": 3,
+      "text": "rón ( ➔ ) • Si en la tirada de producción el jugador obtiene un “7”, entonces ningún jugador recibirá materias primas ese turno. • Todos los jugadores que tengan más de 7 cartas de materia prima elegirán la mitad de sus cartas de materia prima y las devolverán a las pilas correspondientes. Si un jugador tiene una cantidad impar de cartas, se redondea a su favor, es decir, hacia abajo (por ejemplo, si tuviera 9 cartas, deberá devolver 4). • A continuación, el jugador deberá mover el ladrón ( ➔ ): 1. El jugador deberá mover el ladrón ( ➔ ) a otro hexágono de terreno. 2. Después, podrá robar una",
+      "embedding": [
+        599,
+        112,
+        1
+      ]
+    },
+    {
+      "id": "catan-p6-c4",
+      "gameId": "catan",
+      "page": 6,
+      "index": 4,
+      "text": "1. El jugador deberá mover el ladrón ( ➔ ) a otro hexágono de terreno. 2. Después, podrá robar una carta de materia prima a un jugador que tenga un poblado o ciudad adyacente a ese terreno. El jugador al que va a robar mantendrá sus cartas boca abajo, para que el ladrón no pueda saber la carta que va a robar. Si hay más de un jugador que tenga poblados o ciudades adyacentes al terreno, el ladrón podrá elegir a qué jugador desea robarle la carta. 3. A continuación, el jugador continuará su turno con la fase de comercio. Importante: Si al tirar los dados sale el número del terreno sobre el que",
+      "embedding": [
+        598,
+        114,
+        1
+      ]
+    },
+    {
+      "id": "catan-p6-c5",
+      "gameId": "catan",
+      "page": 6,
+      "index": 5,
+      "text": "con la fase de comercio. Importante: Si al tirar los dados sale el número del terreno sobre el que se encuentra el ladrón, los propietarios de poblados y ciudades adyacentes NO reciben NINGUNA carta de materia prima. b) Jugar una carta de desarrollo ( ➔ ) El jugador puede jugar una carta de desarrollo en cualquier momento de su turno, incluso antes de tirar los dados. NO puede jugar una carta de desarrollo en el mismo turno en que la haya comprado. Cartas de caballero ( ➔ ) • El jugador que juegue una carta de caballero moverá al ladrón (ver los puntos 1 y 2 del apartado anterior). • Las cart",
+      "embedding": [
+        599,
+        112,
+        1
+      ]
+    },
+    {
+      "id": "catan-p6-c6",
+      "gameId": "catan",
+      "page": 6,
+      "index": 6,
+      "text": "gue una carta de caballero moverá al ladrón (ver los puntos 1 y 2 del apartado anterior). • Las cartas de caballero, una vez jugadas, se mantienen boca arriba sobre la mesa delante de su propietario. • El primer jugador que consiga tener 3 cartas de caballero a la vista delante de él, obtendrá la tarjeta “Mayor ejército”, que vale por 2 puntos de victoria. • Si algún otro jugador consiguiera tener a la vista más cartas de caballero que el propietario actual de la tarjeta especial “Mayor ejército”, conseguiría entonces, de forma inmediata, la tarjeta especial y con ello los 2 puntos de victoria",
+      "embedding": [
+        600,
+        105,
+        1
+      ]
+    },
+    {
+      "id": "catan-p6-c7",
+      "gameId": "catan",
+      "page": 6,
+      "index": 7,
+      "text": "”, conseguiría entonces, de forma inmediata, la tarjeta especial y con ello los 2 puntos de victoria. Cartas de progreso ( ➔ ) Cuando un jugador juegue una carta de progreso, llevará a cabo la acción indicada en el texto de la carta. A continuación, la carta se retirará del juego, devolviéndola a la caja. Cartas de puntos de victoria ( ➔ ) Las cartas de puntos de victoria se mantienen en secreto durante toda la partida. Sólo se descubren cuando, gracias a ellas, el jugador haya alcanzado un total de 10 puntos de victoria. FIN DE LA PARTIDA ( ➔ ) La partida acabará en el turno en que un jugador",
+      "embedding": [
+        600,
+        112,
+        1
+      ]
+    },
+    {
+      "id": "catan-p6-c8",
+      "gameId": "catan",
+      "page": 6,
+      "index": 8,
+      "text": "l de 10 puntos de victoria. FIN DE LA PARTIDA ( ➔ ) La partida acabará en el turno en que un jugador consiga 10 o más puntos de victoria . Para ganar, el jugador deberá tener 10 o más puntos de victoria cuando llegue su turno, o conseguir llegar durante su turno a 10 o más puntos de victoria. Mayor ejército",
+      "embedding": [
+        308,
+        62,
+        1
+      ]
+    },
+    {
+      "id": "catan-p7-c1",
+      "gameId": "catan",
+      "page": 7,
+      "index": 1,
+      "text": "2 3 4 5 6 . 8 9 . 1 0 1 1 12 7 CATAN - Ampliación 5-6 jugadores COMPONENTES • 11 hexágonos de terreno: 2 bosques, 2 sembrados, 2 pastos, 2 cerros, 2 montañas y 1 desierto. • 25 cartas de materia prima (5 de cada materia prima) • 9 cartas de desarrollo • 2 tablas de costes • 4 piezas de marco • 2 sets de figuras de color marrón y verde. Cada set con 5 poblados, 4 ciudades y 15 carreteras. • 28 fichas numeradas • Todo el material del juego básico (aparte de las fichas numeradas) Atención: para que puedas separar fácilmente los componentes de cada set, los hexágonos de terreno y las fichas numera",
+      "embedding": [
+        600,
+        120,
+        1
+      ]
+    },
+    {
+      "id": "catan-p7-c2",
+      "gameId": "catan",
+      "page": 7,
+      "index": 2,
+      "text": "puedas separar fácilmente los componentes de cada set, los hexágonos de terreno y las fichas numeradas vienen marcados con este símbolo . En los terrenos el símbolo aparece en la esquina inferior izquierda del anverso, mientras que en las fichas numeradas aparece en el reverso. PREPARATIVOS Importante: Para jugar con cinco o seis jugadores se necesitan todos los hexágonos de terreno del juego básico y de esta ampliación. Sin embargo, sólo se usan las fichas numeradas de esta ampliación. En primer lugar deberás encajar el marco, formado por 10 piezas: 6 piezas de marco del juego básico y 4 pie",
+      "embedding": [
+        599,
+        100,
+        1
+      ]
+    },
+    {
+      "id": "catan-p7-c3",
+      "gameId": "catan",
+      "page": 7,
+      "index": 3,
+      "text": "er lugar deberás encajar el marco, formado por 10 piezas: 6 piezas de marco del juego básico y 4 piezas de marco (de color azul) de esta ampliación. Coloca las piezas de marco grandes del juego básico en cualquier orden, con los puertos boca arriba, y las piezas pequeñas de marco entremedio de las grandes, tal como se muestra en la ilustración. La isla ahora se compondrá de un total de 30 hexágonos de terreno (combinando los hexágonos del juego básico y los incluidos en esta ampliación). • M Mezcla todos los hexágonos de terreno y ponlos boca abajo en una pila. Toma el primer hexágono de esta",
+      "embedding": [
+        599,
+        108,
+        1
+      ]
+    },
+    {
+      "id": "catan-p7-c4",
+      "gameId": "catan",
+      "page": 7,
+      "index": 4,
+      "text": "cla todos los hexágonos de terreno y ponlos boca abajo en una pila. Toma el primer hexágono de esta pila y colócalo boca arriba dentro del marco siguiendo este diagrama: primero una fila de 6 hexágonos en el centro; a continua - ción, dos filas de 5 hexágonos por encima y por debajo de la primera fila; luego, dos filas de 4 hexágonos por encima y por debajo; y finalmente, dos filas de 3 hexágonos. • Pon sobre la mesa las 28 fichas numeradas de esta ampliación de modo que la letra está visible. Empieza colocando la ficha A en un hexágono que esté en una esquina y continúa colocando las fichas e",
+      "embedding": [
+        600,
+        113,
+        1
+      ]
+    },
+    {
+      "id": "catan-p7-c5",
+      "gameId": "catan",
+      "page": 7,
+      "index": 5,
+      "text": "mpieza colocando la ficha A en un hexágono que esté en una esquina y continúa colocando las fichas en orden alfabético (B, C, etc.) siguiendo una espiral hacia el centro en sentido contrario a las agujas del reloj. En los dos desiertos no se coloca ninguna ficha. Por último, dales la vuelta a las fichas numeradas para que el número quede a la vista. Atención: las tres últimas fichas tienen 2 letras (Za, Zb y Zc). • El ladrón se coloca en cualquiera de los dos desiertos. • El resto de preparativos coinciden con los del juego básico. DESARROLLO DE LA PARTIDA Se juega según las mismas reglas que",
+      "embedding": [
+        599,
+        109,
+        1
+      ]
+    },
+    {
+      "id": "catan-p7-c6",
+      "gameId": "catan",
+      "page": 7,
+      "index": 6,
+      "text": "s coinciden con los del juego básico. DESARROLLO DE LA PARTIDA Se juega según las mismas reglas que en las partidas de 3 o 4 jugadores, con una única excepción. Como es habitual, en su turno un jugador deberá realizar sus tres fases: 1) Tirada de producción de materias primas 2) Comercio 3) Construcción Sin embargo, hay una regla especial: una fase de construcción adicional fuera del orden habitual. REGLA ESPECIAL Cuando el jugador activo haya terminado su turno, empieza una fase de construcción adicional que se produce fuera del orden normal, en la que el resto de jugadores podrán construir y",
+      "embedding": [
+        600,
+        102,
+        1
+      ]
+    },
+    {
+      "id": "catan-p7-c7",
+      "gameId": "catan",
+      "page": 7,
+      "index": 7,
+      "text": "adicional que se produce fuera del orden normal, en la que el resto de jugadores podrán construir y comprar cartas de desarrollo por turnos. En la práctica esto se realiza de la siguiente forma El jugador activo ha terminado de construir, pero antes de entregar los dados al jugador de su izquierda, pregunta al resto de jugadores si alguien quiere construir. Si algún jugador responde afirmativamente, entonces podrá construir y comprar cartas de desarrollo inmediatamente. Si más de un jugador quiere construir, entonces deberán hacerlo en orden, en sentido horario a partir del jugador activo. Un",
+      "embedding": [
+        599,
+        96,
+        1
+      ]
+    },
+    {
+      "id": "catan-p7-c8",
+      "gameId": "catan",
+      "page": 7,
+      "index": 8,
+      "text": "ere construir, entonces deberán hacerlo en orden, en sentido horario a partir del jugador activo. Una vez terminada la fase de construcción adicional, comenzará el turno del siguiente jugador. Importante: durante la fase de construcción adicional sólo se pueden construir poblados, carreteras y ciudades y comprar cartas de desarrollo. No se pueden jugar ni intercambiar cartas, y están prohibidas todas las formas de comercio (interior y marítimo). Consejo: la fase de construcción adicional te permite influir sobre el desarrollo de la partida, incluso fuera de tu turno. Por ello, deberías intenta",
+      "embedding": [
+        600,
+        91,
+        1
+      ]
+    },
+    {
+      "id": "catan-p7-c9",
+      "gameId": "catan",
+      "page": 7,
+      "index": 9,
+      "text": "ite influir sobre el desarrollo de la partida, incluso fuera de tu turno. Por ello, deberías intentar comerciar tanto como pudieras con el jugador actual ya que, durante la fase de construcción adicional que tiene lugar después de su turno, podrás construir (siempre que tengas las cartas de materia prima necesarias) y con ello tomar ventaja sobre los demás jugadores. Además, construir durante la fase de construcción adicional te permite controlar mejor el riesgo de perder cartas si aparece el ladrón. (2) (3) (3) (3) (3) (3) (3) (3) (3) (2)",
+      "embedding": [
+        545,
+        91,
+        1
+      ]
+    },
+    {
+      "id": "catan-p8-c1",
+      "gameId": "catan",
+      "page": 8,
+      "index": 1,
+      "text": "8 CATAN - Entre amigos COMPONENTES NECESARIOS • 84 fichas de favor 12 fichas de favor del gremio de mercaderes (carromato) 12 fichas de favor del gremio de comerciantes (barco) 12 fichas de favor del gremio de pavimentadores (pala) 24 fichas de favor del gremio de académicos (libro) 24 fichas de favor del gremio de arquitectos (compás) Mercader Comerciante Pavimentador Académico Arquitecto • 1 tablilla de gremios • 12 fichas de Catán • Todos los componentes del juego básico (y de la ampliación para 5 y 6 jugadores, si corresponde). EL CONTEXTO ¡En Catán reina la generosidad y la harmonía! La g",
+      "embedding": [
+        600,
+        102,
+        1
+      ]
+    },
+    {
+      "id": "catan-p8-c2",
+      "gameId": "catan",
+      "page": 8,
+      "index": 2,
+      "text": "ara 5 y 6 jugadores, si corresponde). EL CONTEXTO ¡En Catán reina la generosidad y la harmonía! La gente regala recursos para ayudar a los más necesitados. El ladrón se coloca en lugares apartados para garantizar la seguridad de los demás jugadores. Y todos hacen lo posible para conectar sus carreteras con las carreteras del vecino. ¿Es que todo el mundo se ha vuelto loco? Bueno… En realidad, resulta que este comportamiento tan “noble y desinteresado” se ve recompensado con unos favores que conceden los gremios de Catán. Y estos favores aportan varias ventajas: ya sea construir carreteras, rec",
+      "embedding": [
+        600,
+        99,
+        1
+      ]
+    },
+    {
+      "id": "catan-p8-c3",
+      "gameId": "catan",
+      "page": 8,
+      "index": 3,
+      "text": "eden los gremios de Catán. Y estos favores aportan varias ventajas: ya sea construir carreteras, recibir materias o robar cartas de desarrollo gratis, o bien conseguir una tasa de intercambio más favorable o incluso llevarse algún que otro punto de victoria. Está claro que, aunque el altruismo existe, no forma parte de este juego... PREPARATIVOS • Se prepara el juego básico (y la ampliación para 5 y 6 jugadores, si corresponde) de la forma habitual. • Deja la tablilla de gremios junto a la isla. • Pon las fichas de Catán junto a la tablilla de gremios. • El número de fichas de favor disponible",
+      "embedding": [
+        600,
+        105,
+        1
+      ]
+    },
+    {
+      "id": "catan-p8-c4",
+      "gameId": "catan",
+      "page": 8,
+      "index": 4,
+      "text": "• Pon las fichas de Catán junto a la tablilla de gremios. • El número de fichas de favor disponibles dependerá del número de jugadores: 3 Jug. 6 jug. 5 jug. 4 jug. Pavimentador Comerciante Mercader Arquitecto Académico 6 8 10 12 6 8 10 12 6 8 10 12 12 16 20 24 12 16 20 24 Crea una reserva que incluya sólo la cantidad de fichas de favor necesa - rias, boca abajo y bien mezcladas. REGLAS ESPECIALES Con esta expansión se aplican en esencia las mismas reglas que en el juego básico de Catán (incluidas las reglas de la ampliación para 5 y 6 jugadores, si hiciera falta). Pero además, si uno es gener",
+      "embedding": [
+        599,
+        117,
+        1
+      ]
+    },
+    {
+      "id": "catan-p8-c5",
+      "gameId": "catan",
+      "page": 8,
+      "index": 5,
+      "text": "as las reglas de la ampliación para 5 y 6 jugadores, si hiciera falta). Pero además, si uno es generoso, podrá conseguir fichas de favor. Estas fichas podrán usarse luego para conseguir interesantes ventajas. A continuación te explicamos las reglas especiales que se usan para los favores gremiales. Conseguir una ficha de favor Puedes conseguir el favor de un gremio de 3 maneras distintas: 1. Desplazando al ladrón sin perjudicar a nadie Recibirás una ficha de favor si, al obtener un “7” con la tirada de producción o al jugar una carta de caballero, desplazas el ladrón de una de las siguientes m",
+      "embedding": [
+        600,
+        103,
+        1
+      ]
+    },
+    {
+      "id": "catan-p8-c6",
+      "gameId": "catan",
+      "page": 8,
+      "index": 6,
+      "text": "rada de producción o al jugar una carta de caballero, desplazas el ladrón de una de las siguientes maneras: • colocándolo en un terreno cualquiera (incluido el desierto), que no limite con ningún poblado y con ninguna ciudad, o bien; • colocándolo en el desierto pero optando por no robarle ninguna materia prima a un jugador que tenga un poblado o ciudad junto a ese desierto. 2. Regalando una carta de materia prima Durante tu turno podrás regalarle 1 carta de materia prima a otro jugador. Sin embargo, ese jugador deberá tener los mismos puntos de victoria que tú o menos (sólo se cuentan los vis",
+      "embedding": [
+        600,
+        106,
+        1
+      ]
+    },
+    {
+      "id": "catan-p8-c7",
+      "gameId": "catan",
+      "page": 8,
+      "index": 7,
+      "text": "argo, ese jugador deberá tener los mismos puntos de victoria que tú o menos (sólo se cuentan los visibles). Si el jugador rechaza tu ofrecimiento, podrás regalarle la carta a otro jugador (con la misma restricción sobre los puntos de victoria). Si tu oferta es aceptada, recibirás 1 ficha de favor. Atención: durante tu turno sólo podrás regalar 1 materia prima como máximo.",
+      "embedding": [
+        374,
+        63,
+        1
+      ]
+    },
+    {
+      "id": "catan-p9-c1",
+      "gameId": "catan",
+      "page": 9,
+      "index": 1,
+      "text": "9 3. Enlazar núcleo de poblaciones Un “núcleo de poblaciones” es el conjunto de todos los poblados, ciudades y carreteras de un mismo color que están conectados entre sí. Si constru - yes una carretera que enlaza uno de tus núcleos de poblaciones con el núcleo de otro jugador por primera vez, ese jugador recibe 1 ficha de favor y luego tú recibes 3 fichas de favor. Sólo se concederán fichas de favor si es la primera vez que se unen dos núcleos de poblaciones de distinto color. Si posteriormente los mismos núcleos volvieran a enlazarse por otro punto, no se concedería ninguna otra ficha de favo",
+      "embedding": [
+        600,
+        107,
+        1
+      ]
+    },
+    {
+      "id": "catan-p9-c2",
+      "gameId": "catan",
+      "page": 9,
+      "index": 2,
+      "text": "los mismos núcleos volvieran a enlazarse por otro punto, no se concedería ninguna otra ficha de favor. Ejemplo: el jugador rojo ha construido la carretera “A”, con la que ha enlazado su núcleo de población inferior con el del jugador azul. El jugador azul recibe 1 ficha de favor y el jugador rojo recibe 3. Si luego el jugador rojo o el azul construyeran una carretera en el camino “B”, no recibirían ningún favor por ello. Sin embargo, si construyeran una carretera en el camino “C”, ambos jugadores conseguirían fichas de favor, ya que sería la primera vez que el núcleo superior del jugador rojo",
+      "embedding": [
+        599,
+        105,
+        1
+      ]
+    },
+    {
+      "id": "catan-p9-c3",
+      "gameId": "catan",
+      "page": 9,
+      "index": 3,
+      "text": "s conseguirían fichas de favor, ya que sería la primera vez que el núcleo superior del jugador rojo enlazaría con el núcleo de población central del jugador azul. Si enlazas un núcleo de poblaciones propio con otra de tus núcleos, no conseguirás ninguna ficha de favor. Importante • Si durante la fase de fundación dos núcleos de población quedan enlazados, no se concederá ninguna ficha de favor. • Si construyes una carretera que enlaza uno de tus núcleos simultánea - mente con los núcleos de dos jugadores, recibirás solamente 3 fichas de favor, mientras que los propietarios de esos núcleos reci",
+      "embedding": [
+        600,
+        101,
+        1
+      ]
+    },
+    {
+      "id": "catan-p9-c4",
+      "gameId": "catan",
+      "page": 9,
+      "index": 4,
+      "text": "jugadores, recibirás solamente 3 fichas de favor, mientras que los propietarios de esos núcleos recibirán cada uno 1 favor. Tú decidirías cuál de los dos jugadores sería el primero en elegir la ficha de favor. Conseguir fichas de favor Si te corresponde recibir un favor gremial, deberás tomar una ficha de favor de entre las fichas boca abajo que haya en la reserva. Usar o cambiar una ficha de favor Durante tu turno podrás usar o cambiar un favor gremial una sola vez. 1. Usar un favor gremial Podrás emplear un favor gremial si entregas la cantidad necesaria de fichas de favor, dejándolas boca a",
+      "embedding": [
+        600,
+        105,
+        1
+      ]
+    },
+    {
+      "id": "catan-p9-c5",
+      "gameId": "catan",
+      "page": 9,
+      "index": 5,
+      "text": "rás emplear un favor gremial si entregas la cantidad necesaria de fichas de favor, dejándolas boca arriba junto al gremio correspondiente en la tablilla de gremios: • El gremio de mercaderes requiere 1 ficha de carromato (gris). • El gremio de comerciantes requiere 1 ficha de barco (azul). • El gremio de pavimentadores requiere 1 ficha de pala (marrón). • El gremio de académicos requiere 2 fichas de libro (naranja). • El gremio de arquitectos requiere 2 fichas de compás (verde). Atención: no está permitido usar una ficha de favor que hayas conseguido en este mismo turno. Tendrás que esperar ha",
+      "embedding": [
+        600,
+        101,
+        1
+      ]
+    },
+    {
+      "id": "catan-p9-c6",
+      "gameId": "catan",
+      "page": 9,
+      "index": 6,
+      "text": "á permitido usar una ficha de favor que hayas conseguido en este mismo turno. Tendrás que esperar hasta el turno siguiente para poder usarla. En las partidas con 5 o 6 jugadores los favores gremiales no pueden usarse durante la fase de construcción adicional. Si durante la fase de construcción adicional consiguieras alguna ficha de favor, podrás usarla en tu próximo turno. Después de entregar las fichas de favor, recibirás inmediatamente a cambio el favor del gremio correspondiente (no es posible conservar el efecto para aprovecharlo en un turno posterior). Cada gremio concede un favor concret",
+      "embedding": [
+        600,
+        96,
+        1
+      ]
+    },
+    {
+      "id": "catan-p9-c7",
+      "gameId": "catan",
+      "page": 9,
+      "index": 7,
+      "text": "e conservar el efecto para aprovecharlo en un turno posterior). Cada gremio concede un favor concreto: • Gremio de los mercaderes - Cambia 1 carta de materia prima por cualquier otra carta de materia prima de la reserva. Puedes realizar este cambio hasta dos veces en el mismo turno. • Gremio de los comerciantes - Toma la carta de materia prima que desees de la reserva. • Gremio de los pavimentadores - Construye una carretera sin coste alguno. • Gremio de los arquitectos - Roba 1 carta de desarrollo sin coste alguno. • Gremio de los arquitectos - Toma 1 ficha de Catán. Cada una de estas fichas",
+      "embedding": [
+        599,
+        108,
+        1
+      ]
+    },
+    {
+      "id": "catan-p9-c8",
+      "gameId": "catan",
+      "page": 9,
+      "index": 8,
+      "text": "llo sin coste alguno. • Gremio de los arquitectos - Toma 1 ficha de Catán. Cada una de estas fichas vale por 1 punto de victoria. Las fichas de Catán siempre deben estar a la vista, ya que los puntos de victoria de cada jugador determinan la posibilidad de realizar y recibir regalos. 2. Intercambiar una ficha de favor Si no quieres usar ningún favor, puedes cambiar una de tus fichas de favor por otra de la reserva. Para ello, roba primero una ficha de favor boca abajo de la reserva y luego devuelve cualquier ficha de favor que tuvieras a la reserva. Si lo quisieras, podrías devolver la misma f",
+      "embedding": [
+        600,
+        111,
+        1
+      ]
+    },
+    {
+      "id": "catan-p9-c9",
+      "gameId": "catan",
+      "page": 9,
+      "index": 9,
+      "text": "lve cualquier ficha de favor que tuvieras a la reserva. Si lo quisieras, podrías devolver la misma ficha que acabas de robar. Atención: no está permitido entregar fichas de favor a otros jugadores ni cambiarlas con ellos. FIN DE LA PARTIDA La partida termina cuando un jugador tenga 11 o más puntos de victoria durante su turno.",
+      "embedding": [
+        328,
+        57,
+        1
+      ]
+    },
+    {
+      "id": "catan-p10-c1",
+      "gameId": "catan",
+      "page": 10,
+      "index": 1,
+      "text": "Localidad beige Localidad azul 10 CATAN - Escenario: Nueva York COMPONENTES NECESARIOS • 1 tablero del estado de Nueva York • 8 fichas Catán • Todos los componentes del juego básico —y de la ampliación para 5 y 6 jugadores, si corresponde—, excepto los hexágonos de terreno, las piezas de marco y las fichas numeradas. • Con la variante del canal de Erie: 8 fichas de canal (usando las fichas de favor de Entre amigos por el reverso ). PREPARATIVOS • Dispón el tablero de Nueva York. • En las partidas con 3 y 4 jugadores, coloca una ficha de Catán (con la ilustración de punto de victoria) en cada u",
+      "embedding": [
+        600,
+        111,
+        1
+      ]
+    },
+    {
+      "id": "catan-p10-c2",
+      "gameId": "catan",
+      "page": 10,
+      "index": 2,
+      "text": "s con 3 y 4 jugadores, coloca una ficha de Catán (con la ilustración de punto de victoria) en cada una de las encrucijadas. • Coloca el ladrón en el lugar del tablero señalado para ello (al sudeste de Corning). • El resto de preparativos coincide con la fase de fundación del juego básico. REGLAS ESPECIALES En este escenario se utilizan las mismas reglas que en el juego básico (incluidas las de la ampliación para 5 y 6 jugadores, si hiciera falta), con las siguientes excepciones: 1. Construcción de poblados - Los poblados sólo pueden fundarse y construirse en las casillas de localidad. 2. Const",
+      "embedding": [
+        600,
+        105,
+        1
+      ]
+    },
+    {
+      "id": "catan-p10-c3",
+      "gameId": "catan",
+      "page": 10,
+      "index": 3,
+      "text": "de poblados - Los poblados sólo pueden fundarse y construirse en las casillas de localidad. 2. Construcción de carreteras - Las carreteras sólo pueden construirse en los caminos señalados con un rectángulo ( o ). Si un jugador construye una carretera junto a una casilla de localidad, sólo podrá construir una carretera más allá de dicha casilla si construye antes un poblado en ella. Además, si un jugador tiene dos o más tramos de carreteras separados de tal modo que entre ellos hay una localidad que todavía no ha sido poblada, entonces estos tramos no se considerarán enlazados hasta que dicha l",
+      "embedding": [
+        600,
+        102,
+        1
+      ]
+    },
+    {
+      "id": "catan-p10-c4",
+      "gameId": "catan",
+      "page": 10,
+      "index": 4,
+      "text": "que todavía no ha sido poblada, entonces estos tramos no se considerarán enlazados hasta que dicha localidad tenga un poblado del jugador. 3. Vías navegables - Si un jugador construye un poblado o una ciudad en una localidad junto a una “vía navegable” , podrá considerar esa vía navegable y todas las vías que enlacen con esta como parte de sus carreteras. Estas vías pueden ser compartidas entre varios jugadores. Nadie puede construir sobre una vía navegable. Las vías navegables NO CUENTAN como carreteras a efectos de la mayor ruta comercial. En este escenario, las vías navegables representan l",
+      "embedding": [
+        600,
+        99,
+        1
+      ]
+    },
+    {
+      "id": "catan-p10-c5",
+      "gameId": "catan",
+      "page": 10,
+      "index": 5,
+      "text": "arreteras a efectos de la mayor ruta comercial. En este escenario, las vías navegables representan los transbordadores y barcazas que operan junto a la ciudad de Nueva York y a lo largo de todo el río Hudson. 4. Puertos especiales y puertos 3:1 - Si un jugador construye una carretera sobre un camino rojo, junto a un documento, a partir de entonces ya podrá cambiar materias primas con la reserva según la tasa de cambio indicada (es decir, cambiando o bien 3 materias iguales de cualquier tipo o bien 2 materias iguales del tipo indicado por cualquier otra carta de materia prima). 5. Encrucijadas",
+      "embedding": [
+        599,
+        104,
+        1
+      ]
+    },
+    {
+      "id": "catan-p10-c6",
+      "gameId": "catan",
+      "page": 10,
+      "index": 6,
+      "text": "en 2 materias iguales del tipo indicado por cualquier otra carta de materia prima). 5. Encrucijadas con ficha de Catán ( ) • Con 3 o 4 jugadores: el primer jugador que llegue con una carretera a una encrucijada que tenga una ficha de Catán, se quedará con esa ficha. Cada una de estas fichas vale 1 punto de victoria. Basta con construir una carretera desde una de tus localidades hasta una encrucijada con ficha para poder reclamarla. Sin embargo, durante la fase de fundación no se puede reclamar ninguna de estas fichas. Si durante la fase de fundación inicial un jugador hubiera construido una ca",
+      "embedding": [
+        600,
+        106,
+        1
+      ]
+    },
+    {
+      "id": "catan-p10-c7",
+      "gameId": "catan",
+      "page": 10,
+      "index": 7,
+      "text": "inguna de estas fichas. Si durante la fase de fundación inicial un jugador hubiera construido una carretera hacia una de estas encrucijadas con ficha, tendría que construir una carretera al otro lado de dicha ficha para poder quedársela. No obstante, después de la fase de fundación cualquier jugador que llegara con una carretera a esa encrucijada, podría tomar la ficha de la manera normal. • Con 5 o 6 jugadores: si previamente se ha alcanzado una encrucijada con ficha de modo que allí ya no queda ninguna ficha, ese espacio se considerará una casilla de localidad normal. Tanto en la fase de fun",
+      "embedding": [
+        600,
+        103,
+        1
+      ]
+    },
+    {
+      "id": "catan-p10-c8",
+      "gameId": "catan",
+      "page": 10,
+      "index": 8,
+      "text": "a ninguna ficha, ese espacio se considerará una casilla de localidad normal. Tanto en la fase de fundación como en el transcurso de la partida se podrá construir allí un poblado, teniendo en cuenta las reglas anteriormente descritas. En estas localidades adicionales también está permitido convertir poblados en ciudades. 6. Poblados y ciudades “fuera del mapa” - Todos los poblados y ciudades producen las materias primas de los terrenos adyacentes de la manera habitual, aun cuando el hexágono no toque propiamente la casilla de localidad o la encrucijada. FIN DE LA PARTIDA El ganador de la partid",
+      "embedding": [
+        600,
+        97,
+        1
+      ]
+    },
+    {
+      "id": "catan-p10-c9",
+      "gameId": "catan",
+      "page": 10,
+      "index": 9,
+      "text": "oque propiamente la casilla de localidad o la encrucijada. FIN DE LA PARTIDA El ganador de la partida será aquel jugador que en su turno llegue a 13 puntos (en las partidas con 3 jugadores); o bien a 12 puntos (en las partidas con 4 jugadores); o bien a 10 puntos (en las partidas con 5 o 6 jugadores). VARIANTE DEL CANAL DE ERIE Si todos los jugadores conocen bien el juego, puedes aplicar las siguientes reglas especiales para simular la repercusión económica que tuvo el canal de Erie en la región. Si un jugador consigue enlazar directamente mediante carreteras una ciudad junto al canal ( ) y ot",
+      "embedding": [
+        600,
+        109,
+        1
+      ]
+    },
+    {
+      "id": "catan-p10-c10",
+      "gameId": "catan",
+      "page": 10,
+      "index": 10,
+      "text": ". Si un jugador consigue enlazar directamente mediante carreteras una ciudad junto al canal ( ) y otra ciudad junto al canal, podrá tomar una ficha de canal (utiliza el reverso de las fichas de la expansión Entre amigos ). En este caso, “enlazar directamente” significa tener una conexión por carreteras propias entre dos ciudades del canal sin que haya ningún otro asentamiento entremedio. Esta bonifica - ción sólo podrá conseguirse durante el transcurso de la partida, y nunca durante la fase de fundación. Las fichas de canal conceden al jugador una ligera ventaja a la hora de comerciar. Cuando",
+      "embedding": [
+        599,
+        100,
+        1
+      ]
+    },
+    {
+      "id": "catan-p10-c11",
+      "gameId": "catan",
+      "page": 10,
+      "index": 11,
+      "text": "undación. Las fichas de canal conceden al jugador una ligera ventaja a la hora de comerciar. Cuando el jugador esté comerciando durante su turno, podrá usar una de estas fichas como si se tratara de un puerto 2:1 durante todo el turno. Al final del turno en que haya usado la ficha de canal, tendrá que devolverla a la reserva. Durante la fase de comercio el jugador que tenga una ficha de canal puede usarla como moneda de cambio, ofreciéndola a los demás jugadores junto a otras materias primas o por sí sola como si de una carta de materia prima se tratara.",
+      "embedding": [
+        560,
+        103,
+        1
+      ]
+    },
+    {
+      "id": "catan-p11-c1",
+      "gameId": "catan",
+      "page": 11,
+      "index": 1,
+      "text": "11 CATAN - Escenario: Mallorca COMPONENTES NECESARIOS • 1 tablero de Mallorca • 10 fichas Catán • Todos los componentes del juego básico —y de la ampliación para 5 y 6 jugadores, si corresponde—, excepto los hexágonos de terreno, las piezas de marco y las fichas numeradas.. PREPARATIVOS • Dispón el tablero de Mallorca. • En las partidas con 3 y 4 jugadores, coloca una ficha de Catán (con la ilustración de punto de victoria )en cada una de las encrucijadas. • Coloca el ladrón en el pasto situado al noroeste de la Cala Pi. • El resto de preparativos coinciden con la fase de fundación del juego b",
+      "embedding": [
+        600,
+        109,
+        1
+      ]
+    },
+    {
+      "id": "catan-p11-c2",
+      "gameId": "catan",
+      "page": 11,
+      "index": 2,
+      "text": "al noroeste de la Cala Pi. • El resto de preparativos coinciden con la fase de fundación del juego básico. REGLAS ESPECIALES En este escenario se utilizan las mismas reglas que en el juego básico (incluidas las de la ampliación para 5 y 6 jugadores, si correspondiera), con las siguientes excepciones: 1. Construcción de poblados - Los poblados sólo pueden fundarse y construirse en las casillas de localidad. 2. Construcción de carreteras - Las carreteras sólo pueden construirse en los caminos señalados con un rectángulo. Si un jugador construye una carretera junto a una casilla de localidad, sól",
+      "embedding": [
+        600,
+        98,
+        1
+      ]
+    },
+    {
+      "id": "catan-p11-c3",
+      "gameId": "catan",
+      "page": 11,
+      "index": 3,
+      "text": "lados con un rectángulo. Si un jugador construye una carretera junto a una casilla de localidad, sólo podrá construir una carretera más allá de dicha casilla si construye antes un poblado en ella. Además, si un jugador tiene dos o más tramos de carreteras separados de tal modo que entre ellos hay una localidad que todavía no ha sido poblada, entonces estos tramos no se considerarán enlazados hasta que dicha localidad tenga un poblado del jugador. 3. Puertos especiales y puertos 3:1 - Si un jugador construye una carretera sobre un camino rojo, junto a un documento, a partir de entonces ya podrá",
+      "embedding": [
+        600,
+        103,
+        1
+      ]
+    },
+    {
+      "id": "catan-p11-c4",
+      "gameId": "catan",
+      "page": 11,
+      "index": 4,
+      "text": "or construye una carretera sobre un camino rojo, junto a un documento, a partir de entonces ya podrá cambiar materias primas con la reserva según la tasa de cambio indicada (es decir, cambiando o bien 3 materias iguales de cualquier tipo o bien 2 materias iguales del tipo indicado por cualquier otra carta de materia prima). 4. Encrucijadas con ficha de Catán • Con 3 o 4 jugadores: el primer jugador que llegue con una carretera a una encrucijada que tenga una ficha de Catán, se quedará con esa ficha. Cada una de estas fichas vale 1 punto de victoria. Basta con construir una carretera desde una",
+      "embedding": [
+        599,
+        107,
+        1
+      ]
+    },
+    {
+      "id": "catan-p11-c5",
+      "gameId": "catan",
+      "page": 11,
+      "index": 5,
+      "text": "cha. Cada una de estas fichas vale 1 punto de victoria. Basta con construir una carretera desde una de tus localidades hasta una encrucijada con ficha para poder reclamarla. Sin embargo, durante la fase de fundación no se puede reclamar ninguna de estas fichas. Si durante la fase de fundación inicial un jugador hubiera construido una carretera hacia una de estas encrucijadas con ficha, tendría que construir una carretera al otro lado de dicha ficha para poder quedársela. No obstante, después de la fase de fundación cualquier jugador que llegara con una carretera a esa encrucijada, podría tomar",
+      "embedding": [
+        600,
+        98,
+        1
+      ]
+    },
+    {
+      "id": "catan-p11-c6",
+      "gameId": "catan",
+      "page": 11,
+      "index": 6,
+      "text": "la fase de fundación cualquier jugador que llegara con una carretera a esa encrucijada, podría tomar la ficha de la manera normal. • Con 5 o 6 jugadores: si previamente se ha alcanzado una encrucijada con ficha de modo que allí ya no queda ninguna ficha, ese espacio se considerará una casilla de localidad normal. Tanto en la fase de fundación como en el transcurso de la partida se podrá construir allí un poblado, teniendo en cuenta las reglas anteriormente descritas. En estas localidades adicionales también está permitido convertir poblados en ciudades. 5. Poblados y ciudades “fuera del mapa”",
+      "embedding": [
+        599,
+        99,
+        1
+      ]
+    },
+    {
+      "id": "catan-p11-c7",
+      "gameId": "catan",
+      "page": 11,
+      "index": 7,
+      "text": "ales también está permitido convertir poblados en ciudades. 5. Poblados y ciudades “fuera del mapa” - Todos los poblados y ciudades producen las materias primas de los terrenos adyacentes de la manera habitual, aun cuando el hexágono no toque propiamente la casilla de localidad o la encrucijada. FIN DE LA PARTIDA El ganador de la partida será aquel jugador que en su turno llegue a 13 puntos (en las partidas con 3 jugadores); o bien a 12 puntos (en las partidas con 4 jugadores); o bien a 10 puntos (en las partidas con 5 o 6 jugadores). OBSERVACIONES Las almendras sustituyen a los cereales Dado",
+      "embedding": [
+        599,
+        105,
+        1
+      ]
+    },
+    {
+      "id": "catan-p11-c8",
+      "gameId": "catan",
+      "page": 11,
+      "index": 8,
+      "text": "s (en las partidas con 5 o 6 jugadores). OBSERVACIONES Las almendras sustituyen a los cereales Dado que los almendros juegan un papel clave en la agricultura mallorquina y que la flor del almendro supone un importante reclamo turístico, los habituales sembrados del juego básico de Catan se han sustituido aquí por plantaciones de almendros. Así pues, en los costes de construcción los “cereales” deberían ser reemplazados por “almendras”. Si lo deseas, puedes convertir esto en un pequeño juego: en este escenario al comerciar no se podrá utilizar la palabra “cereal”, “trigo”, “grano” o cualquier o",
+      "embedding": [
+        600,
+        96,
+        1
+      ]
+    },
+    {
+      "id": "catan-p11-c9",
+      "gameId": "catan",
+      "page": 11,
+      "index": 9,
+      "text": "este escenario al comerciar no se podrá utilizar la palabra “cereal”, “trigo”, “grano” o cualquier otra variación por el estilo, sino que se deberá decir “almendras”. El jugador que se despiste y no lo diga correctamente, tendrá que devolver a la reserva una de sus cartas de materia prima (elegida por él). Montañas y bosques Estos dos terrenos se han ilustrado de nuevo para representar mejor su equivalente mallorquín. No obstante, para que resulte más sencillo reconocer la materia prima que produce cada terreno, los círculos numerados se han coloreado según cada materia: Bosque – Madera – Verd",
+      "embedding": [
+        600,
+        98,
+        1
+      ]
+    },
+    {
+      "id": "catan-p11-c10",
+      "gameId": "catan",
+      "page": 11,
+      "index": 10,
+      "text": "uce cada terreno, los círculos numerados se han coloreado según cada materia: Bosque – Madera – Verde oscuro Pasto – Lana – Verde claro Plantación de almendros – Almendras – Amarillo Montañas – Minerales – Gris Cerro – Arcilla – Marrón",
+      "embedding": [
+        235,
+        41,
+        1
+      ]
+    },
+    {
+      "id": "catan-p12-c1",
+      "gameId": "catan",
+      "page": 12,
+      "index": 1,
+      "text": "12 CATAN - Expansión: Entre amigos COMPONENTES NECESARIOS • 10 tarjetas de ayudante • Todos los componentes del juego básico (y de la ampliación para 5 y 6 jugadores, si corresponde). PREPARATIVOS • Cada tarjeta de ayudante tiene un anverso “A” y un reverso “B”. Además, 6 de ellas tienen un número junto a la letra. Crea una pila con las tarjetas señaladas con un número, poniendo encima la tarjeta A1 y el resto debajo en orden ascendiente (es decir, A2, A3, A4, A5 y A6). Las tarjetas que no tengan un número se ponen debajo de la pila en cualquier orden. • Cada vez que un jugador haya colocado s",
+      "embedding": [
+        600,
+        111,
+        1
+      ]
+    },
+    {
+      "id": "catan-p12-c2",
+      "gameId": "catan",
+      "page": 12,
+      "index": 2,
+      "text": "n un número se ponen debajo de la pila en cualquier orden. • Cada vez que un jugador haya colocado su segundo poblado durante la fase de fundación, deberá tomar la tarjeta superior de dicha pila y dejarla ante él con el lado “A” visible. • Una vez terminada la fase de fundación, el resto de tarjetas de la pila se disponen junto al tablero con la cara “A” visible. REGLAS ESPECIALES En este escenario se utilizan las mismas reglas que en el juego básico (incluidas las de la ampliación para 5 y 6 jugadores, si correspondiera), con las siguientes excepciones: • Cada tarjeta de ayudante aporta una v",
+      "embedding": [
+        600,
+        109,
+        1
+      ]
+    },
+    {
+      "id": "catan-p12-c3",
+      "gameId": "catan",
+      "page": 12,
+      "index": 3,
+      "text": "gadores, si correspondiera), con las siguientes excepciones: • Cada tarjeta de ayudante aporta una ventaja específica, que viene descrita en la propia tarjeta. Tras usar el beneficio de una tarjeta, un jugador puede tener dos posibilidades: 1. El jugador devuelve la tarjeta a la reserva y toma de allí cualquier otra tarjeta, dejándola frente a él con el lado “A” visible. O BIEN 2. El jugador le da la vuelta a la tarjeta para que muestre el lado “B”. Con ello podrá aprovechar de nuevo el beneficio de la tarjeta más adelante, cuando se cumplan las condiciones para ello. Tras usar la tarjeta por",
+      "embedding": [
+        599,
+        104,
+        1
+      ]
+    },
+    {
+      "id": "catan-p12-c4",
+      "gameId": "catan",
+      "page": 12,
+      "index": 4,
+      "text": "o de la tarjeta más adelante, cuando se cumplan las condiciones para ello. Tras usar la tarjeta por segunda vez, el jugador tendrá que devolverla, dejándola en su lado “A” y tomando luego una tarjeta distinta que pondrá frente a él con el lado “A” visible. Importante • Un jugador no podrá usar una tarjeta de ayudante en el mismo turno en que la ha tomado. • No está permitido devolver una tarjeta de ayudante voluntariamente sin haberla utilizado para conseguir con ello una tarjeta “mejor”. Esto también se aplica aun cuando el jugador tenga la tarjeta por el lado “B”. ACLARACIONES SOBRE ALGUNOS",
+      "embedding": [
+        599,
+        104,
+        1
+      ]
+    },
+    {
+      "id": "catan-p12-c5",
+      "gameId": "catan",
+      "page": 12,
+      "index": 5,
+      "text": "ambién se aplica aun cuando el jugador tenga la tarjeta por el lado “B”. ACLARACIONES SOBRE ALGUNOS AYUDANTES Marianne - Si acabas de tomar a Marianne, ya podrás usarla en el próximo turno del siguiente jugador. Vicente - Sólo puedes desprenderte de las cartas de caballero que hayas puesto en juego. Nassir - Se debe pedir la misma materia prima a los otros dos jugadores. Aunque sólo se consiga una materia prima o ninguna, la tarjeta se considerará usada y tendrá que voltearse o devolverse. Sigfrido - La tarjeta se usa si la tirada de producción es un “7”, en cuyo caso o bien no se pierde ningu",
+      "embedding": [
+        600,
+        108,
+        1
+      ]
+    },
+    {
+      "id": "catan-p12-c6",
+      "gameId": "catan",
+      "page": 12,
+      "index": 6,
+      "text": "ido - La tarjeta se usa si la tirada de producción es un “7”, en cuyo caso o bien no se pierde ninguna carta de materia o bien se recibe la carta de materia prima que desee el jugador. En ambos casos la tarjeta se considera utilizada. Luis - Se considera que una carretera está “situada en un extremo” si sólo una de sus puntas toca otra carretera, poblado o ciudad del jugador. Está permitido trasladar una carretera situada en un extremo aunque al hacerlo un poblado o ciudad se quede sin carreteras. Créditos Entre amigos Autor: Benjamin Teuber Licenciatario: Catan GmbH © 2012, 2016 Ilustraciones",
+      "embedding": [
+        600,
+        106,
+        1
+      ]
+    },
+    {
+      "id": "catan-p12-c7",
+      "gameId": "catan",
+      "page": 12,
+      "index": 7,
+      "text": "s. Créditos Entre amigos Autor: Benjamin Teuber Licenciatario: Catan GmbH © 2012, 2016 Ilustraciones: Michael Menzel Diseño gráfico: Michaela Kienle Producción y reglamento: los equipos de Mayfair Games y Catan GmbH Nueva York Autor: Klaus Teuber Diseño del escenario: Ron Magin Licenciatario: Catan GmbH © 2012, 2016 Ilustraciones: Michael Menzel Diseño gráfico: Michaela Kienle Producción y reglamento: los equipos de Mayfair Games y Catan GmbH Mallorca Autor: Klaus Teuber Licenciatario: Catan GmbH © 2012, 2016 Ilustraciones de las localidades: anoka Illustration & Design Ilustraciones del table",
+      "embedding": [
+        600,
+        86,
+        1
+      ]
+    },
+    {
+      "id": "catan-p12-c8",
+      "gameId": "catan",
+      "page": 12,
+      "index": 8,
+      "text": "H © 2012, 2016 Ilustraciones de las localidades: anoka Illustration & Design Ilustraciones del tablero: Michael Menzel Diseño gráfico: Michaela Kienle Los ayudantes Autor: Klaus Teuber Licenciatario: Catan GmbH © 2014, 2016 Ilustraciones: Michael Menzel Diseño gráfico: Michaela Kienle 07/16 Catan Plus Licenciatario: Catan GmbH © 2016 Redacción: Arnd Fischer Diseño gráfico: Michaela Kienle © 2016 Franckh-Kosmos Verlags-GmbH & Co. KG Pfizerstr. 5–7, 70184 Stuttgart Tel.: +49 711 2191 – 0, Fax: + 49 711 2191 – 199 info@kosmos.de, kosmos.de Todos los derechos reservados. Fabricado en Alemania Jueg",
+      "embedding": [
+        600,
+        88,
+        1
+      ]
+    },
+    {
+      "id": "catan-p12-c9",
+      "gameId": "catan",
+      "page": 12,
+      "index": 9,
+      "text": "9 711 2191 – 199 info@kosmos.de, kosmos.de Todos los derechos reservados. Fabricado en Alemania Juego básico y ampliación 5-6 jugadores Autor: Klaus Teuber Licenciatario: Catan GmbH © 2002, catan.de Ilustraciones: Michael Menzel Diseño gráfico: Michaela Kienle Diseño de las figuras: Andreas Klober Grafismo 3D: Andreas Resch Redacción de la edición 2015: Arnd Fischer Redacción: Reiner Müller, Sebastian Rapp Del presente reglamento: enero 2015 © 1996, 2016 Créditos de la edición en español Producción editorial: Xavi Garriga Adaptación gráfica: Antonio Catalán y Bascu Traducción: Oriol Garcia, Fr",
+      "embedding": [
+        600,
+        86,
+        1
+      ]
+    },
+    {
+      "id": "catan-p12-c10",
+      "gameId": "catan",
+      "page": 12,
+      "index": 10,
+      "text": "ión editorial: Xavi Garriga Adaptación gráfica: Antonio Catalán y Bascu Traducción: Oriol Garcia, Francisco Franco Garea y Sonja Wlasny",
+      "embedding": [
+        135,
+        19,
+        1
+      ]
+    }
+  ]
+}
