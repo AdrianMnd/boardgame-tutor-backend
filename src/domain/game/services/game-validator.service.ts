@@ -28,7 +28,15 @@ export class GameValidator {
         const metadata =
             await this.loadMetadata(paths);
 
-        await this.ensureRulebook(paths);
+        this.validateMetadata(
+
+            metadata,
+
+            gameId
+
+        );
+
+        await this.validateRulebook(paths);
 
         await this.ensureGeneratedFolder(paths);
 
@@ -101,12 +109,11 @@ export class GameValidator {
         paths: GamePaths
     ): Promise<void> {
 
-        const exists =
-            await this.fileSystem.exists(
+        if (
+            !await this.fileSystem.exists(
                 paths.root
-            );
-
-        if (!exists) {
+            )
+        ) {
 
             throw new ValidationError(
 
@@ -124,16 +131,15 @@ ${paths.root}`
         paths: GamePaths
     ): Promise<GameMetadata> {
 
-        const exists =
-            await this.fileSystem.exists(
+        if (
+            !await this.fileSystem.exists(
                 paths.metadata
-            );
-
-        if (!exists) {
+            )
+        ) {
 
             throw new ValidationError(
 
-                `No existe el archivo metadata.json:
+                `No existe metadata.json:
 
 ${paths.metadata}`
 
@@ -147,16 +153,73 @@ ${paths.metadata}`
 
     }
 
-    private async ensureRulebook(
+    private validateMetadata(
+
+        metadata: GameMetadata,
+
+        gameId: string
+
+    ): void {
+
+        if (
+            metadata.id !== gameId
+        ) {
+
+            throw new ValidationError(
+
+                `El id del metadata debe ser "${gameId}".`
+
+            );
+
+        }
+
+        this.ensureNotEmpty(
+
+            metadata.name,
+
+            "name"
+
+        );
+
+        this.ensureNotEmpty(
+
+            metadata.language,
+
+            "language"
+
+        );
+
+        this.ensureNotEmpty(
+
+            metadata.version,
+
+            "version"
+
+        );
+
+    }
+
+    private async validateRulebook(
         paths: GamePaths
     ): Promise<void> {
 
-        const exists =
-            await this.fileSystem.exists(
-                paths.rulebook
-            );
+        await this.ensureRulebookExists(paths);
 
-        if (!exists) {
+        this.ensurePdfExtension(paths);
+
+        await this.ensureRulebookNotEmpty(paths);
+
+    }
+
+    private async ensureRulebookExists(
+        paths: GamePaths
+    ): Promise<void> {
+
+        if (
+            !await this.fileSystem.exists(
+                paths.rulebook
+            )
+        ) {
 
             throw new ValidationError(
 
@@ -170,16 +233,60 @@ ${paths.rulebook}`
 
     }
 
+    private ensurePdfExtension(
+        paths: GamePaths
+    ): void {
+
+        if (
+            path.extname(
+                paths.rulebook
+            ).toLowerCase() !== ".pdf"
+        ) {
+
+            throw new ValidationError(
+
+                "El reglamento debe ser un archivo PDF."
+
+            );
+
+        }
+
+    }
+
+    private async ensureRulebookNotEmpty(
+        paths: GamePaths
+    ): Promise<void> {
+
+        const info =
+            await this.fileSystem.stat(
+                paths.rulebook
+            );
+
+        if (
+            info.size === 0
+        ) {
+
+            throw new ValidationError(
+
+                `El reglamento está vacío:
+
+${paths.rulebook}`
+
+            );
+
+        }
+
+    }
+
     private async ensureGeneratedFolder(
         paths: GamePaths
     ): Promise<void> {
 
-        const exists =
-            await this.fileSystem.exists(
+        if (
+            !await this.fileSystem.exists(
                 paths.generated
-            );
-
-        if (!exists) {
+            )
+        ) {
 
             await this.fileSystem.ensureDirectory(
                 paths.generated
@@ -193,15 +300,36 @@ ${paths.rulebook}`
         paths: GamePaths
     ): Promise<void> {
 
-        const exists =
-            await this.fileSystem.exists(
+        if (
+            !await this.fileSystem.exists(
                 paths.assets
-            );
-
-        if (!exists) {
+            )
+        ) {
 
             await this.fileSystem.ensureDirectory(
                 paths.assets
+            );
+
+        }
+
+    }
+
+    private ensureNotEmpty(
+
+        value: string,
+
+        field: string
+
+    ): void {
+
+        if (
+            value.trim().length === 0
+        ) {
+
+            throw new ValidationError(
+
+                `El campo "${field}" no puede estar vacío.`
+
             );
 
         }

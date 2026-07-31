@@ -1,3 +1,4 @@
+import { FileInfo } from "../../types/FileInfo";
 export interface IFileSystem {
 
     exists(path: string): Promise<boolean>;
@@ -27,5 +28,9 @@ export interface IFileSystem {
     listFiles(
         path: string
     ): Promise<string[]>;
+
+    stat(
+        path: string
+    ): Promise<FileInfo>;
 
 }

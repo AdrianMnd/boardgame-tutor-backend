@@ -1,7 +1,8 @@
-import fs from "node:fs/promises";
+import fs, { stat } from "node:fs/promises";
 import path from "node:path";
 
 import type { IFileSystem } from "../../shared/contracts/IFileSystem";
+import { FileInfo } from "../../types/FileInfo";
 
 export class NodeFileSystem
     implements IFileSystem {
@@ -21,6 +22,21 @@ export class NodeFileSystem
             return false;
 
         }
+
+    }
+
+    async stat(
+        path: string
+    ): Promise<FileInfo> {
+
+        const info =
+            await stat(path);
+
+        return {
+
+            size: info.size
+
+        };
 
     }
 

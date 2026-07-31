@@ -1,4 +1,5 @@
 import type { IFileSystem } from "../../src/shared/contracts/IFileSystem";
+import { FileInfo } from "../../src/types/FileInfo";
 
 export class FakeFileSystem implements IFileSystem {
 
@@ -8,6 +9,22 @@ export class FakeFileSystem implements IFileSystem {
     private readonly directories =
         new Set<string>();
 
+    
+    private readonly fileSizes =
+    new Map<string, number>();
+
+    async stat(
+    path: string
+        ): Promise<FileInfo> {
+
+            return {
+
+                size:
+                    this.fileSizes.get(path) ?? 0
+
+            };
+
+        }
 
     async exists(
         path: string
