@@ -1,7 +1,20 @@
+import path from "path";
+
+const ROOT =
+    process.cwd();
+
 export const PATHS = {
 
-    KNOWLEDGE: "../../knowledge",
+    ROOT,
 
-    GAMES: "../../knowledge/games",
+    KNOWLEDGE:
+        path.join(ROOT, "knowledge"),
+
+    GAMES:
+        path.join(
+            ROOT,
+            "knowledge",
+            "games"
+        )
 
 };

@@ -1,7 +1,19 @@
 import { promises as fs } from "fs";
 import path from "path";
+import { IFileSystem } from "./IFileSystem";
 
-export class FileSystemService {
+export class FileSystemService implements IFileSystem{
+
+    async listFiles(
+        directory: string
+    ): Promise<string[]> {
+
+        const entries =
+            await fs.readdir(directory);
+
+        return entries;
+
+    }
 
     async exists(filePath: string): Promise<boolean> {
 
