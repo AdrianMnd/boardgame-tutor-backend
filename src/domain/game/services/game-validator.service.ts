@@ -53,57 +53,67 @@ export class GameValidator {
     }
 
     private buildPaths(
-        gameId: string
-    ): GamePaths {
+    gameId: string
+): GamePaths {
 
-        const root =
-            path.join(PATHS.GAMES, gameId);
+    const root =
+        path.join(
+            PATHS.GAMES,
+            gameId
+        );
 
-        return {
+    return {
 
-            root,
+        root,
 
-            metadata:
-                path.join(
-                    root,
-                    "metadata.json"
-                ),
-
-            source:
-                path.join(
-                    root,
-                    "source"
-                ),
-
-            rulebook:
-                path.join(
-                    root,
-                    "source",
-                    "rulebook.pdf"
-                ),
-
-            generated:
-                path.join(
-                    root,
-                    "generated"
-                ),
-
-            embeddings:
-                path.join(
-                    root,
-                    "generated",
-                    "embeddings.json"
+        metadata:
+            path.join(
+                root,
+                "metadata.json"
             ),
 
-            assets:
-                path.join(
-                    root,
-                    "assets"
-                )
+        source:
+            path.join(
+                root,
+                "source"
+            ),
 
-        };
+        rulebook:
+            path.join(
+                root,
+                "source",
+                "rulebook.pdf"
+            ),
 
-    }
+        generated:
+            path.join(
+                root,
+                "generated"
+            ),
+
+        chunks:
+            path.join(
+                root,
+                "generated",
+                "chunks.json"
+            ),
+
+        knowledge:
+            path.join(
+                root,
+                "generated",
+                "knowledge.json"
+            ),
+
+        assets:
+            path.join(
+                root,
+                "assets"
+            )
+
+    };
+
+}
 
     private async ensureGameFolder(
         paths: GamePaths

@@ -10,7 +10,9 @@ export interface GamePaths {
 
     generated: string;
 
-    embeddings: string;
+    chunks: string;
+
+    knowledge: string;
 
     assets: string;
 

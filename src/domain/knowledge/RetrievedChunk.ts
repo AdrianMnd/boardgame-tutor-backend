@@ -1,4 +1,4 @@
-export interface KnowledgeChunk {
+export interface RetrievedChunk {
 
     id: string;
 
@@ -6,10 +6,8 @@ export interface KnowledgeChunk {
 
     page: number;
 
-    index: number;
-
     text: string;
 
-    embedding: number[];
+    score: number;
 
 }
