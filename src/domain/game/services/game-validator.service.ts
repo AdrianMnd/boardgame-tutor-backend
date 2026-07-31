@@ -80,12 +80,12 @@ export class GameValidator {
                     "generated"
                 ),
 
-            chunks:
+            embeddings:
                 path.join(
                     root,
                     "generated",
-                    "chunks.json"
-                ),
+                    "embeddings.json"
+            ),
 
             assets:
                 path.join(
