@@ -1,10 +1,12 @@
 import { GameValidator } from "../../../domain/game/services/game-validator.service";
 
-import { KnowledgeRetriever } from "../../../domain/knowledge/KnowledgeRetriever";
+import { IKnowledgeRetriever } from "../../../domain/knowledge/IknowledgeRetriever";
 
 import { IEmbeddingProvider } from "../../../domain/embeddings/IEmbeddingProvider";
 
 import { ChatProvider } from "../../../domain/ai/chatProvider";
+
+import { ContextBuilder } from "../../../domain/ai/contextBuilder";
 
 export class AskQuestionUseCase {
 
@@ -14,102 +16,79 @@ export class AskQuestionUseCase {
 
         private readonly embeddingProvider: IEmbeddingProvider,
 
-        private readonly retriever: KnowledgeRetriever,
+        private readonly retriever: IKnowledgeRetriever,
 
-        private readonly chatProvider: ChatProvider
+        private readonly chatProvider: ChatProvider,
 
-    ) { }
+        private readonly contextBuilder: ContextBuilder
+
+    ) {}
 
     async execute(
 
-    gameId: string,
+        gameId: string,
 
-    question: string
+        question: string
 
-) {
+    ) {
 
-    console.log("1. Validando juego...");
+        console.log("1. Validando juego...");
 
-    const game =
+        const game =
+            await this.validator.validate(gameId);
 
-        await this.validator.validate(
+        console.log("✔ Juego validado");
+        console.log("");
 
-            gameId
+        console.log("2. Generando embedding de la pregunta...");
 
-        );
+        const embedding =
+            await this.embeddingProvider.generate(question);
 
-    console.log("✔ Juego validado");
+        console.log("✔ Embedding generado");
+        console.log("");
 
-    console.log("");
+        console.log("3. Buscando contexto...");
 
-    console.log("2. Generando embedding de la pregunta...");
+        const chunks =
+            await this.retriever.retrieve(
 
-    const embedding =
+                game,
 
-        await this.embeddingProvider.generate(
+                question,
 
-            question
+                embedding
 
-        );
+            );
 
-    console.log("✔ Embedding generado");
+        console.log(`✔ ${chunks.length} fragmentos encontrados`);
+        console.log("");
 
-    console.log("");
+        console.log("4. Generando respuesta...");
 
-    console.log("3. Buscando contexto...");
+        const context =
+            this.contextBuilder.build(chunks);
 
-    const chunks =
+        const answer =
+            await this.chatProvider.answer(
 
-        await this.retriever.retrieve(
+                question,
 
-            game,
+                context
 
-            embedding
+            );
 
-        );
+        console.log("✔ Respuesta generada");
+        console.log("");
 
-    console.log(
+        return {
 
-        `✔ ${chunks.length} fragmentos encontrados`
+            answer,
 
-    );
+            chunks
 
-    console.log("");
+        };
 
-    console.log("4. Generando respuesta...");
-
-    const context =
-
-        chunks
-            .map(chunk =>
-
-                `Página ${chunk.page}\n${chunk.text}`
-
-            )
-            .join("\n\n----------------\n\n");
-
-    const answer =
-
-        await this.chatProvider.answer(
-
-            question,
-
-            context
-
-        );
-
-    console.log("✔ Respuesta generada");
-
-    console.log("");
-
-    return {
-
-        answer,
-
-        chunks
-
-    };
-
-}
+    }
 
 }

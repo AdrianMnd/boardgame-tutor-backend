@@ -11,6 +11,7 @@ import { ConsoleImportLogger } from "../logger/ConsoleimportLogger";
 import { GeminiEmbeddingProvider } from "../../infrastructure/ai/gemini/geminiEmbeddingProvider";
 import { GEMINI } from "../../config/gemini";
 import { GeminiClient } from "../../infrastructure/ai/gemini/geminiClient";
+import { IMPORT_CONFIGURATION } from "../../config/import";
 
 async function main() {
 
@@ -69,7 +70,8 @@ async function main() {
 
     const embeddingGenerator =
         new EmbeddingGenerator(
-            embeddingProvider
+            embeddingProvider,
+            IMPORT_CONFIGURATION
         );
 
     const writer =

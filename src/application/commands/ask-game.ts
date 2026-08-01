@@ -4,7 +4,10 @@ import { NodeFileSystem } from "../../infrastructure/filesystem/NodeFileSystem";
 
 import { GameValidator } from "../../domain/game/services/game-validator.service";
 
-import { KnowledgeRetriever } from "../../domain/knowledge/KnowledgeRetriever";
+import { SemanticRetriever } from "../../domain/knowledge/SemanticRetriever";
+import { KeywordRetriever } from "../../domain/knowledge/KeywordRetriever";
+import { HybridRetriever } from "../../domain/knowledge/HybridRetriever";
+import { ContextBuilder } from "../../domain/ai/contextBuilder";
 
 import { AskQuestionUseCase } from "../use-cases/ask-question/ask-question.use-case";
 
@@ -13,6 +16,7 @@ import { GeminiEmbeddingProvider } from "../../infrastructure/ai/gemini/geminiEm
 import { GeminiChatProvider } from "../../infrastructure/ai/gemini/geminiChatProvider";
 
 import { GEMINI } from "../../config/gemini";
+import { IMPORT_CONFIGURATION } from "../../config/import";
 
 async function main() {
 
@@ -27,13 +31,9 @@ async function main() {
     if (!gameId || !question) {
 
         console.log("");
-
         console.log("Uso:");
-
         console.log("");
-
         console.log("npm run ask <gameId> <pregunta>");
-
         console.log("");
 
         process.exit(1);
@@ -41,41 +41,66 @@ async function main() {
     }
 
     console.log("");
-
     console.log("==================================");
-
     console.log(`Consultando juego: ${gameId}`);
-
     console.log("==================================");
-
     console.log("");
 
     const fileSystem =
         new NodeFileSystem();
 
     const validator =
-        new GameValidator(
-            fileSystem
+        new GameValidator(fileSystem);
+
+    const semanticRetriever =
+        new SemanticRetriever(
+
+            fileSystem,
+
+            IMPORT_CONFIGURATION
+
+        );
+
+    const keywordRetriever =
+        new KeywordRetriever(
+
+            fileSystem,
+
+            IMPORT_CONFIGURATION
+
         );
 
     const retriever =
-        new KnowledgeRetriever(
-            fileSystem
+        new HybridRetriever(
+
+            semanticRetriever,
+
+            keywordRetriever
+
         );
+
+    const contextBuilder =
+        new ContextBuilder();
 
     const geminiClient =
         new GeminiClient(
+
             GEMINI
+
         );
 
     const embeddingProvider =
-    new GeminiEmbeddingProvider(
-        geminiClient
-    );
+        new GeminiEmbeddingProvider(
+
+            geminiClient
+
+        );
 
     const chatProvider =
         new GeminiChatProvider(
+
             geminiClient
+
         );
 
     const useCase =
@@ -87,7 +112,9 @@ async function main() {
 
             retriever,
 
-            chatProvider
+            chatProvider,
+
+            contextBuilder
 
         );
 
@@ -101,17 +128,11 @@ async function main() {
         );
 
     console.log("");
-
     console.log("Respuesta:");
-
     console.log("");
-
     console.log(result.answer);
-
     console.log("");
-
     console.log("Fuentes:");
-
     console.log("");
 
     for (const chunk of result.chunks) {

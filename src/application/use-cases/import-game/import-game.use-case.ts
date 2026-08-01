@@ -106,14 +106,35 @@ export class ImportGameUseCase {
 
         );
 
-        const knowledge =
+        const embeddedChunks =
+
             await this.embeddingGenerator.generate(
-                chunks
+
+                chunks,
+
+                (
+
+                    completed,
+
+                    total
+
+                ) => {
+
+                    process.stdout.write(
+
+                        `\r   ${completed}/${total}`
+
+                    );
+
+                }
+
             );
+
+        process.stdout.write("\n");
 
         this.logger.success(
 
-            "Embeddings generados"
+            "✔ Embeddings generados"
 
         );
 
@@ -125,7 +146,7 @@ export class ImportGameUseCase {
 
         await this.knowledgeWriter.write(
             game,
-            knowledge
+            embeddedChunks
         );
 
         this.logger.success(

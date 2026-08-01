@@ -1,47 +1,82 @@
-import type { Chunk } from "../chunkGenerator/chunk";
-import type { KnowledgeChunk } from "../../../domain/knowledge/KnowledgeChunk";
-import type { IEmbeddingProvider } from "../../../domain/embeddings/IEmbeddingProvider";
+import { Chunk } from "../chunkGenerator/chunk";
+
+import { EmbeddedChunk } from "../../../domain/importer/embeddedChunk";
+
+import { IEmbeddingProvider } from "../../../domain/embeddings/IEmbeddingProvider";
+
+import { RetryPolicy } from "./RetryPolicy";
+
+import { EmbeddingBatchProcessor } from "./embeddingBatchProcessor";
+
+import { ImportConfiguration } from "../../../config/import";
 
 export class EmbeddingGenerator {
 
     constructor(
 
-        private readonly provider: IEmbeddingProvider
+        private readonly provider: IEmbeddingProvider,
+
+        private readonly configuration: ImportConfiguration
 
     ) {}
 
     async generate(
-        chunks: Chunk[]
-    ): Promise<KnowledgeChunk[]> {
 
-        const result: KnowledgeChunk[] = [];
+        chunks: Chunk[],
 
-        for (const chunk of chunks) {
+        onProgress?: (
 
-            const embedding =
-                await this.provider.generate(
-                    chunk.text
-                );
+            completed: number,
 
-            result.push({
+            total: number
 
-                id: chunk.id,
+        ) => void
 
-                gameId: chunk.gameId,
+    ): Promise<EmbeddedChunk[]> {
 
-                page: chunk.page,
+        const retryPolicy =
 
-                index: chunk.index,
+            new RetryPolicy(
 
-                text: chunk.text,
+                this.configuration.retryCount,
 
-                embedding
+                this.configuration.retryDelay,
 
-            });
+                (
 
-        }
+                    attempt,
 
-        return result;
+                    delay
+
+                ) =>
+
+                    console.log(
+
+                        `   Reintentando (${attempt}) en ${delay} ms...`
+
+                    )
+
+            );
+
+        const processor =
+
+            new EmbeddingBatchProcessor(
+
+                this.provider,
+
+                retryPolicy,
+
+                this.configuration.embeddingConcurrency,
+
+                onProgress
+
+            );
+
+        return processor.process(
+
+            chunks
+
+        );
 
     }
 
