@@ -50,24 +50,27 @@ export class GeminiClient {
 
     async generateText(
 
-        prompt: string
+    prompt: string
 
-    ): Promise<string> {
+): Promise<string> {
 
-        const response =
-            await this.client.models.generateContent({
+    const response =
 
-                model:
+        await this.client.models.generateContent({
 
-                    this.configuration.chatModel,
+            model:
 
-                contents: prompt
+                this.configuration.chatModel,
 
-            });
+            contents:
 
-        return response.text ?? "";
+                prompt
 
-    }
+        });
+
+    return response.text ?? "";
+
+}
 
     async generateAnswer(
 
@@ -107,5 +110,29 @@ export class GeminiClient {
             return response.text ?? "";
 
         }
+
+        async generateStructuredContent(
+
+    prompt: string
+
+): Promise<string> {
+
+    const response =
+
+        await this.client.models.generateContent({
+
+            model:
+
+                this.configuration.chatModel,
+
+            contents:
+
+                prompt
+
+        });
+
+    return response.text ?? "";
+
+}
 
 }

@@ -17,6 +17,8 @@ import { GeminiChatProvider } from "../../infrastructure/ai/gemini/geminiChatPro
 
 import { GEMINI } from "../../config/gemini";
 import { IMPORT_CONFIGURATION } from "../../config/import";
+import { GeminiContextReranker } from "../../infrastructure/ai/gemini/geminiContextReranker";
+import { GeminiContextCompressor } from "../../infrastructure/ai/gemini/geminiContextCompressor";
 
 async function main() {
 
@@ -73,35 +75,61 @@ async function main() {
     const retriever =
         new HybridRetriever(
 
-            semanticRetriever,
+             new SemanticRetriever(
 
-            keywordRetriever
+            fileSystem,
+
+            IMPORT_CONFIGURATION
+
+        ),
+
+        new KeywordRetriever(
+
+            fileSystem,
+
+            IMPORT_CONFIGURATION
+
+        )
 
         );
 
+    
     const contextBuilder =
-        new ContextBuilder();
-
+    new ContextBuilder();
+    
     const geminiClient =
-        new GeminiClient(
-
-            GEMINI
-
-        );
-
+    new GeminiClient(
+        
+        GEMINI
+        
+    );
+    
     const embeddingProvider =
-        new GeminiEmbeddingProvider(
+    new GeminiEmbeddingProvider(
+        
+        geminiClient
+        
+    );
+    
+    const reranker = new GeminiContextReranker(
 
-            geminiClient
+        geminiClient
 
-        );
-
+    );
     const chatProvider =
         new GeminiChatProvider(
 
             geminiClient
 
         );
+
+    const compressor =
+
+    new GeminiContextCompressor(
+
+        geminiClient
+
+    );
 
     const useCase =
         new AskQuestionUseCase(
@@ -112,9 +140,13 @@ async function main() {
 
             retriever,
 
-            chatProvider,
+            reranker,
 
-            contextBuilder
+            compressor,
+
+            contextBuilder,
+
+            chatProvider
 
         );
 
