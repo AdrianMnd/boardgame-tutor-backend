@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { games } from "../../data/games";
+import { games } from "../../../data/games";
 
 
 export class GamesController {

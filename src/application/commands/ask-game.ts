@@ -1,24 +1,5 @@
 import "dotenv/config";
-
-import { NodeFileSystem } from "../../infrastructure/filesystem/NodeFileSystem";
-
-import { GameValidator } from "../../domain/game/services/game-validator.service";
-
-import { SemanticRetriever } from "../../domain/knowledge/SemanticRetriever";
-import { KeywordRetriever } from "../../domain/knowledge/KeywordRetriever";
-import { HybridRetriever } from "../../domain/knowledge/HybridRetriever";
-import { ContextBuilder } from "../../domain/ai/contextBuilder";
-
-import { AskQuestionUseCase } from "../use-cases/ask-question/ask-question.use-case";
-
-import { GeminiClient } from "../../infrastructure/ai/gemini/geminiClient";
-import { GeminiEmbeddingProvider } from "../../infrastructure/ai/gemini/geminiEmbeddingProvider";
-import { GeminiChatProvider } from "../../infrastructure/ai/gemini/geminiChatProvider";
-
-import { GEMINI } from "../../config/gemini";
-import { IMPORT_CONFIGURATION } from "../../config/import";
-import { GeminiContextReranker } from "../../infrastructure/ai/gemini/geminiContextReranker";
-import { GeminiContextCompressor } from "../../infrastructure/ai/gemini/geminiContextCompressor";
+import { container } from "../container/Index";
 
 async function main() {
 
@@ -48,110 +29,8 @@ async function main() {
     console.log("==================================");
     console.log("");
 
-    const fileSystem =
-        new NodeFileSystem();
-
-    const validator =
-        new GameValidator(fileSystem);
-
-    const semanticRetriever =
-        new SemanticRetriever(
-
-            fileSystem,
-
-            IMPORT_CONFIGURATION
-
-        );
-
-    const keywordRetriever =
-        new KeywordRetriever(
-
-            fileSystem,
-
-            IMPORT_CONFIGURATION
-
-        );
-
-    const retriever =
-        new HybridRetriever(
-
-             new SemanticRetriever(
-
-            fileSystem,
-
-            IMPORT_CONFIGURATION
-
-        ),
-
-        new KeywordRetriever(
-
-            fileSystem,
-
-            IMPORT_CONFIGURATION
-
-        )
-
-        );
-
-    
-    const contextBuilder =
-    new ContextBuilder();
-    
-    const geminiClient =
-    new GeminiClient(
-        
-        GEMINI
-        
-    );
-    
-    const embeddingProvider =
-    new GeminiEmbeddingProvider(
-        
-        geminiClient
-        
-    );
-    
-    const reranker = new GeminiContextReranker(
-
-        geminiClient
-
-    );
-    const chatProvider =
-        new GeminiChatProvider(
-
-            geminiClient
-
-        );
-
-    const compressor =
-
-    new GeminiContextCompressor(
-
-        geminiClient
-
-    );
-
-    const useCase =
-        new AskQuestionUseCase(
-
-            validator,
-
-            embeddingProvider,
-
-            retriever,
-
-            reranker,
-
-            compressor,
-
-            contextBuilder,
-
-            chatProvider
-
-        );
-
     const result =
-        await useCase.execute(
+        await container.askQuestionUseCase.execute(
 
             gameId,
 
@@ -164,6 +43,7 @@ async function main() {
     console.log("");
     console.log(result.answer);
     console.log("");
+
     console.log("Fuentes:");
     console.log("");
 

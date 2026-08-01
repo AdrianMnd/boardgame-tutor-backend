@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "build": "tsc --noEmit",
     "import": "tsx src/application/commands/import-game.ts",
     "ask": "tsx src/application/commands/ask-game.ts",
     "test-gemini": "tsx src/application/commands/test-gemini.ts",

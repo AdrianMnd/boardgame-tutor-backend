@@ -3,8 +3,8 @@ dotenv.config();
 import express from "express";
 import cors from "cors";
 
-import chatRoutes from "./presentation/routes/chat.routes";
-import gamesRoutes from "./presentation/routes/games.routes";
+import chatRoutes from "./presentation/api/routes/chat.routes";
+import gamesRoutes from "./presentation/api/routes/games.routes";
 import { ConsoleImportLogger } from "./application/logger/ConsoleimportLogger";
 
 

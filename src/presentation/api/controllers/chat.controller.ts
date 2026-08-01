@@ -6,7 +6,7 @@ import type {
 
 import {
     generateAnswer
-} from "../../services/ai/ai.service";
+} from "../../../services/ai/ai.service";
 
 
 

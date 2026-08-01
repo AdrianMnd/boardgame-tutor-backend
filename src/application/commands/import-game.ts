@@ -12,6 +12,7 @@ import { GeminiEmbeddingProvider } from "../../infrastructure/ai/gemini/geminiEm
 import { GEMINI } from "../../config/gemini";
 import { GeminiClient } from "../../infrastructure/ai/gemini/geminiClient";
 import { IMPORT_CONFIGURATION } from "../../config/import";
+import { FileGameRepository } from "../../infrastructure/repositories/FileGameRepository";
 
 async function main() {
 
@@ -44,10 +45,17 @@ async function main() {
 
 
     const fileSystem =
-        new NodeFileSystem();
+    new NodeFileSystem();
 
-    const validator =
-        new GameValidator(fileSystem);
+const repository =
+    new FileGameRepository(
+        fileSystem
+    );
+
+const validator =
+    new GameValidator(
+        repository
+    );
 
     const extractor =
         new Pdf2JsonExtractor();
