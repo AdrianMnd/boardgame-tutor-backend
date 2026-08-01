@@ -1,33 +1,39 @@
-import { EmbeddedChunk } from "../../../domain/importer/embeddedChunk";
-import { IEmbeddingProvider } from "../../ai/embeddings/iEmbeddingProvider";
-import { Chunk } from "../chunkGenerator/chunk";
-
+import type { Chunk } from "../chunkGenerator/chunk";
+import type { KnowledgeChunk } from "../../../domain/knowledge/KnowledgeChunk";
+import type { IEmbeddingProvider } from "../../../domain/embeddings/IEmbeddingProvider";
 
 export class EmbeddingGenerator {
 
     constructor(
 
-        private readonly provider:
-            IEmbeddingProvider
+        private readonly provider: IEmbeddingProvider
 
-    ) { }
+    ) {}
 
     async generate(
         chunks: Chunk[]
-    ): Promise<EmbeddedChunk[]> {
+    ): Promise<KnowledgeChunk[]> {
 
-        const embeddedChunks: EmbeddedChunk[] = [];
+        const result: KnowledgeChunk[] = [];
 
         for (const chunk of chunks) {
 
             const embedding =
-                await this.provider.generateEmbedding(
+                await this.provider.generate(
                     chunk.text
                 );
 
-            embeddedChunks.push({
+            result.push({
 
-                ...chunk,
+                id: chunk.id,
+
+                gameId: chunk.gameId,
+
+                page: chunk.page,
+
+                index: chunk.index,
+
+                text: chunk.text,
 
                 embedding
 
@@ -35,7 +41,7 @@ export class EmbeddingGenerator {
 
         }
 
-        return embeddedChunks;
+        return result;
 
     }
 

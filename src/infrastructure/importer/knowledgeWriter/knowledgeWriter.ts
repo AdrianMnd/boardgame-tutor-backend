@@ -1,31 +1,31 @@
-import path from "node:path";
-import { IFileSystem } from "../../../shared/contracts/IFileSystem";
-import { EmbeddedChunk } from "../../../domain/importer/embeddedChunk";
-import { KnowledgeIndex } from "./knowledgeIndex";
+import type { IFileSystem } from "../../../shared/contracts/IFileSystem";
 
+import type { EmbeddedChunk } from "../../../domain/importer/embeddedChunk";
+import type { ValidatedGame } from "../../../domain/game/types/ValidatedGame";
 
+import type { KnowledgeIndex } from "./knowledgeIndex";
 
 export class KnowledgeWriter {
 
     constructor(
 
-    private readonly fileSystem: IFileSystem,
+        private readonly fileSystem: IFileSystem,
 
-    private readonly embeddingModel: string
+        private readonly embeddingModel: string
 
-) {}
+    ) {}
 
     async write(
 
-        gameId: string,
+        game: ValidatedGame,
 
         chunks: EmbeddedChunk[]
 
     ): Promise<void> {
 
-        const knowledgeIndex: KnowledgeIndex = {
+        const knowledge: KnowledgeIndex = {
 
-            gameId,
+            gameId: game.metadata.id,
 
             createdAt: new Date().toISOString(),
 
@@ -37,27 +37,11 @@ export class KnowledgeWriter {
 
         };
 
-        const outputPath = path.join(
-
-            process.cwd(),
-
-            "knowledge",
-
-            "games",
-
-            gameId,
-
-            "generated",
-
-            "embeddings.json"
-
-        );
-
         await this.fileSystem.writeJson(
 
-            outputPath,
+            game.paths.knowledge,
 
-            knowledgeIndex
+            knowledge
 
         );
 

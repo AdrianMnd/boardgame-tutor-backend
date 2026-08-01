@@ -1,6 +1,6 @@
 export interface IEmbeddingProvider {
 
-    generateEmbedding(
+    generate(
         text: string
     ): Promise<number[]>;
 

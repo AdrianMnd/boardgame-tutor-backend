@@ -1,21 +1,21 @@
-import type { IEmbeddingProvider } from "./IEmbeddingProvider";
+import { IEmbeddingProvider } from "./IEmbeddingProvider";
 
 export class FakeEmbeddingProvider
     implements IEmbeddingProvider {
 
-    async generateEmbedding(
+    async generate(
         text: string
     ): Promise<number[]> {
 
-        return [
+        return Array.from(
 
-            text.length,
+            { length: 768 },
 
-            text.split(" ").length,
+            (_, index) =>
 
-            1
+                (text.length + index) / 1000
 
-        ];
+        );
 
     }
 

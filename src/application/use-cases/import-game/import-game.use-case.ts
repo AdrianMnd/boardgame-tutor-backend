@@ -124,7 +124,7 @@ export class ImportGameUseCase {
         );
 
         await this.knowledgeWriter.write(
-            game.metadata.id,
+            game,
             knowledge
         );
 

@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { NodeFileSystem } from "../../infrastructure/filesystem/NodeFileSystem";
 import { GameValidator } from "../../domain/game/services/game-validator.service";
 import { ChunkGenerator } from "../../infrastructure/importer/chunkGenerator/chunkGenerator";
@@ -5,9 +6,11 @@ import { EmbeddingGenerator } from "../../infrastructure/importer/embeddingGener
 import { KnowledgeWriter } from "../../infrastructure/importer/knowledgeWriter/knowledgeWriter";
 import { TextCleaner } from "../../infrastructure/importer/textCleaner/textCleaner";
 import { ImportGameUseCase } from "../use-cases/import-game/import-game.use-case";
-import { FakeEmbeddingProvider } from "../../domain/embeddings/fakeEmbeddingProvider";
 import { Pdf2JsonExtractor } from "../../infrastructure/importer/pdf/Pdf2JsonExtractor";
 import { ConsoleImportLogger } from "../logger/ConsoleimportLogger";
+import { GeminiEmbeddingProvider } from "../../infrastructure/ai/gemini/geminiEmbeddingProvider";
+import { GEMINI } from "../../config/gemini";
+import { GeminiClient } from "../../infrastructure/ai/gemini/geminiClient";
 
 async function main() {
 
@@ -54,8 +57,15 @@ async function main() {
     const chunkGenerator =
         new ChunkGenerator();
 
+    const geminiClient =
+            new GeminiClient(
+                GEMINI
+);
+
     const embeddingProvider =
-        new FakeEmbeddingProvider();
+     new GeminiEmbeddingProvider(
+        geminiClient
+    ); 
 
     const embeddingGenerator =
         new EmbeddingGenerator(

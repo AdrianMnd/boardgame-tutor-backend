@@ -1,3 +1,4 @@
+import { KnowledgeIndex } from "../../infrastructure/importer/knowledgeWriter/knowledgeIndex";
 import type { IFileSystem } from "../../shared/contracts/IFileSystem";
 
 import type { ValidatedGame } from "../game/types/ValidatedGame";
@@ -28,12 +29,14 @@ export class KnowledgeRetriever {
 
     ): Promise<RetrievedChunk[]> {
 
+        const knowledge =
+    await this.fileSystem.readJson<KnowledgeIndex>(
+        game.paths.knowledge
+    );
+
         const chunks =
-            await this.fileSystem.readJson<KnowledgeChunk[]>(
-
-                game.paths.knowledge
-
-            );
+            knowledge.chunks;
+            
 
         const results =
             chunks.map(
@@ -75,7 +78,7 @@ export class KnowledgeRetriever {
                 b.score - a.score
 
         );
-
+        
         return results.slice(
 
             0,
