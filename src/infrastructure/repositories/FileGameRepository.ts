@@ -47,120 +47,99 @@ export class FileGameRepository
 
     async findById(
 
-        gameId: string
+    gameId: string
 
-    ): Promise<ValidatedGame | null> {
+): Promise<ValidatedGame | null> {
 
-        const root =
-            path.resolve(
-                "games",
-                gameId
-            );
+    const root =
+        path.resolve(
+            "games",
+            gameId
+        );
 
-        const metadataPath =
-            path.join(
-                root,
-                "metadata.json"
-            );
+    const metadataPath =
+        path.join(
+            root,
+            "metadata.json"
+        );
 
-        if (
+    console.log("ROOT:", root);
+    console.log("METADATA:", metadataPath);
 
-            !(await this.fileSystem.exists(metadataPath))
+    const exists =
+        await this.fileSystem.exists(
+            metadataPath
+        );
 
-        ) {
+    console.log("EXISTS:", exists);
 
-            return null;
+    if (!exists) {
+
+        return null;
+
+    }
+
+    const metadata =
+
+        await this.fileSystem.readJson<GameMetadata>(
+
+            metadataPath
+
+        );
+
+    return {
+
+        metadata,
+
+        paths: {
+
+            root,
+
+            metadata: metadataPath,
+
+            source:
+                path.join(
+                    root,
+                    "source"
+                ),
+
+            rulebook:
+                path.join(
+                    root,
+                    "source",
+                    "rulebook.pdf"
+                ),
+
+            generated:
+                path.join(
+                    root,
+                    "generated"
+                ),
+
+            chunks:
+                path.join(
+                    root,
+                    "generated",
+                    "chunks.json"
+                ),
+
+            knowledge:
+                path.join(
+                    root,
+                    "generated",
+                    "knowledge.json"
+                ),
+
+            assets:
+                path.join(
+                    root,
+                    "assets"
+                )
 
         }
 
-        const metadata =
+    };
 
-            await this.fileSystem.readJson<GameMetadata>(
-
-                metadataPath
-
-            );
-
-        return {
-
-            metadata,
-
-            paths: {
-
-                root,
-
-                metadata: metadataPath,
-
-                source:
-
-                    path.join(
-
-                        root,
-
-                        "source"
-
-                    ),
-
-                rulebook:
-
-                    path.join(
-
-                        root,
-
-                        "source",
-
-                        "rulebook.pdf"
-
-                    ),
-
-                generated:
-
-                    path.join(
-
-                        root,
-
-                        "generated"
-
-                    ),
-
-                chunks:
-
-                    path.join(
-
-                        root,
-
-                        "generated",
-
-                        "chunks.json"
-
-                    ),
-
-                knowledge:
-
-                    path.join(
-
-                        root,
-
-                        "generated",
-
-                        "knowledge.json"
-
-                    ),
-
-                assets:
-
-                    path.join(
-
-                        root,
-
-                        "assets"
-
-                    )
-
-            }
-
-        };
-
-    }
+}
 
 }

@@ -1,0 +1,9 @@
+{
+    "id": "catan",
+    "name": "Catan",
+    "language": "es",
+    "version": "1.0",
+    "minPlayers": 3,
+    "maxPlayers": 4,
+    "year": 1995
+}

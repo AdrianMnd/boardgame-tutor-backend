@@ -16,6 +16,9 @@ import { FileGameRepository } from "../../infrastructure/repositories/FileGameRe
 
 async function main() {
 
+        console.log("CWD:", process.cwd());
+
+
     const gameId = process.argv[2];
 
     if (!gameId) {
