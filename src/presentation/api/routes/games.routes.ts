@@ -1,23 +1,25 @@
 import { Router } from "express";
 
-import { GamesController } from "../controllers/games.controller";
+import { ApplicationContainer } from "../../../application/container/ApplicationContainer";
 
+import { GamesController } from "../controllers/games.controller";
 
 const router = Router();
 
-const controller = new GamesController();
+const container =
+    new ApplicationContainer();
 
+const controller =
+    new GamesController(
+        container.listGamesUseCase
+    );
 
 router.get(
+
     "/",
+
     controller.getGames
+
 );
-
-
-router.get(
-    "/:id",
-    controller.getGameById
-);
-
 
 export default router;

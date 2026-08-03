@@ -47,7 +47,7 @@ async function main() {
     console.log("Fuentes:");
     console.log("");
 
-    for (const chunk of result.chunks) {
+    for (const chunk of result.sources) {
 
         console.log(
 

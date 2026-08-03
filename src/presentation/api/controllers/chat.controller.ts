@@ -1,55 +1,61 @@
 import type {
+
     Request,
+
     Response
+
 } from "express";
 
+import { AskQuestionUseCase } from "../../../application/use-cases/ask-question/ask-question.use-case";
 
-import {
-    generateAnswer
-} from "../../../services/ai/ai.service";
+import type {
 
+    AskQuestionRequest
 
+} from "../dto/askQuestionRequest";
 
-export async function askQuestion(
-    req: Request,
-    res: Response
-) {
+import { ChatMapper } from "../mappers/chatMapper";
 
+export class ChatController {
 
-    const {
-        gameId,
-        question
-    } = req.body;
+    constructor(
 
+        private readonly useCase: AskQuestionUseCase
 
+    ) {}
 
-    if (!gameId || !question) {
+    ask = async (
 
+        request: Request,
 
-        return res.status(400).json({
+        response: Response
 
-            message:
-                "gameId y question son obligatorios"
+    ): Promise<void> => {
 
-        });
+        const body =
 
-    }
+            request.body as AskQuestionRequest;
 
+        const result =
 
+            await this.useCase.execute(
 
-    const answer =
-        await generateAnswer(
-            gameId,
-            question
+                body.gameId,
+
+                body.question
+
+            );
+
+        response.json(
+
+            ChatMapper.toResponse(
+
+                result
+
+            )
+
         );
 
-
-
-    const response = await generateAnswer(
-        gameId,
-        question
-    );
-
-    res.json(response);
+    };
 
 }

@@ -10,6 +10,7 @@ import { ContextBuilder } from "../../../domain/ai/contextBuilder";
 
 import { ChatProvider } from "../../../domain/ai/chatProvider";
 import { IContextCompressor } from "../../../domain/knowledge/IContextCompressor";
+import { AskQuestionResult } from "./askQuestionResult";
 
 export class AskQuestionUseCase {
 
@@ -37,7 +38,7 @@ export class AskQuestionUseCase {
 
         question: string
 
-    ) {
+    ):Promise<AskQuestionResult> {
 
         console.log("1. Validando juego...");
 
@@ -130,7 +131,7 @@ export class AskQuestionUseCase {
 
             this.contextBuilder.build(
 
-                reranked
+                compressed
 
             );
 
@@ -162,7 +163,7 @@ export class AskQuestionUseCase {
 
             answer,
 
-            chunks: compressed
+            sources: compressed
 
         };
 

@@ -1,38 +1,45 @@
-import { Request, Response } from "express";
-import { games } from "../../../data/games";
+import type {
 
+    Request,
+
+    Response
+
+} from "express";
+
+import { ListGamesUseCase } from "../../../application/use-cases/list-games/list-games.use-case";
+
+import { GameMapper } from "../mappers/gameMapper";
 
 export class GamesController {
 
+    constructor(
 
-    getGames(_req: Request, res: Response) {
+        private readonly useCase: ListGamesUseCase
 
-        res.json(games);
+    ) {}
 
-    }
+    getGames = async (
 
+        _request: Request,
 
-    getGameById(req: Request, res: Response) {
+        response: Response
 
-        const id = Number(req.params.id);
+    ): Promise<void> => {
 
+        const games =
 
-        const game = games.find(
-            game => game.id === id
+            await this.useCase.execute();
+
+        response.json(
+
+            GameMapper.toResponses(
+
+                games
+
+            )
+
         );
 
-
-        if (!game) {
-
-            return res.status(404).json({
-                message: "Juego no encontrado"
-            });
-
-        }
-
-
-        res.json(game);
-
-    }
+    };
 
 }

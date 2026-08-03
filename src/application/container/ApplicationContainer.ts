@@ -15,6 +15,7 @@ import { SemanticRetriever } from "../../domain/knowledge/SemanticRetriever";
 import { ContextBuilder } from "../../domain/ai/contextBuilder";
 
 import { AskQuestionUseCase } from "../use-cases/ask-question/ask-question.use-case";
+import { ListGamesUseCase } from "../use-cases/list-games/list-games.use-case";
 
 export class ApplicationContainer {
 
@@ -22,14 +23,19 @@ export class ApplicationContainer {
         new NodeFileSystem();
 
     readonly repository =
-    new FileGameRepository(
-        this.fileSystem
-    );
+        new FileGameRepository(
+            this.fileSystem
+        );
 
-readonly validator =
-    new GameValidator(
-        this.repository
-    );
+    readonly listGamesUseCase =
+        new ListGamesUseCase(
+            this.repository
+        );
+
+    readonly validator =
+        new GameValidator(
+            this.repository
+        );
 
     readonly geminiClient =
         new GeminiClient(
