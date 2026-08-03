@@ -1,6 +1,7 @@
 import "dotenv/config";
 
 import express from "express";
+import path from "node:path";
 import cors from "cors";
 
 import gamesRoutes from "./presentation/api/routes/games.routes";
@@ -11,6 +12,18 @@ const app = express();
 app.use(cors());
 
 app.use(express.json());
+
+app.use(
+
+    "/games",
+
+    express.static(
+
+        path.resolve("games")
+
+    )
+
+);
 
 app.get(
 
