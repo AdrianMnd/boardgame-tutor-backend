@@ -8,7 +8,8 @@
     "build": "tsc --noEmit",
     "import": "tsx src/application/commands/import-game.ts",
     "ask": "tsx src/application/commands/ask-game.ts",
-    "test-gemini": "tsx src/application/commands/test-gemini.ts",
+    "test:gemini": "tsx src/application/commands/test-gemini.ts",
+    "test:openrouter": "tsx src/application/commands/test-openrouter.ts",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage"

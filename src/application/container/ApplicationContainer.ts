@@ -1,14 +1,9 @@
-import { GEMINI } from "../../config/gemini";
 import { IMPORT_CONFIGURATION } from "../../config/import";
 
 import { NodeFileSystem } from "../../infrastructure/filesystem/NodeFileSystem";
 import { FileGameRepository } from "../../infrastructure/repositories/FileGameRepository";
 
-import { GeminiClient } from "../../infrastructure/ai/gemini/geminiClient";
-import { GeminiEmbeddingProvider } from "../../infrastructure/ai/gemini/geminiEmbeddingProvider";
-import { GeminiChatProvider } from "../../infrastructure/ai/gemini/geminiChatProvider";
-import { GeminiContextReranker } from "../../infrastructure/ai/gemini/geminiContextReranker";
-import { GeminiContextCompressor } from "../../infrastructure/ai/gemini/geminiContextCompressor";
+import { AIProviderFactory } from "../../infrastructure/ai/factory/AIProviderFactory";
 
 import { GameValidator } from "../../domain/game/services/game-validator.service";
 import { SemanticRetriever } from "../../domain/knowledge/SemanticRetriever";
@@ -37,30 +32,25 @@ export class ApplicationContainer {
             this.repository
         );
 
-    readonly geminiClient =
-        new GeminiClient(
-            GEMINI
-        );
+    readonly ai =
+
+    AIProviderFactory.create();
 
     readonly embeddingProvider =
-        new GeminiEmbeddingProvider(
-            this.geminiClient
-        );
+
+        this.ai.embeddingProvider;
 
     readonly chatProvider =
-        new GeminiChatProvider(
-            this.geminiClient
-        );
+
+        this.ai.chatProvider;
 
     readonly reranker =
-        new GeminiContextReranker(
-            this.geminiClient
-        );
+
+        this.ai.reranker;
 
     readonly compressor =
-        new GeminiContextCompressor(
-            this.geminiClient
-        );
+
+        this.ai.compressor;
 
     readonly retriever =
         new SemanticRetriever(
