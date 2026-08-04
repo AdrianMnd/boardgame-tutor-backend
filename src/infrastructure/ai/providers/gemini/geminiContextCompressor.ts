@@ -1,14 +1,15 @@
 import { RetrievedChunk } from "../../../../domain/knowledge/RetrievedChunk";
 import { IContextCompressor } from "../../../../domain/knowledge/IContextCompressor";
 
-import { GeminiClient } from "./geminiClient";
+import type { ILLMClient }
+    from "../../common/ILLMClient";
 
 export class GeminiContextCompressor
 implements IContextCompressor {
 
     constructor(
 
-        private readonly client: GeminiClient
+        private readonly client: ILLMClient
 
     ) {}
 

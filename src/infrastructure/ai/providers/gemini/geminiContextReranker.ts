@@ -1,14 +1,15 @@
 import { IContextReranker } from "../../../../domain/knowledge/IContextReranker";
 import { RetrievedChunk } from "../../../../domain/knowledge/RetrievedChunk";
 
-import { GeminiClient } from "./geminiClient";
+import type { ILLMClient }
+    from "../../common/ILLMClient";
 
 export class GeminiContextReranker
 implements IContextReranker {
 
     constructor(
 
-        private readonly client: GeminiClient
+        private readonly client: ILLMClient
 
     ) {}
 

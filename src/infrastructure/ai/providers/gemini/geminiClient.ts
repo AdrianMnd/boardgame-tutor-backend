@@ -3,7 +3,14 @@ import { GoogleGenAI } from "@google/genai";
 import type { GeminiConfiguration }
     from "./geminiConfiguration";
 
-export class GeminiClient {
+import type { ILLMClient }
+    from "../../common/ILLMClient";
+
+import type { ChatMessage }
+    from "../../common/ChatMessage";
+
+export class GeminiClient
+implements ILLMClient {
 
     private readonly client: GoogleGenAI;
 
@@ -45,11 +52,35 @@ export class GeminiClient {
 
             });
 
-        return (
+        return response.text ?? "";
 
-            response.text
+    }
 
-            ?? ""
+    async generateChat(
+
+        messages: ChatMessage[]
+
+    ): Promise<string> {
+
+        const prompt =
+
+            messages
+
+                .map(
+
+                    message =>
+
+`${message.role.toUpperCase()}
+
+${message.content}`
+
+                )
+
+                .join("\n\n");
+
+        return this.generateText(
+
+            prompt
 
         );
 
@@ -69,7 +100,9 @@ export class GeminiClient {
 
                     this.configuration.embeddingModel,
 
-                contents: text
+                contents:
+
+                    text
 
             });
 

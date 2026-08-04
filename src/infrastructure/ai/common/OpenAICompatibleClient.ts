@@ -1,5 +1,6 @@
 import type { ChatMessage } from "./ChatMessage";
 import type { OpenAICompatibleConfiguration } from "./OpenAICompatibleConfiguration";
+import type { ILLMClient } from "./ILLMClient";
 
 interface ChatCompletionResponse {
 
@@ -15,7 +16,8 @@ interface ChatCompletionResponse {
 
 }
 
-export class OpenAICompatibleClient {
+export class OpenAICompatibleClient
+    implements ILLMClient {
 
     constructor(
 
@@ -78,6 +80,62 @@ export class OpenAICompatibleClient {
 
     async generateText(
 
+    prompt: string
+
+): Promise<string> {
+
+    return this.generateChat([
+
+        {
+
+            role: "user",
+
+            content: prompt
+
+        }
+
+    ]);
+
+}
+
+async generateChat(
+
+    messages: ChatMessage[]
+
+): Promise<string> {
+
+    const response =
+
+        await this.post<ChatCompletionResponse>(
+
+            "/chat/completions",
+
+            {
+
+                model:
+
+                    this.configuration.chatModel,
+
+                messages
+
+            }
+
+        );
+
+    return (
+
+        response.choices[0]?.message.content
+
+        ??
+
+        ""
+
+    );
+
+}
+
+    /* async generateChat(
+
         messages: ChatMessage[]
 
     ): Promise<string> {
@@ -110,7 +168,7 @@ export class OpenAICompatibleClient {
 
         );
 
-    }
+    } */
 
     async generateEmbedding(
 

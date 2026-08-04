@@ -30,7 +30,7 @@ async function main() {
 
     const response =
 
-        await client.generateText([
+        await client.generateChat([
 
             {
 

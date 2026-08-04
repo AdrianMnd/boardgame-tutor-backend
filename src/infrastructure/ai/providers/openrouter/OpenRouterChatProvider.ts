@@ -25,7 +25,7 @@ export class OpenRouterChatProvider
 
         const response =
 
-            await this.client.generateText([
+            await this.client.generateChat([
 
                 {
 
