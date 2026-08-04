@@ -8,8 +8,14 @@ export interface AskQuestionResponse {
 
 export interface SourceResponse {
 
+    id: string;
+
+    gameId: string;
+
     page: number;
 
     score: number;
+
+    text: string;
 
 }

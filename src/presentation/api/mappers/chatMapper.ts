@@ -1,17 +1,13 @@
 import type { AskQuestionResult } from "../../../application/use-cases/ask-question/askQuestionResult";
 
 import type {
-
     AskQuestionResponse
-
 } from "../dto/askQuestionResponse";
 
 export class ChatMapper {
 
     static toResponse(
-
         result: AskQuestionResult
-
     ): AskQuestionResponse {
 
         return {
@@ -20,21 +16,21 @@ export class ChatMapper {
 
             sources:
 
-                result.sources.map(
+                result.sources.map(source => ({
 
-                    source => ({
+                    id: source.id,
 
-                        page: source.page,
+                    gameId: source.gameId,
 
-                        score: Number(
+                    page: source.page,
 
-                            source.score.toFixed(3)
+                    text: source.text,
 
-                        )
+                    score: Number(
+                        source.score.toFixed(3)
+                    )
 
-                    })
-
-                )
+                }))
 
         };
 
