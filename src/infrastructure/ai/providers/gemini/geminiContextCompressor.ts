@@ -1,5 +1,5 @@
-import { RetrievedChunk } from "../../../domain/knowledge/RetrievedChunk";
-import { IContextCompressor } from "../../../domain/knowledge/IContextCompressor";
+import { RetrievedChunk } from "../../../../domain/knowledge/RetrievedChunk";
+import { IContextCompressor } from "../../../../domain/knowledge/IContextCompressor";
 
 import { GeminiClient } from "./geminiClient";
 
@@ -38,7 +38,7 @@ implements IContextCompressor {
 
         const response =
 
-            await this.client.generateStructuredContent(
+            await this.client.generateText(
 
                 prompt
 

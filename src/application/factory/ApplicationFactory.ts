@@ -10,13 +10,13 @@ import { SemanticRetriever } from "../../domain/knowledge/SemanticRetriever";
 
 import { ContextBuilder } from "../../domain/ai/contextBuilder";
 
-import { GeminiClient } from "../../infrastructure/ai/gemini/geminiClient";
-import { GeminiEmbeddingProvider } from "../../infrastructure/ai/gemini/geminiEmbeddingProvider";
-import { GeminiChatProvider } from "../../infrastructure/ai/gemini/geminiChatProvider";
+import { GeminiClient } from "../../infrastructure/ai/providers/gemini/geminiClient";
+import { GeminiEmbeddingProvider } from "../../infrastructure/ai/providers/gemini/geminiEmbeddingProvider";
+import { GeminiChatProvider } from "../../infrastructure/ai/providers/gemini/geminiChatProvider";
 
 import { AskQuestionUseCase } from "../use-cases/ask-question/ask-question.use-case";
-import { GeminiContextReranker } from "../../infrastructure/ai/gemini/geminiContextReranker";
-import { GeminiContextCompressor } from "../../infrastructure/ai/gemini/geminiContextCompressor";
+import { GeminiContextReranker } from "../../infrastructure/ai/providers/gemini/geminiContextReranker";
+import { GeminiContextCompressor } from "../../infrastructure/ai/providers/gemini/geminiContextCompressor";
 
 export class ApplicationFactory {
 

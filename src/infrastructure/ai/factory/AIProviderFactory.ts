@@ -2,57 +2,40 @@ import { AI_CONFIGURATION } from "../../../config/ai";
 
 import type { AIProviders } from "./AIProviders";
 
-import { GeminiClient } from "../providers/gemini/geminiClient";
-import { GeminiProvider } from "../providers/gemini/geminiProvider";
+import { GeminiProvider }
+    from "../providers/gemini/geminiProvider";
 
-import { GEMINI } from "../../../config/gemini";
-
-import { OpenRouterClient } from "../providers/openrouter/OpenRouterClient";
-import { OpenRouterProvider } from "../providers/openrouter/OpenRouterProvider";
+import { OpenRouterProvider }
+    from "../providers/openrouter/OpenRouterProvider";
 
 export class AIProviderFactory {
 
     static create(): AIProviders {
 
-        switch (AI_CONFIGURATION.provider) {
+        console.log(
+            "Proveedor IA:",
+            AI_CONFIGURATION.provider
+        );
 
-            case "gemini": {
+        switch (
+            AI_CONFIGURATION.provider
+        ) {
 
-                const client =
+            case "gemini":
 
-                    new GeminiClient(
+                return new GeminiProvider()
+                    .create();
 
-                        GEMINI
+            case "openrouter":
 
-                    );
-
-                return new GeminiProvider(
-
-                    client
-
-                ).create();
-
-            }
-
-            case "openrouter": {
-
-                const client =
-
-                    new OpenRouterClient();
-
-                return new OpenRouterProvider(
-
-                    client
-
-                ).create();
-
-            }
+                return new OpenRouterProvider()
+                    .create();
 
             default:
 
                 throw new Error(
 
-                    `Proveedor de IA no soportado: ${AI_CONFIGURATION.provider}`
+                    `Proveedor IA no soportado: ${AI_CONFIGURATION.provider}`
 
                 );
 

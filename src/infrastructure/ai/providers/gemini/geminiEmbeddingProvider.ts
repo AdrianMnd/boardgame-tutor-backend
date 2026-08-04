@@ -1,4 +1,4 @@
-import { IEmbeddingProvider } from "../../../domain/embeddings/IEmbeddingProvider";
+import { IEmbeddingProvider } from "../../../../domain/embeddings/IEmbeddingProvider";
 import { GeminiClient } from "./geminiClient";
 
 export class GeminiEmbeddingProvider

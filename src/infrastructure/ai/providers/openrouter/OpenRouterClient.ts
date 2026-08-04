@@ -1,10 +1,14 @@
-import { OPENROUTER } from "../../../../config/openrouter";
+
+
+import { OPENROUTER }
+    from "../../../../config/openrouter";
 
 import { OpenAICompatibleClient }
     from "../../common/OpenAICompatibleClient";
 
 export class OpenRouterClient
-    extends OpenAICompatibleClient {
+    extends OpenAICompatibleClient
+     {
 
     constructor() {
 

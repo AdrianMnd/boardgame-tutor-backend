@@ -1,6 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 
-import type { GeminiConfiguration } from "./geminiConfiguration";
+import type { GeminiConfiguration }
+    from "./geminiConfiguration";
 
 export class GeminiClient {
 
@@ -12,127 +13,74 @@ export class GeminiClient {
 
     ) {
 
-        this.client = new GoogleGenAI({
+        this.client =
 
-            apiKey: configuration.apiKey
+            new GoogleGenAI({
 
-        });
+                apiKey:
+
+                    configuration.apiKey
+
+            });
 
     }
 
-    async generateEmbedding(
-    text: string
-): Promise<number[]> {
+    async generateText(
 
-    const response =
-        await this.client.models.embedContent({
+        prompt: string
 
-            model: this.configuration.embeddingModel,
+    ): Promise<string> {
 
-            contents: text
+        const response =
 
-        });
+            await this.client.models.generateContent({
 
-    const embedding =
-        response.embeddings?.[0]?.values;
+                model:
 
-    if (!embedding) {
+                    this.configuration.chatModel,
 
-        throw new Error(
-            "Gemini no devolvió ningún embedding."
+                contents:
+
+                    prompt
+
+            });
+
+        return (
+
+            response.text
+
+            ?? ""
+
         );
 
     }
 
-    return embedding;
+    async generateEmbedding(
 
-}
+        text: string
 
-    async generateText(
+    ): Promise<number[]> {
 
-    prompt: string
+        const response =
 
-): Promise<string> {
+            await this.client.models.embedContent({
 
-    const response =
+                model:
 
-        await this.client.models.generateContent({
+                    this.configuration.embeddingModel,
 
-            model:
+                contents: text
 
-                this.configuration.chatModel,
+            });
 
-            contents:
+        return (
 
-                prompt
+            response.embeddings?.[0]?.values
 
-        });
+            ?? []
 
-    return response.text ?? "";
+        );
 
-}
-
-    async generateAnswer(
-
-            question: string,
-
-            context: string
-
-        ): Promise<string> {
-
-            const prompt = `
-        Eres un experto en juegos de mesa.
-
-        Contesta únicamente usando la información del reglamento.
-
-        Si el reglamento no contiene la respuesta, responde:
-
-        "No he encontrado esa información en el reglamento."
-
-        Reglamento:
-
-        ${context}
-
-        Pregunta:
-
-        ${question}
-        `;
-
-            const response =
-                await this.client.models.generateContent({
-
-                    model: this.configuration.chatModel,
-
-                    contents: prompt
-
-                });
-
-            return response.text ?? "";
-
-        }
-
-        async generateStructuredContent(
-
-    prompt: string
-
-): Promise<string> {
-
-    const response =
-
-        await this.client.models.generateContent({
-
-            model:
-
-                this.configuration.chatModel,
-
-            contents:
-
-                prompt
-
-        });
-
-    return response.text ?? "";
-
-}
+    }
 
 }

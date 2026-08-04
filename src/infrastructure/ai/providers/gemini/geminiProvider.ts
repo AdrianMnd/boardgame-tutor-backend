@@ -1,24 +1,27 @@
+import type { IAIProvider } from "../IAIProvider";
 import type { AIProviders } from "../../factory/AIProviders";
 
-import type { IAIProvider } from "../IAIProvider";
+import { GEMINI } from "../../../../config/gemini";
 
-import { GeminiClient } from "../../providers/gemini/geminiClient";
+import { GeminiClient } from "./geminiClient";
 
-import { GeminiEmbeddingProvider } from "../../providers/gemini/geminiEmbeddingProvider";
-import { GeminiChatProvider } from "../../providers/gemini/geminiChatProvider";
-import { GeminiContextReranker } from "../../providers/gemini/geminiContextReranker";
-import { GeminiContextCompressor } from "../../providers/gemini/geminiContextCompressor";
+import { GeminiEmbeddingProvider } from "./geminiEmbeddingProvider";
+import { GeminiChatProvider } from "./geminiChatProvider";
+import { GeminiContextReranker } from "./geminiContextReranker";
+import { GeminiContextCompressor } from "./geminiContextCompressor";
 
 export class GeminiProvider
-    implements IAIProvider {
-
-    constructor(
-
-        private readonly client: GeminiClient
-
-    ) {}
+implements IAIProvider {
 
     create(): AIProviders {
+
+        const client =
+
+            new GeminiClient(
+
+                GEMINI
+
+            );
 
         return {
 
@@ -26,7 +29,7 @@ export class GeminiProvider
 
                 new GeminiEmbeddingProvider(
 
-                    this.client
+                    client
 
                 ),
 
@@ -34,7 +37,7 @@ export class GeminiProvider
 
                 new GeminiChatProvider(
 
-                    this.client
+                    client
 
                 ),
 
@@ -42,7 +45,7 @@ export class GeminiProvider
 
                 new GeminiContextReranker(
 
-                    this.client
+                    client
 
                 ),
 
@@ -50,7 +53,7 @@ export class GeminiProvider
 
                 new GeminiContextCompressor(
 
-                    this.client
+                    client
 
                 )
 

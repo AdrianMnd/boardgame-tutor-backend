@@ -2,7 +2,7 @@ import "dotenv/config";
 
 import { GEMINI } from "../../config/gemini";
 
-import { GeminiClient } from "../../infrastructure/ai/gemini/geminiClient";
+import { GeminiClient } from "../../infrastructure/ai/providers/gemini/geminiClient";
 
 async function main() {
 

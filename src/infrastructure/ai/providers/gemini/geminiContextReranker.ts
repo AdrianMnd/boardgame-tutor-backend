@@ -1,5 +1,5 @@
-import { IContextReranker } from "../../../domain/knowledge/IContextReranker";
-import { RetrievedChunk } from "../../../domain/knowledge/RetrievedChunk";
+import { IContextReranker } from "../../../../domain/knowledge/IContextReranker";
+import { RetrievedChunk } from "../../../../domain/knowledge/RetrievedChunk";
 
 import { GeminiClient } from "./geminiClient";
 

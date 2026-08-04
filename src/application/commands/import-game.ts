@@ -8,9 +8,9 @@ import { TextCleaner } from "../../infrastructure/importer/textCleaner/textClean
 import { ImportGameUseCase } from "../use-cases/import-game/import-game.use-case";
 import { Pdf2JsonExtractor } from "../../infrastructure/importer/pdf/Pdf2JsonExtractor";
 import { ConsoleImportLogger } from "../logger/ConsoleimportLogger";
-import { GeminiEmbeddingProvider } from "../../infrastructure/ai/gemini/geminiEmbeddingProvider";
+import { GeminiEmbeddingProvider } from "../../infrastructure/ai/providers/gemini/geminiEmbeddingProvider";
 import { GEMINI } from "../../config/gemini";
-import { GeminiClient } from "../../infrastructure/ai/gemini/geminiClient";
+import { GeminiClient } from "../../infrastructure/ai/providers/gemini/geminiClient";
 import { IMPORT_CONFIGURATION } from "../../config/import";
 import { FileGameRepository } from "../../infrastructure/repositories/FileGameRepository";
 

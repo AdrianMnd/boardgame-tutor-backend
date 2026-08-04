@@ -1,4 +1,4 @@
-import { GeminiConfiguration } from "../infrastructure/ai/gemini/geminiConfiguration";
+import { GeminiConfiguration } from "../infrastructure/ai/providers/gemini/geminiConfiguration";
 
 export const GEMINI: GeminiConfiguration = {
 
