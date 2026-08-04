@@ -19,6 +19,10 @@ export class OpenRouterChatProvider
 
     ): Promise<string> {
 
+        console.log(
+    "Usando OpenRouter"
+);
+
         const response =
 
             await this.client.generateText([

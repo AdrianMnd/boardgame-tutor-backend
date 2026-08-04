@@ -15,6 +15,10 @@ export class GeminiChatProvider
         context: string
     ): Promise<string> {
 
+        console.log(
+    "Usando Gemini"
+);
+
         return this.client.generateAnswer(
 
             question,
