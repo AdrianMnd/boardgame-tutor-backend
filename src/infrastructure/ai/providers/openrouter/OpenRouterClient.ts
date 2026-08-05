@@ -17,4 +17,18 @@ export class OpenRouterClient
 
     }
 
+    async generateEmbedding(
+
+        text: string
+
+    ): Promise<number[]> {
+
+        throw new Error(
+
+            "OpenRouter no implementa embeddings."
+
+        );
+
+    }
+
 }

@@ -9,6 +9,8 @@ import type { ILLMClient }
 import type { ChatMessage }
     from "../../common/ChatMessage";
 
+import { retry } from "../../common/retry";
+
 export class GeminiClient
 implements ILLMClient {
 
@@ -34,13 +36,15 @@ implements ILLMClient {
 
     async generateText(
 
-        prompt: string
+    prompt: string
 
-    ): Promise<string> {
+): Promise<string> {
 
-        const response =
+    const response =
 
-            await this.client.models.generateContent({
+        await retry(() =>
+
+            this.client.models.generateContent({
 
                 model:
 
@@ -50,11 +54,13 @@ implements ILLMClient {
 
                     prompt
 
-            });
+            })
 
-        return response.text ?? "";
+        );
 
-    }
+    return response.text ?? "";
+
+}
 
     async generateChat(
 
@@ -88,13 +94,15 @@ ${message.content}`
 
     async generateEmbedding(
 
-        text: string
+    text: string
 
-    ): Promise<number[]> {
+): Promise<number[]> {
 
-        const response =
+    const response =
 
-            await this.client.models.embedContent({
+        await retry(() =>
+
+            this.client.models.embedContent({
 
                 model:
 
@@ -104,16 +112,18 @@ ${message.content}`
 
                     text
 
-            });
-
-        return (
-
-            response.embeddings?.[0]?.values
-
-            ?? []
+            })
 
         );
 
-    }
+    return (
+
+        response.embeddings?.[0]?.values
+
+        ?? []
+
+    );
+
+}
 
 }

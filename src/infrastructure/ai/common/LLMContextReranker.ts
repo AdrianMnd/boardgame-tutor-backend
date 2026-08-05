@@ -56,48 +56,55 @@ export class LLMContextReranker
 
     private buildPrompt(
 
-        question: string,
+            question: string,
 
-        chunks: RetrievedChunk[]
+            chunks: RetrievedChunk[]
 
-    ): string {
+        ): string {
 
-        return `
-Eres un sistema de recuperación de información.
+            return `
+        Eres un sistema de recuperación de información.
 
-Ordena los siguientes fragmentos según su utilidad para responder la pregunta.
+        Debes ordenar los fragmentos desde el MÁS útil hasta el MENOS útil para responder la pregunta.
 
-Devuelve EXCLUSIVAMENTE un JSON válido.
+        NO respondas la pregunta.
 
-Formato:
+        NO expliques nada.
 
-{
-    "ids":[
-        "chunk-id-1",
-        "chunk-id-2"
-    ]
-}
+        Devuelve EXCLUSIVAMENTE un JSON válido.
 
-Pregunta:
+        Formato:
 
-${question}
+        {
+        "ids": [
+            "chunk-id-1",
+            "chunk-id-2"
+        ]
+        }
 
-Fragmentos:
+        Si todos los fragmentos son relevantes, devuélvelos todos ordenados.
 
-${chunks.map(
+        Pregunta:
 
-chunk =>
+        ${question}
 
-`ID: ${chunk.id}
+        Fragmentos:
 
-${chunk.text}
+        ${chunks.map(
 
-`
+        chunk =>
 
-).join("\n-----------------\n")}
-`;
+        `ID: ${chunk.id}
 
-    }
+        ${chunk.text}
+
+        `
+
+        ).join("\n-----------------\n")}
+
+        `;
+
+        }
 
     private parseResponse(
 

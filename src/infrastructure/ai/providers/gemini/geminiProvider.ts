@@ -5,10 +5,10 @@ import { GEMINI } from "../../../../config/gemini";
 
 import { GeminiClient } from "./geminiClient";
 
-import { GeminiEmbeddingProvider } from "./geminiEmbeddingProvider";
+import { LLMEmbeddingProvider } from "../../common/LLMEmbeddingProvider";
 import { GeminiChatProvider } from "./geminiChatProvider";
-import { GeminiContextReranker } from "./geminiContextReranker";
-import { GeminiContextCompressor } from "./geminiContextCompressor";
+import { LLMContextReranker } from "../../common/LLMContextReranker";
+import { LLMContextCompressor } from "../../common/LLMContextCompressor";
 
 export class GeminiProvider
 implements IAIProvider {
@@ -27,7 +27,7 @@ implements IAIProvider {
 
             embeddingProvider:
 
-                new GeminiEmbeddingProvider(
+                new LLMEmbeddingProvider(
 
                     client
 
@@ -43,7 +43,7 @@ implements IAIProvider {
 
             reranker:
 
-                new GeminiContextReranker(
+                new LLMContextReranker(
 
                     client
 
@@ -51,7 +51,7 @@ implements IAIProvider {
 
             compressor:
 
-                new GeminiContextCompressor(
+                new LLMContextCompressor(
 
                     client
 

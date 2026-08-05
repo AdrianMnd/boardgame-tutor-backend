@@ -1,6 +1,7 @@
 import type { ChatMessage } from "./ChatMessage";
 import type { OpenAICompatibleConfiguration } from "./OpenAICompatibleConfiguration";
 import type { ILLMClient } from "./ILLMClient";
+import { retry } from "./retry";
 
 interface ChatCompletionResponse {
 
@@ -28,15 +29,17 @@ export class OpenAICompatibleClient
 
     protected async post<T>(
 
-        endpoint: string,
+    endpoint: string,
 
-        body: unknown
+    body: unknown
 
-    ): Promise<T> {
+): Promise<T> {
 
-        const response =
+    const response =
 
-            await fetch(
+        await retry(() =>
+
+            fetch(
 
                 `${this.configuration.baseUrl}${endpoint}`,
 
@@ -62,21 +65,23 @@ export class OpenAICompatibleClient
 
                 }
 
-            );
+            )
 
-        if (!response.ok) {
+        );
 
-            throw new Error(
+    if (!response.ok) {
 
-                await response.text()
+        throw new Error(
 
-            );
+            await response.text()
 
-        }
-
-        return response.json();
+        );
 
     }
+
+    return response.json();
+
+}
 
     async generateText(
 

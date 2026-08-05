@@ -1,66 +1,54 @@
 import type { AIProviders } from "../../factory/AIProviders";
 import type { IAIProvider } from "../IAIProvider";
 
-import { OpenRouterClient } from "./OpenRouterClient";
+import { GEMINI } from "../../../../config/gemini";
 
+import { GeminiClient } from "../../providers/gemini/geminiClient";
+
+import { OpenRouterClient } from "./OpenRouterClient";
 import { OpenRouterChatProvider } from "./OpenRouterChatProvider";
 
-import { GeminiClient } from "../gemini/geminiClient";
-import { GeminiEmbeddingProvider } from "../gemini/geminiEmbeddingProvider";
-import { GeminiContextReranker } from "../gemini/geminiContextReranker";
-import { GeminiContextCompressor } from "../gemini/geminiContextCompressor";
-
-import { GEMINI } from "../../../../config/gemini";
+import { LLMEmbeddingProvider } from "../../common/LLMEmbeddingProvider";
+import { LLMContextReranker } from "../../common/LLMContextReranker";
+import { LLMContextCompressor } from "../../common/LLMContextCompressor";
 
 export class OpenRouterProvider
     implements IAIProvider {
 
     create(): AIProviders {
 
-        const chatClient =
-
+        const openRouterClient =
             new OpenRouterClient();
 
         const geminiClient =
-
             new GeminiClient(
-
                 GEMINI
-
             );
 
         return {
 
             embeddingProvider:
 
-                new GeminiEmbeddingProvider(
-
+                new LLMEmbeddingProvider(
                     geminiClient
-
                 ),
 
             chatProvider:
 
                 new OpenRouterChatProvider(
-
-                    chatClient
-
+                    openRouterClient
                 ),
 
             reranker:
 
-                new GeminiContextReranker(
-
-                    geminiClient
-
+                new LLMContextReranker(
+                    openRouterClient
                 ),
 
             compressor:
 
-                new GeminiContextCompressor(
-
-                    geminiClient
-
+                new LLMContextCompressor(
+                    openRouterClient
                 )
 
         };

@@ -8,7 +8,7 @@ import { TextCleaner } from "../../infrastructure/importer/textCleaner/textClean
 import { ImportGameUseCase } from "../use-cases/import-game/import-game.use-case";
 import { Pdf2JsonExtractor } from "../../infrastructure/importer/pdf/Pdf2JsonExtractor";
 import { ConsoleImportLogger } from "../logger/ConsoleimportLogger";
-import { GeminiEmbeddingProvider } from "../../infrastructure/ai/providers/gemini/geminiEmbeddingProvider";
+import { LLMEmbeddingProvider } from "../../infrastructure/ai/common/LLMEmbeddingProvider";
 import { GEMINI } from "../../config/gemini";
 import { GeminiClient } from "../../infrastructure/ai/providers/gemini/geminiClient";
 import { IMPORT_CONFIGURATION } from "../../config/import";
@@ -75,7 +75,7 @@ const validator =
 );
 
     const embeddingProvider =
-     new GeminiEmbeddingProvider(
+     new LLMEmbeddingProvider(
         geminiClient
     ); 
 

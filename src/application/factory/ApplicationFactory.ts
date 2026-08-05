@@ -11,12 +11,12 @@ import { SemanticRetriever } from "../../domain/knowledge/SemanticRetriever";
 import { ContextBuilder } from "../../domain/ai/contextBuilder";
 
 import { GeminiClient } from "../../infrastructure/ai/providers/gemini/geminiClient";
-import { GeminiEmbeddingProvider } from "../../infrastructure/ai/providers/gemini/geminiEmbeddingProvider";
+import { LLMEmbeddingProvider } from "../../infrastructure/ai/common/LLMEmbeddingProvider";
 import { GeminiChatProvider } from "../../infrastructure/ai/providers/gemini/geminiChatProvider";
 
 import { AskQuestionUseCase } from "../use-cases/ask-question/ask-question.use-case";
-import { GeminiContextReranker } from "../../infrastructure/ai/providers/gemini/geminiContextReranker";
-import { GeminiContextCompressor } from "../../infrastructure/ai/providers/gemini/geminiContextCompressor";
+import { LLMContextReranker } from "../../infrastructure/ai/common/LLMContextReranker";
+import { LLMContextCompressor } from "../../infrastructure/ai/common/LLMContextCompressor";
 
 export class ApplicationFactory {
 
@@ -50,7 +50,7 @@ const validator =
             );
 
         const embeddingProvider =
-            new GeminiEmbeddingProvider(
+            new LLMEmbeddingProvider(
                 geminiClient
             );
 
@@ -60,12 +60,12 @@ const validator =
             );
 
         const reranker =
-            new GeminiContextReranker(
+            new LLMContextReranker(
                 geminiClient
             );
 
         const compressor =
-            new GeminiContextCompressor(
+            new LLMContextCompressor(
                 geminiClient
             );
 

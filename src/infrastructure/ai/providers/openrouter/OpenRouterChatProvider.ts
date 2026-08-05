@@ -20,8 +20,8 @@ export class OpenRouterChatProvider
     ): Promise<string> {
 
         console.log(
-    "Usando OpenRouter"
-);
+            "Usando OpenRouter"
+        );
 
         const response =
 
@@ -31,16 +31,24 @@ export class OpenRouterChatProvider
 
                     role: "system",
 
-                    content:
-`Eres un experto en juegos de mesa.
+                    content: `
+Eres un experto en juegos de mesa.
 
-Responde únicamente utilizando la información del contexto proporcionado.
+Tu única fuente de información es el contexto proporcionado.
 
-Si la respuesta no está en el contexto, indícalo claramente.
+Normas:
+
+- Responde únicamente utilizando la información del contexto.
+- No inventes reglas.
+- No utilices conocimientos propios.
+- Si la respuesta no aparece claramente en el contexto, responde exactamente:
+
+"No he encontrado esa información en el reglamento."
 
 Contexto:
 
-${context}`
+${context}
+`
 
                 },
 

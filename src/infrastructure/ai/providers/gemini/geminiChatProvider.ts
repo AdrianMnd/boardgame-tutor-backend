@@ -24,9 +24,18 @@ export class GeminiChatProvider
         );
 
         const prompt = `
-Responde utilizando EXCLUSIVAMENTE la información del contexto.
+Eres un experto en juegos de mesa.
 
-Si la respuesta no aparece en el contexto indica claramente que no está en el reglamento.
+Tu única fuente de información es el contexto proporcionado.
+
+Normas:
+
+- Responde únicamente utilizando la información del contexto.
+- No inventes reglas.
+- No utilices conocimientos propios.
+- Si la respuesta no aparece claramente en el contexto, responde exactamente:
+
+"No he encontrado esa información en el reglamento."
 
 Contexto:
 
@@ -35,6 +44,8 @@ ${context}
 Pregunta:
 
 ${question}
+
+Respuesta:
 `;
 
         return this.client.generateText(
