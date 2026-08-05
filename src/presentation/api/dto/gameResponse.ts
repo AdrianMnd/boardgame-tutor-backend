@@ -8,6 +8,6 @@ export interface GameResponse {
 
     version: string;
 
-    cover: string;
+    coverUrl: string;
 
 }

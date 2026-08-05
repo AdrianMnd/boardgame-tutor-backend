@@ -1,9 +1,19 @@
 export interface Game {
 
-    id: number;
+    id: string;
 
     name: string;
 
-    description: string;
+    language: string;
+
+    version: string;
+
+    minPlayers?: number;
+
+    maxPlayers?: number;
+
+    year?: number;
+
+    coverUrl?: string;
 
 }

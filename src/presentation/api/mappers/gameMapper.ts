@@ -1,6 +1,13 @@
-import type { ValidatedGame } from "../../../domain/game/types/ValidatedGame";
+import type { ValidatedGame }
+    from "../../../domain/game/types/ValidatedGame";
 
-import type { GameResponse } from "../dto/gameResponse";
+import type { GameResponse }
+    from "../dto/gameResponse";
+
+const BASE_URL =
+
+    process.env.API_PUBLIC_URL
+    ?? `http://localhost:${process.env.PORT ?? 3000}`;
 
 export class GameMapper {
 
@@ -12,17 +19,25 @@ export class GameMapper {
 
         return {
 
-            id: game.metadata.id,
+            id:
 
-            name: game.metadata.name,
+                game.metadata.id,
 
-            language: game.metadata.language,
+            name:
 
-            version: game.metadata.version,
+                game.metadata.name,
 
-            cover:
+            language:
 
-                `/games/${game.metadata.id}/assets/cover.png`
+                game.metadata.language,
+
+            version:
+
+                game.metadata.version,
+
+            coverUrl:
+
+                `${BASE_URL}/games/${game.metadata.id}/assets/cover.png`
 
         };
 
