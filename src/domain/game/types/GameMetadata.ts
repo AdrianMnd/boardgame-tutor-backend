@@ -24,16 +24,16 @@ export interface GameMetadata {
     /**
      * Número mínimo de jugadores.
      */
-    minPlayers?: number;
+    minPlayers: number;
 
     /**
      * Número máximo de jugadores.
      */
-    maxPlayers?: number;
+    maxPlayers: number;
 
     /**
      * Año de publicación.
      */
-    year?: number;
+    year: number;
 
 }

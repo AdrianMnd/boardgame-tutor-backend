@@ -8,6 +8,12 @@ export interface GameResponse {
 
     version: string;
 
+    minPlayers: number;
+
+    maxPlayers: number;
+
+    year: number;
+
     coverUrl: string;
 
 }

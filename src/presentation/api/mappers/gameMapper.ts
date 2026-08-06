@@ -19,25 +19,23 @@ export class GameMapper {
 
         return {
 
-            id:
+            id: game.metadata.id,
 
-                game.metadata.id,
+            name: game.metadata.name,
 
-            name:
+            language: game.metadata.language,
 
-                game.metadata.name,
+            version: game.metadata.version,
 
-            language:
+            minPlayers: game.metadata.minPlayers,
 
-                game.metadata.language,
+            maxPlayers: game.metadata.maxPlayers,
 
-            version:
-
-                game.metadata.version,
+            year: game.metadata.year,
 
             coverUrl:
 
-                `${BASE_URL}/games/${game.metadata.id}/assets/cover.png`
+                `/games/${game.metadata.id}/assets/cover.png`
 
         };
 
