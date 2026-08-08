@@ -4,9 +4,9 @@ export interface Game {
 
     name: string;
 
-    language: string;
+    language?: string;
 
-    version: string;
+    version?: string;
 
     minPlayers?: number;
 

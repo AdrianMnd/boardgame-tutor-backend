@@ -11,6 +11,7 @@ import { ContextBuilder } from "../../domain/ai/contextBuilder";
 
 import { AskQuestionUseCase } from "../use-cases/ask-question/ask-question.use-case";
 import { ListGamesUseCase } from "../use-cases/list-games/list-games.use-case";
+import { GetGameManualUseCase } from "../use-cases/get-game-manual/get-game-manual.use-case";
 
 export class ApplicationContainer {
 
@@ -27,29 +28,29 @@ export class ApplicationContainer {
             this.repository
         );
 
+    readonly getGameManualUseCase =
+        new GetGameManualUseCase(
+            this.repository
+        );
+
     readonly validator =
         new GameValidator(
             this.repository
         );
 
     readonly ai =
-
-    AIProviderFactory.create();
+        AIProviderFactory.create();
 
     readonly embeddingProvider =
-
         this.ai.embeddingProvider;
 
     readonly chatProvider =
-
         this.ai.chatProvider;
 
     readonly reranker =
-
         this.ai.reranker;
 
     readonly compressor =
-
         this.ai.compressor;
 
     readonly retriever =

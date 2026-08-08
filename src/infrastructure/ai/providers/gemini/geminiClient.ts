@@ -10,9 +10,12 @@ import type { ChatMessage }
     from "../../common/ChatMessage";
 
 import { retry } from "../../common/retry";
+import { isRetryableProviderError } from "../../common/isRetryableProviderError";
 
 export class GeminiClient
 implements ILLMClient {
+
+    readonly supportsEmbeddings = true;
 
     private readonly client: GoogleGenAI;
 
@@ -54,7 +57,12 @@ implements ILLMClient {
 
                     prompt
 
-            })
+            }),
+
+            {
+                shouldRetry:
+                    error => !isRetryableProviderError(error)
+            }
 
         );
 
@@ -112,7 +120,12 @@ ${message.content}`
 
                     text
 
-            })
+            }),
+
+            {
+                shouldRetry:
+                    error => !isRetryableProviderError(error)
+            }
 
         );
 

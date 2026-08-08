@@ -1,13 +1,10 @@
 import { Router } from "express";
 
-import { ApplicationContainer } from "../../../application/container/ApplicationContainer";
+import { container } from "../../../application/container/Index";
 
 import { ChatController } from "../controllers/chat.controller";
 
 const router = Router();
-
-const container =
-    new ApplicationContainer();
 
 const controller =
     new ChatController(

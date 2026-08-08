@@ -23,12 +23,8 @@ export const GEMINI: GeminiConfiguration = {
 
 };
 
-if (!GEMINI.apiKey) {
-
-    throw new Error(
-
-        "No se ha configurado GEMINI_API_KEY."
-
-    );
-
-}
+// Nota: ya no se lanza un error si falta la API key.
+// Con el sistema de fallback entre proveedores, un proveedor
+// sin configurar simplemente se omite de la cadena — solo
+// falla si NINGÚN proveedor tiene credenciales válidas
+// (ver AIProviderFactory).
