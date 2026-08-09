@@ -1,0 +1,34 @@
+import { Router } from "express";
+
+import { container } from "../../../application/container/Index";
+
+import { GamesController } from "../controllers/games.controller";
+
+const router = Router();
+
+const controller =
+    new GamesController(
+
+        container.listGamesUseCase,
+
+        container.getGameManualUseCase
+
+    );
+
+router.get(
+
+    "/",
+
+    controller.getGames
+
+);
+
+router.get(
+
+    "/:id/manual",
+
+    controller.getManual
+
+);
+
+export default router;

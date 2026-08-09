@@ -1,0 +1,9 @@
+{
+    "id": "cdmd",
+    "name": "Cthulhu Death May Die",
+    "language": "es",
+    "version": "1.0",
+    "minPlayers": 1,
+    "maxPlayers": 5,
+    "year": 2019
+}

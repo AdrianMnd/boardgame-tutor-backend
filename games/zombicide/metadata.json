@@ -1,0 +1,9 @@
+{
+    "id": "zombicide",
+    "name": "Zombicide 2nd Edition",
+    "language": "es",
+    "version": "1.0",
+    "minPlayers": 1,
+    "maxPlayers": 6,
+    "year": 2021
+}
