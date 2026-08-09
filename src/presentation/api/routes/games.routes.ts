@@ -1,17 +1,18 @@
 import { Router } from "express";
 
-import { ApplicationContainer } from "../../../application/container/ApplicationContainer";
+import { container } from "../../../application/container/Index";
 
 import { GamesController } from "../controllers/games.controller";
 
 const router = Router();
 
-const container =
-    new ApplicationContainer();
-
 const controller =
     new GamesController(
-        container.listGamesUseCase
+
+        container.listGamesUseCase,
+
+        container.getGameManualUseCase
+
     );
 
 router.get(
@@ -19,6 +20,14 @@ router.get(
     "/",
 
     controller.getGames
+
+);
+
+router.get(
+
+    "/:id/manual",
+
+    controller.getManual
 
 );
 

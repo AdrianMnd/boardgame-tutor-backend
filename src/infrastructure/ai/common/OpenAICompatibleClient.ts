@@ -2,6 +2,7 @@ import type { ChatMessage } from "./ChatMessage";
 import type { OpenAICompatibleConfiguration } from "./OpenAICompatibleConfiguration";
 import type { ILLMClient } from "./ILLMClient";
 import { retry } from "./retry";
+import { isRetryableProviderError } from "./isRetryableProviderError";
 
 interface ChatCompletionResponse {
 
@@ -17,8 +18,25 @@ interface ChatCompletionResponse {
 
 }
 
+interface EmbeddingResponse {
+
+    data: {
+
+        embedding: number[];
+
+    }[];
+
+}
+
 export class OpenAICompatibleClient
     implements ILLMClient {
+
+    /**
+     * Por defecto, no se asume soporte de embeddings — las
+     * subclases que sí lo soporten (ej. MistralClient) lo
+     * sobreescriben a `true`.
+     */
+    readonly supportsEmbeddings: boolean = false;
 
     constructor(
 
@@ -29,117 +47,93 @@ export class OpenAICompatibleClient
 
     protected async post<T>(
 
-    endpoint: string,
+        endpoint: string,
 
-    body: unknown
+        body: unknown
 
-): Promise<T> {
+    ): Promise<T> {
 
-    const response =
+        const response =
 
-        await retry(() =>
+            await retry(() =>
 
-            fetch(
+                fetch(
 
-                `${this.configuration.baseUrl}${endpoint}`,
+                    `${this.configuration.baseUrl}${endpoint}`,
+
+                    {
+
+                        method: "POST",
+
+                        headers: {
+
+                            Authorization:
+
+                                `Bearer ${this.configuration.apiKey}`,
+
+                            "Content-Type":
+
+                                "application/json"
+
+                        },
+
+                        body:
+
+                            JSON.stringify(body)
+
+                    }
+
+                ),
 
                 {
-
-                    method: "POST",
-
-                    headers: {
-
-                        Authorization:
-
-                            `Bearer ${this.configuration.apiKey}`,
-
-                        "Content-Type":
-
-                            "application/json"
-
-                    },
-
-                    body:
-
-                        JSON.stringify(body)
-
+                    shouldRetry:
+                        error => !isRetryableProviderError(error)
                 }
 
-            )
+            );
 
-        );
+        if (!response.ok) {
 
-    if (!response.ok) {
+            const errorBody =
+                await response.text();
 
-        throw new Error(
+            const error: Error & { status?: number } =
 
-            await response.text()
+                new Error(
+                    errorBody || response.statusText
+                );
 
-        );
+            error.status = response.status;
 
-    }
-
-    return response.json();
-
-}
-
-    async generateText(
-
-    prompt: string
-
-): Promise<string> {
-
-    return this.generateChat([
-
-        {
-
-            role: "user",
-
-            content: prompt
+            throw error;
 
         }
 
-    ]);
+        return response.json();
 
-}
+    }
 
-async generateChat(
+    async generateText(
 
-    messages: ChatMessage[]
+        prompt: string
 
-): Promise<string> {
+    ): Promise<string> {
 
-    const response =
-
-        await this.post<ChatCompletionResponse>(
-
-            "/chat/completions",
+        return this.generateChat([
 
             {
 
-                model:
+                role: "user",
 
-                    this.configuration.chatModel,
-
-                messages
+                content: prompt
 
             }
 
-        );
+        ]);
 
-    return (
+    }
 
-        response.choices[0]?.message.content
-
-        ??
-
-        ""
-
-    );
-
-}
-
-    /* async generateChat(
+    async generateChat(
 
         messages: ChatMessage[]
 
@@ -173,7 +167,7 @@ async generateChat(
 
         );
 
-    } */
+    }
 
     async generateEmbedding(
 
@@ -186,6 +180,42 @@ async generateChat(
             "Not implemented."
 
         );
+
+    }
+
+    /**
+     * Implementación genérica del endpoint de embeddings
+     * compatible con el formato de OpenAI (`POST /embeddings`).
+     * Las subclases cuyo proveedor lo soporte pueden llamarla
+     * directamente desde su propio `generateEmbedding`.
+     */
+    protected async generateEmbeddingViaOpenAiApi(
+
+        text: string
+
+    ): Promise<number[]> {
+
+        const response =
+
+            await this.post<EmbeddingResponse>(
+
+                "/embeddings",
+
+                {
+
+                    model:
+
+                        this.configuration.embeddingModel,
+
+                    input:
+
+                        text
+
+                }
+
+            );
+
+        return response.data[0]?.embedding ?? [];
 
     }
 

@@ -35,7 +35,7 @@ export class GameMapper {
 
             coverUrl:
 
-                `/games/${game.metadata.id}/assets/cover.png`
+                `${BASE_URL}/games/${game.metadata.id}/assets/cover.png`
 
         };
 

@@ -9,8 +9,7 @@ import { ImportGameUseCase } from "../use-cases/import-game/import-game.use-case
 import { Pdf2JsonExtractor } from "../../infrastructure/importer/pdf/Pdf2JsonExtractor";
 import { ConsoleImportLogger } from "../logger/ConsoleimportLogger";
 import { LLMEmbeddingProvider } from "../../infrastructure/ai/common/LLMEmbeddingProvider";
-import { GEMINI } from "../../config/gemini";
-import { GeminiClient } from "../../infrastructure/ai/providers/gemini/geminiClient";
+import { AIProviderFactory } from "../../infrastructure/ai/factory/AIProviderFactory";
 import { IMPORT_CONFIGURATION } from "../../config/import";
 import { FileGameRepository } from "../../infrastructure/repositories/FileGameRepository";
 
@@ -69,14 +68,13 @@ const validator =
     const chunkGenerator =
         new ChunkGenerator();
 
-    const geminiClient =
-            new GeminiClient(
-                GEMINI
-);
+    const fallbackClient =
+
+        AIProviderFactory.createFallbackClient();
 
     const embeddingProvider =
      new LLMEmbeddingProvider(
-        geminiClient
+        fallbackClient
     ); 
 
     const embeddingGenerator =

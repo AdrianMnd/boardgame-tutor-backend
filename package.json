@@ -10,6 +10,10 @@
     "ask": "tsx src/application/commands/ask-game.ts",
     "test:gemini": "tsx src/application/commands/test-gemini.ts",
     "test:openrouter": "tsx src/application/commands/test-openrouter.ts",
+    "test:mistral": "tsx src/application/commands/test-mistral.ts",
+    "test:openai": "tsx src/application/commands/test-openai.ts",
+    "test:deepinfra": "tsx src/application/commands/test-deepinfra.ts",
+    "test:together": "tsx src/application/commands/test-together.ts",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage"
