@@ -9,7 +9,12 @@ import chatRoutes from "./presentation/api/routes/chat.routes";
 
 const app = express();
 
-app.use(cors());
+//Abierto para pruebas, pero luego se debe restringir a la URL del frontend
+//app.use(cors());
+
+app.use(cors({
+  origin: "https://boardgame-tutor-frontend.vercel.app"
+}));
 
 app.use(express.json());
 
