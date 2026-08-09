@@ -1,10 +1,16 @@
+import path from "node:path";
+
 import { GameValidator } from "../../../domain/game/services/game-validator.service";
 import { ChunkGenerator } from "../../../infrastructure/importer/chunkGenerator/chunkGenerator";
 import { EmbeddingGenerator } from "../../../infrastructure/importer/embeddingGenerator/embeddingGenerator";
+import { EmbeddingCheckpoint } from "../../../infrastructure/importer/embeddingGenerator/EmbeddingCheckpoint";
 import { KnowledgeWriter } from "../../../infrastructure/importer/knowledgeWriter/knowledgeWriter";
 import { TextCleaner } from "../../../infrastructure/importer/textCleaner/textCleaner";
 import type { IPDFExtractor } from "../../../shared/contracts/IPDFExtractor";
+import type { IFileSystem } from "../../../shared/contracts/IFileSystem";
 import { IImportLogger } from "../../logger/IImportLogger";
+
+const CHECKPOINT_FILENAME = "embeddings-checkpoint.json";
 
 export class ImportGameUseCase {
 
@@ -22,7 +28,9 @@ export class ImportGameUseCase {
 
     private readonly embeddingGenerator: EmbeddingGenerator,
 
-    private readonly knowledgeWriter: KnowledgeWriter
+    private readonly knowledgeWriter: KnowledgeWriter,
+
+    private readonly fileSystem: IFileSystem
 
 ) {}
 
@@ -106,29 +114,90 @@ export class ImportGameUseCase {
 
         );
 
-        const embeddedChunks =
+        const checkpoint =
 
-            await this.embeddingGenerator.generate(
+            new EmbeddingCheckpoint(
 
-                chunks,
+                this.fileSystem,
 
-                (
+                path.join(
 
-                    completed,
+                    game.paths.generated,
 
-                    total
+                    CHECKPOINT_FILENAME
 
-                ) => {
-
-                    process.stdout.write(
-
-                        `\r   ${completed}/${total}`
-
-                    );
-
-                }
+                )
 
             );
+
+        const alreadyEmbedded =
+            await checkpoint.load();
+
+        if (alreadyEmbedded.size > 0) {
+
+            this.logger.info(
+
+                `   Reanudando desde un intento anterior: ` +
+                `${alreadyEmbedded.size}/${chunks.length} chunks ya tenían embedding.`
+
+            );
+
+        }
+
+        let embeddedChunks;
+
+        try {
+
+            embeddedChunks =
+
+                await this.embeddingGenerator.generate(
+
+                    chunks,
+
+                    (
+
+                        completed,
+
+                        total
+
+                    ) => {
+
+                        process.stdout.write(
+
+                            `\r   ${completed}/${total}`
+
+                        );
+
+                    },
+
+                    alreadyEmbedded,
+
+                    results =>
+
+                        checkpoint.save(
+
+                            results
+
+                        )
+
+                );
+
+        }
+        catch (error) {
+
+            this.logger.info(
+
+                "\n   Se ha guardado el progreso conseguido hasta el fallo. " +
+
+                `Vuelve a ejecutar "npm run import ${gameId}" ` +
+
+                "más tarde para continuar donde se ha quedado."
+
+            );
+
+            throw error;
+
+        }
 
         process.stdout.write("\n");
 
@@ -148,6 +217,10 @@ export class ImportGameUseCase {
             game,
             embeddedChunks
         );
+
+        // Importación completada con éxito: el checkpoint ya
+        // no hace falta, todo está en knowledge.json.
+        await checkpoint.clear();
 
         this.logger.success(
 
