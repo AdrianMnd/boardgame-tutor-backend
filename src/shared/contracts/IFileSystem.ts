@@ -33,4 +33,8 @@ export interface IFileSystem {
         path: string
     ): Promise<FileInfo>;
 
+    delete(
+        path: string
+    ): Promise<void>;
+
 }

@@ -71,6 +71,19 @@ export class FakeFileSystem implements IFileSystem {
     }
 
 
+    async delete(
+
+        path: string
+
+    ): Promise<void> {
+
+        this.files.delete(path);
+
+        this.directories.delete(path);
+
+    }
+
+
     async readJson<T>(
         path: string
     ): Promise<T> {

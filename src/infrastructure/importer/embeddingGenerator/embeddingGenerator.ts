@@ -30,7 +30,15 @@ export class EmbeddingGenerator {
 
             total: number
 
-        ) => void
+        ) => void,
+
+        alreadyEmbedded?: Map<string, EmbeddedChunk>,
+
+        onBatchFinished?: (
+
+            results: EmbeddedChunk[]
+
+        ) => Promise<void> | void
 
     ): Promise<EmbeddedChunk[]> {
 
@@ -68,13 +76,19 @@ export class EmbeddingGenerator {
 
                 this.configuration.embeddingConcurrency,
 
-                onProgress
+                onProgress,
+
+                this.configuration.embeddingRequestDelay,
+
+                onBatchFinished
 
             );
 
         return processor.process(
 
-            chunks
+            chunks,
+
+            alreadyEmbedded
 
         );
 
