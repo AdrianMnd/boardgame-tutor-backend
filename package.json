@@ -15,6 +15,7 @@
     "test:openai": "tsx src/application/commands/test-openai.ts",
     "test:deepinfra": "tsx src/application/commands/test-deepinfra.ts",
     "test:together": "tsx src/application/commands/test-together.ts",
+    "test:local-embedding": "tsx src/application/commands/test-local-embedding.ts",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage"
@@ -25,6 +26,7 @@
   "type": "commonjs",
   "dependencies": {
     "@google/genai": "^2.15.0",
+    "@huggingface/transformers": "^4.2.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",

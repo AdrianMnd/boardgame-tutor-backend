@@ -38,6 +38,8 @@ export class OpenAICompatibleClient
      */
     readonly supportsEmbeddings: boolean = false;
 
+    readonly supportsChat: boolean = true;
+
     constructor(
 
         protected readonly configuration:
