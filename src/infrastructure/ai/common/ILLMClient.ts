@@ -39,4 +39,16 @@ export interface ILLMClient {
 
     ): Promise<number[]>;
 
+    /**
+     * Genera varios embeddings en una sola petición HTTP en
+     * vez de una por texto. Es opcional porque no todos los
+     * proveedores lo soportan (si falta, FallbackLLMClient cae
+     * a generar uno a uno con el mismo proveedor).
+     */
+    generateEmbeddingBatch?(
+
+        texts: string[]
+
+    ): Promise<number[][]>;
+
 }

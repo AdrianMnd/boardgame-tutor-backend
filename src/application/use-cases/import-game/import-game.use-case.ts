@@ -8,6 +8,7 @@ import { KnowledgeWriter } from "../../../infrastructure/importer/knowledgeWrite
 import { TextCleaner } from "../../../infrastructure/importer/textCleaner/textCleaner";
 import type { IPDFExtractor } from "../../../shared/contracts/IPDFExtractor";
 import type { IFileSystem } from "../../../shared/contracts/IFileSystem";
+import type { EmbeddedChunk } from "../../../domain/importer/embeddedChunk";
 import { IImportLogger } from "../../logger/IImportLogger";
 
 const CHECKPOINT_FILENAME = "embeddings-checkpoint.json";
@@ -207,6 +208,14 @@ export class ImportGameUseCase {
 
         );
 
+        await this.warnIfDimensionMismatch(
+
+            game.paths.generated,
+
+            embeddedChunks
+
+        );
+
         this.logger.step(
 
             "6.Guardando conocimiento..."
@@ -233,6 +242,161 @@ export class ImportGameUseCase {
             Date.now() - start
 
         );
+    }
+
+    /**
+     * Comprueba que la dimensión de los embeddings recién
+     * generados coincide con la de otro juego ya importado.
+     * Si no coincide, avisa de forma bien visible en vez de
+     * dejar que el fallo aparezca más tarde como un 500 al
+     * preguntar en producción (el proveedor de embeddings usado
+     * al importar debe ser siempre el mismo que usa el servidor
+     * para las preguntas en vivo).
+     */
+    private async warnIfDimensionMismatch(
+
+        generatedPath: string,
+
+        embeddedChunks: EmbeddedChunk[]
+
+    ): Promise<void> {
+
+        const currentDimension =
+
+            embeddedChunks[0]?.embedding.length;
+
+        if (!currentDimension) {
+
+            return;
+
+        }
+
+        const gamesRoot =
+
+            path.resolve(
+
+                generatedPath,
+
+                "..",
+
+                ".."
+
+            );
+
+        const currentGameId =
+
+            path.basename(
+
+                path.dirname(
+
+                    path.resolve(generatedPath)
+
+                )
+
+            );
+
+        let otherGameIds: string[];
+
+        try {
+
+            otherGameIds =
+
+                await this.fileSystem.listDirectories(
+
+                    gamesRoot
+
+                );
+
+        }
+        catch {
+
+            return;
+
+        }
+
+        for (const otherId of otherGameIds) {
+
+            if (otherId === currentGameId) {
+
+                continue;
+
+            }
+
+            const otherKnowledgePath =
+
+                path.join(
+
+                    gamesRoot,
+
+                    otherId,
+
+                    "generated",
+
+                    "knowledge.json"
+
+                );
+
+            if (
+
+                !(await this.fileSystem.exists(otherKnowledgePath))
+
+            ) {
+
+                continue;
+
+            }
+
+            try {
+
+                const otherKnowledge =
+
+                    await this.fileSystem.readJson<{
+
+                        chunks: EmbeddedChunk[];
+
+                    }>(
+
+                        otherKnowledgePath
+
+                    );
+
+                const otherDimension =
+
+                    otherKnowledge.chunks[0]?.embedding.length;
+
+                if (
+
+                    otherDimension &&
+                    otherDimension !== currentDimension
+
+                ) {
+
+                    this.logger.warning(
+
+                        `\n⚠ Este juego se ha importado con embeddings de ` +
+                        `${currentDimension} dimensiones, pero "${otherId}" ` +
+                        `tiene ${otherDimension}. Si tu servidor en producción ` +
+                        `usa un proveedor distinto al que acabas de usar aquí, ` +
+                        `las preguntas sobre este juego fallarán con un error ` +
+                        `500. Revisa que AI_PROVIDER_ORDER / ` +
+                        `LOCAL_EMBEDDING_ENABLED sean iguales en tu entorno ` +
+                        `local y en el servidor desplegado.\n`
+
+                    );
+
+                    return;
+
+                }
+
+            }
+            catch {
+
+                continue;
+
+            }
+
+        }
+
     }
 
 }
