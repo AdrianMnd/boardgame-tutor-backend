@@ -45,24 +45,8 @@ class ImportGameUseCase {
         const checkpoint = new EmbeddingCheckpoint_1.EmbeddingCheckpoint(this.fileSystem, node_path_1.default.join(game.paths.generated, CHECKPOINT_FILENAME));
         const alreadyEmbedded = await checkpoint.load();
         if (alreadyEmbedded.size > 0) {
-            const checkpointDimension = alreadyEmbedded.values().next().value
-                ?.embedding.length;
-            const todayDimension = await this.embeddingGenerator.probeDimension();
-            if (checkpointDimension &&
-                checkpointDimension !== todayDimension) {
-                this.logger.warning(`\n⚠ El progreso guardado de un intento anterior usa ` +
-                    `embeddings de ${checkpointDimension} dimensiones, pero ` +
-                    `el proveedor de IA activo hoy genera ${todayDimension}. ` +
-                    `Se descarta ese progreso (se regenerará desde cero con ` +
-                    `el proveedor de hoy) para no mezclar dimensiones dentro ` +
-                    `del mismo juego.\n`);
-                await checkpoint.clear();
-                alreadyEmbedded.clear();
-            }
-            else {
-                this.logger.info(`   Reanudando desde un intento anterior: ` +
-                    `${alreadyEmbedded.size}/${chunks.length} chunks ya tenían embedding.`);
-            }
+            this.logger.info(`   Reanudando desde un intento anterior: ` +
+                `${alreadyEmbedded.size}/${chunks.length} chunks ya tenían embedding.`);
         }
         let embeddedChunks;
         try {
@@ -79,7 +63,6 @@ class ImportGameUseCase {
         }
         process.stdout.write("\n");
         this.logger.success("✔ Embeddings generados");
-        this.assertNoInternalDimensionMismatch(gameId, embeddedChunks);
         await this.warnIfDimensionMismatch(game.paths.generated, embeddedChunks);
         this.logger.step("6.Guardando conocimiento...");
         await this.knowledgeWriter.write(game, embeddedChunks);
@@ -88,25 +71,6 @@ class ImportGameUseCase {
         await checkpoint.clear();
         this.logger.success("Conocimiento guardado");
         this.logger.footer(Date.now() - start);
-    }
-    /**
-     * Red de seguridad final: nunca debe escribirse un
-     * knowledge.json con chunks de dimensiones distintas entre
-     * sí (rompería las búsquedas para ese juego de forma
-     * intermitente e impredecible). Si esto llega a pasar, se
-     * aborta la importación con un mensaje claro en vez de
-     * guardar datos corruptos.
-     */
-    assertNoInternalDimensionMismatch(gameId, embeddedChunks) {
-        const dimensions = new Set(embeddedChunks.map(chunk => chunk.embedding.length));
-        if (dimensions.size > 1) {
-            throw new Error(`El juego "${gameId}" ha quedado con chunks de ` +
-                `dimensiones distintas (${[...dimensions].join(", ")}) ` +
-                `porque el proveedor de embeddings cambió a mitad de la ` +
-                `importación. Borra el checkpoint en ` +
-                `games/${gameId}/generated/embeddings-checkpoint.json y ` +
-                `vuelve a ejecutar la importación desde cero.`);
-        }
     }
     /**
      * Comprueba que la dimensión de los embeddings recién

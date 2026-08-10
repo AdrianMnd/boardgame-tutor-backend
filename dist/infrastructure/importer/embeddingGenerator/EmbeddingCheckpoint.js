@@ -28,24 +28,8 @@ class EmbeddingCheckpoint {
         }
         try {
             const saved = await this.fileSystem.readJson(this.path);
-            // Si el checkpoint tiene chunks con dimensiones
-            // distintas entre sí (de una ejecución anterior que
-            // cambió de proveedor a mitad), solo se conserva el
-            // grupo mayoritario — los demás se descartan para
-            // que se regeneren con el proveedor que se use en
-            // esta ejecución, y así el resultado final nunca
-            // queda con dimensiones mezcladas.
-            const dominant = this.dominantDimension(saved);
             for (const chunk of saved) {
-                if (chunk.embedding.length === dominant) {
-                    map.set(chunk.id, chunk);
-                }
-            }
-            if (map.size < saved.length) {
-                console.warn(`[Checkpoint] Se han descartado ${saved.length - map.size} ` +
-                    `chunks guardados con una dimensión de embedding distinta ` +
-                    `a la mayoritaria — se regenerarán con el proveedor actual ` +
-                    `para no mezclar dimensiones dentro del mismo juego.`);
+                map.set(chunk.id, chunk);
             }
         }
         catch {
@@ -53,22 +37,6 @@ class EmbeddingCheckpoint {
             // empieza de cero en lugar de romper la importación.
         }
         return map;
-    }
-    dominantDimension(chunks) {
-        const counts = new Map();
-        for (const chunk of chunks) {
-            const dimension = chunk.embedding.length;
-            counts.set(dimension, (counts.get(dimension) ?? 0) + 1);
-        }
-        let best = 0;
-        let bestCount = -1;
-        for (const [dimension, count] of counts) {
-            if (count > bestCount) {
-                best = dimension;
-                bestCount = count;
-            }
-        }
-        return best;
     }
     async save(chunks) {
         await this.fileSystem.writeJson(this.path, chunks);

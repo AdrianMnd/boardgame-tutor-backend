@@ -4,15 +4,6 @@ exports.EmbeddingBatchProcessor = void 0;
 function sleep(milliseconds) {
     return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
-/**
- * Agrupa los chunks pendientes en lotes de tamaño `batchSize`
- * y los envía en una sola petición HTTP por lote (en vez de una
- * petición por chunk). Con 20 chunks por lote, importar un
- * juego de 350 chunks pasa de necesitar ~350 peticiones a
- * necesitar ~18 — que es lo que realmente permite acercarse a
- * los límites de "peticiones por minuto" de los planes
- * gratuitos sin agotarlos en segundos.
- */
 class EmbeddingBatchProcessor {
     provider;
     retryPolicy;
@@ -20,29 +11,27 @@ class EmbeddingBatchProcessor {
     onProgress;
     requestDelayMs;
     onBatchFinished;
-    batchSize;
     constructor(provider, retryPolicy, concurrency = 5, onProgress, 
     /**
-     * Espera mínima (ms) antes de cada petición, por worker
-     * concurrente. Ahora que cada petición cubre un lote
-     * entero de chunks, hace mucha menos falta que antes,
-     * pero se mantiene como red de seguridad adicional.
+     * Espera mínima (ms) antes de cada petición de embedding,
+     * por worker concurrente. Ayuda a no disparar los límites
+     * de peticiones-por-minuto de los proveedores gratuitos
+     * cuando hay varios workers en paralelo.
      */
     requestDelayMs = 0, 
     /**
-     * Se invoca cada vez que un lote termina (haya tenido
+     * Se invoca cada vez que el lote termina (haya tenido
      * éxito o haya fallado a mitad) con todos los chunks
      * conseguidos hasta ese momento, para poder persistirlos
      * como checkpoint y no perder el progreso.
      */
-    onBatchFinished, batchSize = 20) {
+    onBatchFinished) {
         this.provider = provider;
         this.retryPolicy = retryPolicy;
         this.concurrency = concurrency;
         this.onProgress = onProgress;
         this.requestDelayMs = requestDelayMs;
         this.onBatchFinished = onBatchFinished;
-        this.batchSize = batchSize;
     }
     async process(chunks, alreadyEmbedded = new Map()) {
         const results = new Array(chunks.length);
@@ -60,37 +49,21 @@ class EmbeddingBatchProcessor {
         if (completed > 0) {
             this.onProgress?.(completed, chunks.length);
         }
-        // Se agrupan los índices PENDIENTES (no los ya
-        // resueltos por el checkpoint) en lotes contiguos de
-        // como mucho `batchSize` elementos.
-        const pendingIndexBatches = [];
-        let currentBatch = [];
-        for (let i = 0; i < chunks.length; i++) {
-            if (results[i]) {
-                continue;
-            }
-            currentBatch.push(i);
-            if (currentBatch.length >= this.batchSize) {
-                pendingIndexBatches.push(currentBatch);
-                currentBatch = [];
-            }
-        }
-        if (currentBatch.length > 0) {
-            pendingIndexBatches.push(currentBatch);
-        }
-        let nextBatchIndex = 0;
         const worker = async () => {
             while (true) {
                 const batchIndex = nextBatchIndex++;
                 if (batchIndex >= pendingIndexBatches.length) {
                     return;
                 }
-                const indices = pendingIndexBatches[batchIndex];
-                const texts = indices.map(i => chunks[i].text);
+                if (results[current]) {
+                    // Ya venía del checkpoint, nada que hacer.
+                    continue;
+                }
+                const chunk = chunks[current];
                 if (this.requestDelayMs > 0) {
                     await sleep(this.requestDelayMs);
                 }
-                const embeddings = await this.retryPolicy.execute(() => this.provider.generateBatch(texts));
+                const embedding = await this.retryPolicy.execute(() => this.provider.generateBatch(texts));
                 indices.forEach((chunkIndex, position) => {
                     results[chunkIndex] = {
                         ...chunks[chunkIndex],
@@ -108,9 +81,9 @@ class EmbeddingBatchProcessor {
             await Promise.all(workers);
         }
         finally {
-            // Se guarda el progreso tanto si terminó bien como
-            // si falló a mitad de camino (ej. cuota agotada en
-            // todos los proveedores configurados).
+            // Se guarda el progreso tanto si el lote terminó
+            // bien como si falló a mitad de camino (ej. cuota
+            // agotada en todos los proveedores configurados).
             if (this.onBatchFinished) {
                 const finished = results.filter((chunk) => chunk !== undefined);
                 await this.onBatchFinished(finished);
