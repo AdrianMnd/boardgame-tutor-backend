@@ -16,6 +16,15 @@ function sleep(milliseconds: number): Promise<void> {
 
 }
 
+/**
+ * Agrupa los chunks pendientes en lotes de tamaño `batchSize`
+ * y los envía en una sola petición HTTP por lote (en vez de una
+ * petición por chunk). Con 20 chunks por lote, importar un
+ * juego de 350 chunks pasa de necesitar ~350 peticiones a
+ * necesitar ~18 — que es lo que realmente permite acercarse a
+ * los límites de "peticiones por minuto" de los planes
+ * gratuitos sin agotarlos en segundos.
+ */
 export class EmbeddingBatchProcessor {
 
     constructor(
@@ -35,15 +44,15 @@ export class EmbeddingBatchProcessor {
         ) => void,
 
         /**
-         * Espera mínima (ms) antes de cada petición de embedding,
-         * por worker concurrente. Ayuda a no disparar los límites
-         * de peticiones-por-minuto de los proveedores gratuitos
-         * cuando hay varios workers en paralelo.
+         * Espera mínima (ms) antes de cada petición, por worker
+         * concurrente. Ahora que cada petición cubre un lote
+         * entero de chunks, hace mucha menos falta que antes,
+         * pero se mantiene como red de seguridad adicional.
          */
         private readonly requestDelayMs = 0,
 
         /**
-         * Se invoca cada vez que el lote termina (haya tenido
+         * Se invoca cada vez que un lote termina (haya tenido
          * éxito o haya fallado a mitad) con todos los chunks
          * conseguidos hasta ese momento, para poder persistirlos
          * como checkpoint y no perder el progreso.
@@ -52,7 +61,9 @@ export class EmbeddingBatchProcessor {
 
             results: EmbeddedChunk[]
 
-        ) => Promise<void> | void
+        ) => Promise<void> | void,
+
+        private readonly batchSize = 20
 
     ) {}
 
@@ -67,8 +78,6 @@ export class EmbeddingBatchProcessor {
         const results: EmbeddedChunk[] =
 
             new Array(chunks.length);
-
-        let nextIndex = 0;
 
         let completed = 0;
 
@@ -102,26 +111,62 @@ export class EmbeddingBatchProcessor {
 
         }
 
+        // Se agrupan los índices PENDIENTES (no los ya
+        // resueltos por el checkpoint) en lotes contiguos de
+        // como mucho `batchSize` elementos.
+        const pendingIndexBatches: number[][] = [];
+
+        let currentBatch: number[] = [];
+
+        for (let i = 0; i < chunks.length; i++) {
+
+            if (results[i]) {
+
+                continue;
+
+            }
+
+            currentBatch.push(i);
+
+            if (currentBatch.length >= this.batchSize) {
+
+                pendingIndexBatches.push(currentBatch);
+
+                currentBatch = [];
+
+            }
+
+        }
+
+        if (currentBatch.length > 0) {
+
+            pendingIndexBatches.push(currentBatch);
+
+        }
+
+        let nextBatchIndex = 0;
+
         const worker = async () => {
 
             while (true) {
 
-                const current = nextIndex++;
+                const batchIndex = nextBatchIndex++;
 
-                if (current >= chunks.length) {
+                if (batchIndex >= pendingIndexBatches.length) {
 
                     return;
 
                 }
 
-                if (results[current]) {
+                const indices = pendingIndexBatches[batchIndex];
 
-                    // Ya venía del checkpoint, nada que hacer.
-                    continue;
+                const texts =
 
-                }
+                    indices.map(
 
-                const chunk = chunks[current];
+                        i => chunks[i].text
+
+                    );
 
                 if (this.requestDelayMs > 0) {
 
@@ -129,29 +174,33 @@ export class EmbeddingBatchProcessor {
 
                 }
 
-                const embedding =
+                const embeddings =
 
                     await this.retryPolicy.execute(
 
                         () =>
 
-                            this.provider.generate(
+                            this.provider.generateBatch(
 
-                                chunk.text
+                                texts
 
                             )
 
                     );
 
-                results[current] = {
+                indices.forEach((chunkIndex, position) => {
 
-                    ...chunk,
+                    results[chunkIndex] = {
 
-                    embedding
+                        ...chunks[chunkIndex],
 
-                };
+                        embedding: embeddings[position]
 
-                completed++;
+                    };
+
+                });
+
+                completed += indices.length;
 
                 this.onProgress?.(
 
@@ -175,7 +224,7 @@ export class EmbeddingBatchProcessor {
 
                         this.concurrency,
 
-                        chunks.length
+                        pendingIndexBatches.length
 
                     )
 
@@ -196,9 +245,9 @@ export class EmbeddingBatchProcessor {
         }
         finally {
 
-            // Se guarda el progreso tanto si el lote terminó
-            // bien como si falló a mitad de camino (ej. cuota
-            // agotada en todos los proveedores configurados).
+            // Se guarda el progreso tanto si terminó bien como
+            // si falló a mitad de camino (ej. cuota agotada en
+            // todos los proveedores configurados).
             if (this.onBatchFinished) {
 
                 const finished =

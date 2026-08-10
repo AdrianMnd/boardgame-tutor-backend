@@ -24,6 +24,8 @@ interface EmbeddingResponse {
 
         embedding: number[];
 
+        index: number;
+
     }[];
 
 }
@@ -218,6 +220,63 @@ export class OpenAICompatibleClient
             );
 
         return response.data[0]?.embedding ?? [];
+
+    }
+
+    /**
+     * Igual que generateEmbeddingViaOpenAiApi pero para varios
+     * textos en una sola petición HTTP (el endpoint de OpenAI
+     * y compatibles acepta un array en `input`). Reduce
+     * drásticamente el número de peticiones — de una por chunk
+     * a una por lote — que es lo que agota los límites de
+     * peticiones-por-minuto de los planes gratuitos.
+     */
+    protected async generateEmbeddingBatchViaOpenAiApi(
+
+        texts: string[]
+
+    ): Promise<number[][]> {
+
+        const response =
+
+            await this.post<EmbeddingResponse>(
+
+                "/embeddings",
+
+                {
+
+                    model:
+
+                        this.configuration.embeddingModel,
+
+                    input:
+
+                        texts
+
+                }
+
+            );
+
+        // El array `data` no siempre viene en el mismo orden
+        // que `texts` — se ordena explícitamente por `index`
+        // para no desalinear los embeddings con sus chunks.
+        return response.data
+
+            .slice()
+
+            .sort(
+
+                (a, b) =>
+
+                    a.index - b.index
+
+            )
+
+            .map(
+
+                item => item.embedding
+
+            );
 
     }
 

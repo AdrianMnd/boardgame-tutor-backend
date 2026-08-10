@@ -41,4 +41,43 @@ export class LLMEmbeddingProvider
 
     }
 
+    async generateBatch(
+
+        texts: string[]
+
+    ): Promise<number[][]> {
+
+        if (
+
+            !this.client.generateEmbeddingBatch
+
+        ) {
+
+            // Sin soporte de lote a este nivel: se genera uno a
+            // uno (el propio cliente/FallbackLLMClient decide
+            // internamente cómo resolverlo).
+            const results: number[][] = [];
+
+            for (const text of texts) {
+
+                results.push(
+
+                    await this.generate(text)
+
+                );
+
+            }
+
+            return results;
+
+        }
+
+        return this.client.generateEmbeddingBatch(
+
+            texts
+
+        );
+
+    }
+
 }
