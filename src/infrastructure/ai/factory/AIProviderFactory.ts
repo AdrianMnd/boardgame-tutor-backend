@@ -5,6 +5,7 @@ import { MISTRAL } from "../../../config/mistral";
 import { OPENAI } from "../../../config/openai";
 import { DEEPINFRA } from "../../../config/deepinfra";
 import { TOGETHER } from "../../../config/together";
+import { LOCAL_EMBEDDING } from "../../../config/localEmbedding";
 
 import type { AIProviders } from "./AIProviders";
 import type { ILLMClient } from "../common/ILLMClient";
@@ -15,6 +16,7 @@ import { MistralClient } from "../providers/mistral/MistralClient";
 import { OpenAIClient } from "../providers/openai/OpenAIClient";
 import { DeepInfraClient } from "../providers/deepinfra/DeepInfraClient";
 import { TogetherClient } from "../providers/together/TogetherClient";
+import { LocalEmbeddingClient } from "../providers/local/LocalEmbeddingClient";
 
 import { FallbackLLMClient, type NamedLLMClient } from "../common/FallbackLLMClient";
 
@@ -30,6 +32,12 @@ const PROVIDER_BUILDERS: Record<
     () => ILLMClient | null
 
 > = {
+
+    local: () =>
+
+        LOCAL_EMBEDDING.enabled
+            ? new LocalEmbeddingClient(LOCAL_EMBEDDING)
+            : null,
 
     gemini: () =>
 
@@ -116,7 +124,9 @@ export class AIProviderFactory {
                 "No hay ningún proveedor de IA configurado. " +
                 "Define al menos una de estas variables en tu .env: " +
                 "GEMINI_API_KEY, OPENROUTER_API_KEY, MISTRAL_API_KEY, " +
-                "OPENAI_API_KEY, DEEPINFRA_API_KEY, TOGETHER_API_KEY."
+                "OPENAI_API_KEY, DEEPINFRA_API_KEY, TOGETHER_API_KEY " +
+                "— o activa LOCAL_EMBEDDING_ENABLED=true para embeddings " +
+                "sin depender de ningún proveedor externo."
 
             );
 

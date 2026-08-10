@@ -20,11 +20,20 @@ export interface NamedLLMClient {
  * (parámetros inválidos, bug real, etc.) se propaga
  * inmediatamente sin intentar los demás proveedores, para no
  * ocultar fallos que no tienen que ver con la cuota.
+ *
+ * Antes de intentar una operación, se filtran los clientes que
+ * no la soportan (ej. un modelo local solo-embeddings no se
+ * intenta nunca para generateChat, y OpenRouter no se intenta
+ * nunca para embeddings) — la capacidad se declara explícitamente
+ * vía supportsChat/supportsEmbeddings, no se infiere de si el
+ * método existe.
  */
 export class FallbackLLMClient
     implements ILLMClient {
 
     readonly supportsEmbeddings: boolean;
+
+    readonly supportsChat: boolean;
 
     constructor(
 
@@ -50,6 +59,14 @@ export class FallbackLLMClient
 
             );
 
+        this.supportsChat =
+
+            clients.some(
+
+                entry => entry.client.supportsChat
+
+            );
+
     }
 
     async generateText(
@@ -61,6 +78,8 @@ export class FallbackLLMClient
         return this.run(
 
             "generateText",
+
+            client => client.supportsChat,
 
             client => client.generateText(prompt)
 
@@ -78,6 +97,8 @@ export class FallbackLLMClient
 
             "generateChat",
 
+            client => client.supportsChat,
+
             client => client.generateChat(messages)
 
         );
@@ -90,11 +111,33 @@ export class FallbackLLMClient
 
     ): Promise<number[]> {
 
+        return this.run(
+
+            "embeddings",
+
+            client => client.supportsEmbeddings,
+
+            client => client.generateEmbedding!(text)
+
+        );
+
+    }
+
+    private async run<T>(
+
+        operationName: string,
+
+        supports: (client: ILLMClient) => boolean,
+
+        operation: (client: ILLMClient) => Promise<T>
+
+    ): Promise<T> {
+
         const capableClients =
 
             this.clients.filter(
 
-                entry => entry.client.supportsEmbeddings
+                entry => supports(entry.client)
 
             );
 
@@ -102,11 +145,11 @@ export class FallbackLLMClient
 
             throw new Error(
 
-                "Ningún proveedor de IA configurado soporta generación de embeddings. " +
+                `Ningún proveedor de IA configurado soporta "${operationName}". ` +
 
                 "Proveedores disponibles: " +
                 this.clients.map(entry => entry.name).join(", ") +
-                ". Configura GEMINI_API_KEY o MISTRAL_API_KEY (OpenRouter no soporta embeddings)."
+                "."
 
             );
 
@@ -115,47 +158,6 @@ export class FallbackLLMClient
         let lastError: unknown;
 
         for (const { name, client } of capableClients) {
-
-            try {
-
-                return await client.generateEmbedding!(text);
-
-            }
-            catch (error) {
-
-                lastError = error;
-
-                if (!isRetryableProviderError(error)) {
-
-                    throw error;
-
-                }
-
-                console.warn(
-
-                    `[IA] ${name} no disponible para embeddings (cuota/rate-limit). Probando siguiente proveedor...`
-
-                );
-
-            }
-
-        }
-
-        throw lastError;
-
-    }
-
-    private async run<T>(
-
-        operationName: string,
-
-        operation: (client: ILLMClient) => Promise<T>
-
-    ): Promise<T> {
-
-        let lastError: unknown;
-
-        for (const { name, client } of this.clients) {
 
             try {
 

@@ -1,5 +1,7 @@
 const ALL_PROVIDERS = [
 
+    "local",
+
     "gemini",
 
     "openrouter",
@@ -48,9 +50,11 @@ function parseProviderOrder(
 
     }
 
-    // Sin AI_PROVIDER_ORDER explícito: se respeta el AI_PROVIDER
-    // legado como primero de la cadena, y se añaden el resto de
-    // proveedores como red de seguridad ante fallos de cuota.
+    // Sin AI_PROVIDER_ORDER explícito: "local" siempre va primero
+    // (es gratis e ilimitado, conviene intentarlo antes que
+    // nada), luego se respeta el AI_PROVIDER legado, y se añaden
+    // el resto de proveedores como red de seguridad ante fallos
+    // de cuota.
     const legacy =
 
         (process.env.AI_PROVIDER ?? "gemini")
@@ -63,17 +67,23 @@ function parseProviderOrder(
             ? legacy
             : "gemini";
 
-    return [
+    const order = [
+
+        "local",
 
         primary,
 
-        ...ALL_PROVIDERS.filter(
+        ...ALL_PROVIDERS
 
-            provider => provider !== primary
+    ] as AIProviderName[];
 
-        )
+    return order.filter(
 
-    ];
+        (provider, index) =>
+
+            order.indexOf(provider) === index
+
+    );
 
 }
 
