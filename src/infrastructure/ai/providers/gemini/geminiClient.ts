@@ -141,4 +141,47 @@ ${message.content}`
 
 }
 
+    async generateEmbeddingBatch(
+
+        texts: string[]
+
+    ): Promise<number[][]> {
+
+        const response =
+
+            await retry(() =>
+
+                this.client.models.embedContent({
+
+                    model:
+
+                        this.configuration.embeddingModel,
+
+                    contents:
+
+                        texts
+
+                }),
+
+                {
+                    shouldRetry:
+                        error => !isRetryableProviderError(error)
+                }
+
+            );
+
+        return (
+
+            response.embeddings?.map(
+
+                embedding => embedding.values ?? []
+
+            )
+
+            ?? []
+
+        );
+
+    }
+
 }

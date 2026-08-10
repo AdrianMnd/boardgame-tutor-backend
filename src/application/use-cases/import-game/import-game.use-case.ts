@@ -207,6 +207,14 @@ export class ImportGameUseCase {
 
         );
 
+        await this.warnIfDimensionMismatch(
+
+            game.paths.generated,
+
+            embeddedChunks
+
+        );
+
         this.logger.step(
 
             "6.Guardando conocimiento..."

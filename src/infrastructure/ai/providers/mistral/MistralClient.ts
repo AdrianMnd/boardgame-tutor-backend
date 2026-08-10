@@ -43,4 +43,18 @@ export class MistralClient
 
     }
 
+    async generateEmbeddingBatch(
+
+        texts: string[]
+
+    ): Promise<number[][]> {
+
+        return this.generateEmbeddingBatchViaOpenAiApi(
+
+            texts
+
+        );
+
+    }
+
 }

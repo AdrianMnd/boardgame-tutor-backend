@@ -68,8 +68,6 @@ export class EmbeddingBatchProcessor {
 
             new Array(chunks.length);
 
-        let nextIndex = 0;
-
         let completed = 0;
 
         // Los chunks que ya vienen de un checkpoint anterior
@@ -106,9 +104,9 @@ export class EmbeddingBatchProcessor {
 
             while (true) {
 
-                const current = nextIndex++;
+                const batchIndex = nextBatchIndex++;
 
-                if (current >= chunks.length) {
+                if (batchIndex >= pendingIndexBatches.length) {
 
                     return;
 
@@ -135,23 +133,27 @@ export class EmbeddingBatchProcessor {
 
                         () =>
 
-                            this.provider.generate(
+                            this.provider.generateBatch(
 
-                                chunk.text
+                                texts
 
                             )
 
                     );
 
-                results[current] = {
+                indices.forEach((chunkIndex, position) => {
 
-                    ...chunk,
+                    results[chunkIndex] = {
 
-                    embedding
+                        ...chunks[chunkIndex],
 
-                };
+                        embedding: embeddings[position]
 
-                completed++;
+                    };
+
+                });
+
+                completed += indices.length;
 
                 this.onProgress?.(
 
@@ -175,7 +177,7 @@ export class EmbeddingBatchProcessor {
 
                         this.concurrency,
 
-                        chunks.length
+                        pendingIndexBatches.length
 
                     )
 

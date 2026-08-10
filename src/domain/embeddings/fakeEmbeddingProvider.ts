@@ -19,4 +19,20 @@ export class FakeEmbeddingProvider
 
     }
 
+    async generateBatch(
+        texts: string[]
+    ): Promise<number[][]> {
+
+        return Promise.all(
+
+            texts.map(
+
+                text => this.generate(text)
+
+            )
+
+        );
+
+    }
+
 }
