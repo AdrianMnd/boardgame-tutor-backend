@@ -11,6 +11,16 @@ export interface ILLMClient {
      */
     readonly supportsEmbeddings: boolean;
 
+    /**
+     * Indica explícitamente si este cliente soporta generación
+     * de texto/chat. Necesario por el mismo motivo que
+     * supportsEmbeddings: un cliente dedicado solo a embeddings
+     * (ej. un modelo local) puede implementar generateText/
+     * generateChat únicamente para lanzar "no soportado", y eso
+     * no debe tratarse como un fallo de cuota.
+     */
+    readonly supportsChat: boolean;
+
     generateText(
 
         prompt: string

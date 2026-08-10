@@ -17,6 +17,8 @@ implements ILLMClient {
 
     readonly supportsEmbeddings = true;
 
+    readonly supportsChat = true;
+
     private readonly client: GoogleGenAI;
 
     constructor(
