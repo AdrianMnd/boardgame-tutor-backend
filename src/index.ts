@@ -192,6 +192,10 @@ if (
 
 ) {
 
+    // En producción, servir URLs de localhost (ej. portadas de
+    // juego) rompe en cualquier navegador que cargue la app por
+    // HTTPS (mixed content). Si esto se ve en los logs, falta
+    // configurar API_PUBLIC_URL en las variables de entorno.
     console.warn(
 
         "[Config] API_PUBLIC_URL no está configurada y no se ha " +

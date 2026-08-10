@@ -99,38 +99,6 @@ export class LocalEmbeddingClient
 
     }
 
-    async generateEmbeddingBatch(
-
-        texts: string[]
-
-    ): Promise<number[][]> {
-
-        const extractor =
-            await this.getPipeline();
-
-        const output =
-
-            await extractor(
-
-                texts,
-
-                {
-
-                    pooling: "mean",
-
-                    normalize: true
-
-                }
-
-            );
-
-        // Con un array de entrada, transformers.js devuelve un
-        // tensor 2D (uno por texto). tolist() lo convierte en
-        // un array de arrays normal de JS.
-        return output.tolist() as number[][];
-
-    }
-
     async generateText(
 
         _prompt: string

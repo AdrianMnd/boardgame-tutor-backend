@@ -15,15 +15,6 @@ export interface ImportConfiguration {
      */
     embeddingRequestDelay: number;
 
-    /**
-     * Cuántos chunks se agrupan en una sola petición de
-     * embeddings. Con lotes de 20, un juego de 350 chunks pasa
-     * de necesitar ~350 peticiones a necesitar ~18 — la mejora
-     * con más impacto real para no agotar los límites de
-     * peticiones-por-minuto de los proveedores gratuitos.
-     */
-    embeddingBatchSize: number;
-
     retryCount: number;
 
     retryDelay: number;
@@ -47,10 +38,6 @@ export const IMPORT_CONFIGURATION: ImportConfiguration = {
     embeddingRequestDelay:
 
         Number(process.env.IMPORT_EMBEDDING_REQUEST_DELAY) || 300,
-
-    embeddingBatchSize:
-
-        Number(process.env.IMPORT_EMBEDDING_BATCH_SIZE) || 20,
 
     retryCount: 3,
 

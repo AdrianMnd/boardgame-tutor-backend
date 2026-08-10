@@ -80,9 +80,7 @@ export class EmbeddingGenerator {
 
                 this.configuration.embeddingRequestDelay,
 
-                onBatchFinished,
-
-                this.configuration.embeddingBatchSize
+                onBatchFinished
 
             );
 
@@ -93,29 +91,6 @@ export class EmbeddingGenerator {
             alreadyEmbedded
 
         );
-
-    }
-
-    /**
-     * Genera un único embedding de prueba para saber qué
-     * dimensión produce el proveedor que resulte activo HOY
-     * (puede no ser el mismo que ayer, si aquel se quedó sin
-     * cuota). Se usa para detectar, antes de generar nada más,
-     * si un checkpoint de un día anterior es compatible con el
-     * proveedor de hoy.
-     */
-    async probeDimension(): Promise<number> {
-
-        const embedding =
-
-            await this.provider.generate(
-
-                "Texto de prueba para detectar la dimensión " +
-                "del proveedor de embeddings activo."
-
-            );
-
-        return embedding.length;
 
     }
 
