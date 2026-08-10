@@ -105,7 +105,9 @@ const validator =
 
             embeddingGenerator,
 
-            writer
+            writer,
+
+            fileSystem
 
         );
 
