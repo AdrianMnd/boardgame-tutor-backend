@@ -19,4 +19,12 @@ router.post(
 
 );
 
+router.post(
+
+    "/stream",
+
+    controller.askStream
+
+);
+
 export default router;

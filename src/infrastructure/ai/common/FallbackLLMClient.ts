@@ -87,6 +87,34 @@ export class FallbackLLMClient
 
     }
 
+    async *generateTextStream(
+
+        prompt: string
+
+    ): AsyncIterable<string> {
+
+        yield* this.runStream(
+
+            "generateTextStream",
+
+            client => client.supportsChat,
+
+            client =>
+
+                client.generateTextStream
+
+                    ? client.generateTextStream(prompt)
+
+                    : this.singleChunkStream(
+
+                        () => client.generateText(prompt)
+
+                    )
+
+        );
+
+    }
+
     async generateChat(
 
         messages: ChatMessage[]
@@ -180,6 +208,22 @@ export class FallbackLLMClient
 
     }
 
+    private async *singleChunkStream(
+
+        operation: () => Promise<string>
+
+    ): AsyncIterable<string> {
+
+        const text = await operation();
+
+        if (text) {
+
+            yield text;
+
+        }
+
+    }
+
     private async run<T>(
 
         operationName: string,
@@ -226,6 +270,89 @@ export class FallbackLLMClient
                 lastError = error;
 
                 if (!isRetryableProviderError(error)) {
+
+                    throw error;
+
+                }
+
+                console.warn(
+
+                    `[IA] ${name} no disponible para ${operationName} (cuota/rate-limit). Probando siguiente proveedor...`
+
+                );
+
+            }
+
+        }
+
+        throw lastError;
+
+    }
+
+    /**
+     * Versión en streaming de `run`. La diferencia clave: si un
+     * proveedor falla DESPUÉS de haber emitido ya algún
+     * fragmento, no tiene sentido "cambiar de proveedor" — el
+     * usuario ya está viendo una respuesta a medias — así que
+     * el error se propaga tal cual en vez de reintentar con
+     * otro proveedor desde cero.
+     */
+    private async *runStream(
+
+        operationName: string,
+
+        supports: (client: ILLMClient) => boolean,
+
+        getStream: (client: ILLMClient) => AsyncIterable<string>
+
+    ): AsyncIterable<string> {
+
+        const capableClients =
+
+            this.clients.filter(
+
+                entry => supports(entry.client)
+
+            );
+
+        if (capableClients.length === 0) {
+
+            throw new Error(
+
+                `Ningún proveedor de IA configurado soporta "${operationName}". ` +
+
+                "Proveedores disponibles: " +
+                this.clients.map(entry => entry.name).join(", ") +
+                "."
+
+            );
+
+        }
+
+        let lastError: unknown;
+
+        for (const { name, client } of capableClients) {
+
+            let yieldedAny = false;
+
+            try {
+
+                for await (const chunk of getStream(client)) {
+
+                    yieldedAny = true;
+
+                    yield chunk;
+
+                }
+
+                return;
+
+            }
+            catch (error) {
+
+                lastError = error;
+
+                if (yieldedAny || !isRetryableProviderError(error)) {
 
                     throw error;
 
