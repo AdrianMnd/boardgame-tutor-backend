@@ -4,12 +4,11 @@ import { IEmbeddingProvider } from "../../../domain/embeddings/IEmbeddingProvide
 
 import { IKnowledgeRetriever } from "../../../domain/knowledge/IknowledgeRetriever";
 
-import { IContextReranker } from "../../../domain/knowledge/IContextReranker";
+import { IContextRefiner } from "../../../domain/knowledge/IContextRefiner";
 
 import { ContextBuilder } from "../../../domain/ai/contextBuilder";
 
 import { ChatProvider } from "../../../domain/ai/chatProvider";
-import { IContextCompressor } from "../../../domain/knowledge/IContextCompressor";
 import { AskQuestionResult } from "./askQuestionResult";
 
 export class AskQuestionUseCase {
@@ -22,9 +21,7 @@ export class AskQuestionUseCase {
 
         private readonly retriever: IKnowledgeRetriever,
 
-        private readonly reranker: IContextReranker,
-
-        private readonly compressor: IContextCompressor,
+        private readonly refiner: IContextRefiner,
 
         private readonly contextBuilder: ContextBuilder,
 
@@ -96,11 +93,11 @@ export class AskQuestionUseCase {
 
 
 
-        console.log("4. Reordenando contexto...");
+        console.log("4. Reordenando y recortando contexto (1 sola llamada)...");
 
-        const reranked =
+        const refined =
 
-            await this.reranker.rerank(
+            await this.refiner.refine(
 
                 question,
 
@@ -108,40 +105,21 @@ export class AskQuestionUseCase {
 
             );
 
-        console.log("✔ Contexto reordenado");
-
-        console.log("");
-
-
-
-        console.log("5. Construyendo contexto...");
-
-
-        const compressed =
-
-            await this.compressor.compress(
-
-                question,
-
-                reranked
-
-    );
-
         const context =
 
             this.contextBuilder.build(
 
-                compressed
+                refined
 
             );
 
-        console.log("✔ Contexto construido");
+        console.log("✔ Contexto listo");
 
         console.log("");
 
 
 
-        console.log("6. Generando respuesta...");
+        console.log("5. Generando respuesta...");
 
         const answer =
 
@@ -163,7 +141,7 @@ export class AskQuestionUseCase {
 
             answer,
 
-            sources: compressed
+            sources: refined
 
         };
 
