@@ -170,7 +170,7 @@ ${message.content}`
 
             );
 
-        return (
+        const embeddings =
 
             response.embeddings?.map(
 
@@ -178,9 +178,31 @@ ${message.content}`
 
             )
 
-            ?? []
+            ?? [];
 
-        );
+        // Defensa crítica: si la API devuelve menos embeddings
+        // de los textos pedidos (puede pasar con lotes grandes,
+        // sin que llegue a ser un error HTTP), asignar por
+        // posición dejaría chunks con embedding "undefined" —
+        // que luego se guardan silenciosamente sin ese campo en
+        // knowledge.json (JSON.stringify elimina las claves
+        // undefined) y rompen CUALQUIER pregunta sobre ese juego
+        // más adelante, de forma muy difícil de diagnosticar.
+        // Mejor fallar aquí, alto y claro.
+        if (embeddings.length !== texts.length) {
+
+            throw new Error(
+
+                `Gemini devolvió ${embeddings.length} embeddings ` +
+                `para ${texts.length} textos pedidos en el mismo lote. ` +
+                `Prueba a reducir IMPORT_EMBEDDING_BATCH_SIZE en tu .env ` +
+                `(por ejemplo, a la mitad del valor actual).`
+
+            );
+
+        }
+
+        return embeddings;
 
     }
 
