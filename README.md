@@ -2,8 +2,6 @@
 
 BoardGame Tutor es una aplicación web que permite seleccionar un juego de mesa, consultar su reglamento mediante lenguaje natural y abrir el reglamento PDF para revisar las páginas utilizadas como fuente.
 
-La documentación describe el código y la estructura observados en esos archivos. No presupone funcionalidades que no estén implementadas en ellos.
-
 ## Arquitectura
 
 ```text
