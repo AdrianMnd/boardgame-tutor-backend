@@ -42,15 +42,15 @@ export const IMPORT_CONFIGURATION: ImportConfiguration = {
 
     embeddingConcurrency:
 
-        Number(process.env.IMPORT_EMBEDDING_CONCURRENCY) || 2,
+        Number(process.env.IMPORT_EMBEDDING_CONCURRENCY) || 1,
 
     embeddingRequestDelay:
 
-        Number(process.env.IMPORT_EMBEDDING_REQUEST_DELAY) || 300,
+        Number(process.env.IMPORT_EMBEDDING_REQUEST_DELAY) || 500,
 
     embeddingBatchSize:
 
-        Number(process.env.IMPORT_EMBEDDING_BATCH_SIZE) || 20,
+        Number(process.env.IMPORT_EMBEDDING_BATCH_SIZE) || 100,
 
     retryCount: 3,
 
