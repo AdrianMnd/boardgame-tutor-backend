@@ -2,9 +2,7 @@ import type { ChatProvider } from "../../../domain/ai/chatProvider";
 
 import type { IEmbeddingProvider } from "../../../domain/embeddings/IEmbeddingProvider";
 
-import type { IContextReranker } from "../../../domain/knowledge/IContextReranker";
-
-import type { IContextCompressor } from "../../../domain/knowledge/IContextCompressor";
+import type { IContextRefiner } from "../../../domain/knowledge/IContextRefiner";
 
 export interface AIProviders {
 
@@ -12,8 +10,6 @@ export interface AIProviders {
 
     chatProvider: ChatProvider;
 
-    reranker: IContextReranker;
-
-    compressor: IContextCompressor;
+    refiner: IContextRefiner;
 
 }

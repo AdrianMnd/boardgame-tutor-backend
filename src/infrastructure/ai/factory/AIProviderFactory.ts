@@ -22,8 +22,7 @@ import { FallbackLLMClient, type NamedLLMClient } from "../common/FallbackLLMCli
 
 import { LLMChatProvider } from "../common/LLMChatProvider";
 import { LLMEmbeddingProvider } from "../common/LLMEmbeddingProvider";
-import { LLMContextReranker } from "../common/LLMContextReranker";
-import { LLMContextCompressor } from "../common/LLMContextCompressor";
+import { LLMContextRefiner } from "../common/LLMContextRefiner";
 
 const PROVIDER_BUILDERS: Record<
 
@@ -164,13 +163,9 @@ export class AIProviderFactory {
 
                 new LLMChatProvider(client),
 
-            reranker:
+            refiner:
 
-                new LLMContextReranker(client),
-
-            compressor:
-
-                new LLMContextCompressor(client)
+                new LLMContextRefiner(client)
 
         };
 

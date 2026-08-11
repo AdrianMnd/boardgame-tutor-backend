@@ -47,11 +47,8 @@ export class ApplicationContainer {
     readonly chatProvider =
         this.ai.chatProvider;
 
-    readonly reranker =
-        this.ai.reranker;
-
-    readonly compressor =
-        this.ai.compressor;
+    readonly refiner =
+        this.ai.refiner;
 
     readonly retriever =
         new SemanticRetriever(
@@ -71,9 +68,7 @@ export class ApplicationContainer {
 
             this.retriever,
 
-            this.reranker,
-
-            this.compressor,
+            this.refiner,
 
             this.contextBuilder,
 
