@@ -9,7 +9,10 @@ export const GEMINI: GeminiConfiguration = {
     embeddingModel:
 
         process.env.GEMINI_EMBEDDING_MODEL
-            ?? "text-embedding-004",
+            // text-embedding-004 fue retirado por Google el
+            // 14 de enero de 2026 — gemini-embedding-001 es el
+            // modelo estable (GA) que lo reemplaza oficialmente.
+            ?? "gemini-embedding-001",
 
     chatModel:
 

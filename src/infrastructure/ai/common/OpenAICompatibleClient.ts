@@ -260,23 +260,43 @@ export class OpenAICompatibleClient
         // El array `data` no siempre viene en el mismo orden
         // que `texts` — se ordena explícitamente por `index`
         // para no desalinear los embeddings con sus chunks.
-        return response.data
+        const embeddings =
 
-            .slice()
+            response.data
 
-            .sort(
+                .slice()
 
-                (a, b) =>
+                .sort(
 
-                    a.index - b.index
+                    (a, b) =>
 
-            )
+                        a.index - b.index
 
-            .map(
+                )
 
-                item => item.embedding
+                .map(
+
+                    item => item.embedding
+
+                );
+
+        // Misma defensa que en GeminiClient: si el proveedor
+        // devuelve menos embeddings de los pedidos, mejor fallar
+        // alto y claro que guardar chunks sin embedding en
+        // silencio (rompen las preguntas más adelante).
+        if (embeddings.length !== texts.length) {
+
+            throw new Error(
+
+                `El proveedor devolvió ${embeddings.length} embeddings ` +
+                `para ${texts.length} textos pedidos en el mismo lote. ` +
+                `Prueba a reducir IMPORT_EMBEDDING_BATCH_SIZE en tu .env.`
 
             );
+
+        }
+
+        return embeddings;
 
     }
 

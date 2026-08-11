@@ -17,10 +17,15 @@ export interface ImportConfiguration {
 
     /**
      * Cuántos chunks se agrupan en una sola petición de
-     * embeddings. Con lotes de 20, un juego de 350 chunks pasa
-     * de necesitar ~350 peticiones a necesitar ~18 — la mejora
-     * con más impacto real para no agotar los límites de
-     * peticiones-por-minuto de los proveedores gratuitos.
+     * embeddings. Lotes más grandes = menos peticiones = menos
+     * probabilidad de agotar límites de peticiones-por-minuto o
+     * al día. PERO algunos proveedores (Gemini incluido) pueden
+     * devolver silenciosamente menos resultados de los pedidos
+     * si el lote es demasiado grande, en vez de dar un error —
+     * por eso ahora se valida la respuesta (ver GeminiClient /
+     * OpenAICompatibleClient) y se lanza un error claro si no
+     * cuadra, para que puedas bajar este valor si hace falta en
+     * vez de acabar con datos corruptos en silencio.
      */
     embeddingBatchSize: number;
 
@@ -50,7 +55,7 @@ export const IMPORT_CONFIGURATION: ImportConfiguration = {
 
     embeddingBatchSize:
 
-        Number(process.env.IMPORT_EMBEDDING_BATCH_SIZE) || 100,
+        Number(process.env.IMPORT_EMBEDDING_BATCH_SIZE) || 40,
 
     retryCount: 3,
 
