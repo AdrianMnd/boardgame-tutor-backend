@@ -149,25 +149,103 @@ export class AIProviderFactory {
 
     static create(): AIProviders {
 
-        const client =
+        const chatClient =
 
             this.createFallbackClient();
+
+        const embeddingClient =
+
+            this.createEmbeddingClient();
 
         return {
 
             embeddingProvider:
 
-                new LLMEmbeddingProvider(client),
+                new LLMEmbeddingProvider(embeddingClient),
 
             chatProvider:
 
-                new LLMChatProvider(client),
+                new LLMChatProvider(chatClient),
 
             refiner:
 
-                new LLMContextRefiner(client)
+                new LLMContextRefiner(chatClient)
 
         };
+
+    }
+
+    /**
+     * Construye el ÚNICO cliente usado para generar embeddings
+     * — sin fallback entre proveedores (ver el comentario en
+     * AI_CONFIGURATION.embeddingProvider sobre por qué). Se usa
+     * tanto en el servidor (preguntas en vivo) como en
+     * `npm run import`, para garantizar que ambos generan
+     * embeddings exactamente iguales.
+     */
+    static createEmbeddingClient(): ILLMClient {
+
+        const name =
+            AI_CONFIGURATION.embeddingProvider;
+
+        if (!name) {
+
+            throw new Error(
+
+                "Falta configurar AI_EMBEDDING_PROVIDER en el .env " +
+
+                "(ej. AI_EMBEDDING_PROVIDER=local o AI_EMBEDDING_PROVIDER=gemini). " +
+
+                "Tiene que ser EXACTAMENTE el mismo valor en tu máquina " +
+
+                "local y en el servidor desplegado, o las preguntas sobre " +
+
+                "los juegos importados en un sitio fallarán en el otro."
+
+            );
+
+        }
+
+        const client =
+            PROVIDER_BUILDERS[name]?.();
+
+        if (!client) {
+
+            throw new Error(
+
+                `El proveedor configurado en AI_EMBEDDING_PROVIDER ("${name}") ` +
+
+                "no está disponible. Si es un proveedor en la nube, revisa " +
+
+                "que tenga su API key configurada. Si es \"local\", revisa " +
+
+                "que LOCAL_EMBEDDING_ENABLED=true."
+
+            );
+
+        }
+
+        if (!client.supportsEmbeddings) {
+
+            throw new Error(
+
+                `El proveedor configurado en AI_EMBEDDING_PROVIDER ("${name}") ` +
+
+                "no soporta generación de embeddings (ej. \"openrouter\" no " +
+
+                "los soporta). Elige otro proveedor."
+
+            );
+
+        }
+
+        console.log(
+
+            `Proveedor de embeddings (fijo, sin fallback): ${name}`
+
+        );
+
+        return client;
 
     }
 

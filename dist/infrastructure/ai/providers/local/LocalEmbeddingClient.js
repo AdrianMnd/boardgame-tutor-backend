@@ -79,6 +79,17 @@ class LocalEmbeddingClient {
         });
         return Array.from(output.data);
     }
+    async generateEmbeddingBatch(texts) {
+        const extractor = await this.getPipeline();
+        const output = await extractor(texts, {
+            pooling: "mean",
+            normalize: true
+        });
+        // Con un array de entrada, transformers.js devuelve un
+        // tensor 2D (uno por texto). tolist() lo convierte en
+        // un array de arrays normal de JS.
+        return output.tolist();
+    }
     async generateText(_prompt) {
         throw new Error("El modelo local solo genera embeddings, no texto/chat.");
     }

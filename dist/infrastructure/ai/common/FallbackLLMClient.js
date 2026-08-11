@@ -42,6 +42,27 @@ class FallbackLLMClient {
     async generateEmbedding(text) {
         return this.run("embeddings", client => client.supportsEmbeddings, client => client.generateEmbedding(text));
     }
+    /**
+     * Igual que generateEmbedding pero para varios textos de
+     * una vez. Si el proveedor activo soporta lotes, se manda
+     * todo en una sola petición HTTP. Si no, se generan uno a
+     * uno pero SIEMPRE con el mismo proveedor dentro del mismo
+     * lote — nunca se reparte un lote entre distintos
+     * proveedores, para no acabar con embeddings de
+     * dimensiones distintas mezclados en el mismo resultado.
+     */
+    async generateEmbeddingBatch(texts) {
+        return this.run("embeddings en lote", client => client.supportsEmbeddings, async (client) => {
+            if (client.generateEmbeddingBatch) {
+                return client.generateEmbeddingBatch(texts);
+            }
+            const results = [];
+            for (const text of texts) {
+                results.push(await client.generateEmbedding(text));
+            }
+            return results;
+        });
+    }
     async run(operationName, supports, operation) {
         const capableClients = this.clients.filter(entry => supports(entry.client));
         if (capableClients.length === 0) {

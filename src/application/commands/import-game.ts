@@ -68,13 +68,13 @@ const validator =
     const chunkGenerator =
         new ChunkGenerator();
 
-    const fallbackClient =
+    const embeddingClient =
 
-        AIProviderFactory.createFallbackClient();
+        AIProviderFactory.createEmbeddingClient();
 
     const embeddingProvider =
      new LLMEmbeddingProvider(
-        fallbackClient
+        embeddingClient
     ); 
 
     const embeddingGenerator =

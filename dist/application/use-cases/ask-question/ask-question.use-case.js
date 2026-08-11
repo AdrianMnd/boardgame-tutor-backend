@@ -5,16 +5,14 @@ class AskQuestionUseCase {
     validator;
     embeddingProvider;
     retriever;
-    reranker;
-    compressor;
+    refiner;
     contextBuilder;
     chatProvider;
-    constructor(validator, embeddingProvider, retriever, reranker, compressor, contextBuilder, chatProvider) {
+    constructor(validator, embeddingProvider, retriever, refiner, contextBuilder, chatProvider) {
         this.validator = validator;
         this.embeddingProvider = embeddingProvider;
         this.retriever = retriever;
-        this.reranker = reranker;
-        this.compressor = compressor;
+        this.refiner = refiner;
         this.contextBuilder = contextBuilder;
         this.chatProvider = chatProvider;
     }
@@ -31,22 +29,18 @@ class AskQuestionUseCase {
         const retrieved = await this.retriever.retrieve(game, question, embedding);
         console.log(`✔ ${retrieved.length} fragmentos recuperados`);
         console.log("");
-        console.log("4. Reordenando contexto...");
-        const reranked = await this.reranker.rerank(question, retrieved);
-        console.log("✔ Contexto reordenado");
+        console.log("4. Reordenando y recortando contexto (1 sola llamada)...");
+        const refined = await this.refiner.refine(question, retrieved);
+        const context = this.contextBuilder.build(refined);
+        console.log("✔ Contexto listo");
         console.log("");
-        console.log("5. Construyendo contexto...");
-        const compressed = await this.compressor.compress(question, reranked);
-        const context = this.contextBuilder.build(compressed);
-        console.log("✔ Contexto construido");
-        console.log("");
-        console.log("6. Generando respuesta...");
+        console.log("5. Generando respuesta...");
         const answer = await this.chatProvider.answer(question, context);
         console.log("✔ Respuesta generada");
         console.log("");
         return {
             answer,
-            sources: compressed
+            sources: refined
         };
     }
 }

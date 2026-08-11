@@ -33,8 +33,8 @@ async function main() {
     const extractor = new Pdf2JsonExtractor_1.Pdf2JsonExtractor();
     const cleaner = new textCleaner_1.TextCleaner();
     const chunkGenerator = new chunkGenerator_1.ChunkGenerator();
-    const fallbackClient = AIProviderFactory_1.AIProviderFactory.createFallbackClient();
-    const embeddingProvider = new LLMEmbeddingProvider_1.LLMEmbeddingProvider(fallbackClient);
+    const embeddingClient = AIProviderFactory_1.AIProviderFactory.createEmbeddingClient();
+    const embeddingProvider = new LLMEmbeddingProvider_1.LLMEmbeddingProvider(embeddingClient);
     const embeddingGenerator = new embeddingGenerator_1.EmbeddingGenerator(embeddingProvider, import_1.IMPORT_CONFIGURATION);
     const writer = new knowledgeWriter_1.KnowledgeWriter(fileSystem, process.env.EMBEDDING_MODEL || "unknown");
     const importer = new import_game_use_case_1.ImportGameUseCase(logger, validator, extractor, cleaner, chunkGenerator, embeddingGenerator, writer, fileSystem);

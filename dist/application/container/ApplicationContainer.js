@@ -20,10 +20,9 @@ class ApplicationContainer {
     ai = AIProviderFactory_1.AIProviderFactory.create();
     embeddingProvider = this.ai.embeddingProvider;
     chatProvider = this.ai.chatProvider;
-    reranker = this.ai.reranker;
-    compressor = this.ai.compressor;
+    refiner = this.ai.refiner;
     retriever = new SemanticRetriever_1.SemanticRetriever(this.fileSystem, import_1.IMPORT_CONFIGURATION);
     contextBuilder = new contextBuilder_1.ContextBuilder();
-    askQuestionUseCase = new ask_question_use_case_1.AskQuestionUseCase(this.validator, this.embeddingProvider, this.retriever, this.reranker, this.compressor, this.contextBuilder, this.chatProvider);
+    askQuestionUseCase = new ask_question_use_case_1.AskQuestionUseCase(this.validator, this.embeddingProvider, this.retriever, this.refiner, this.contextBuilder, this.chatProvider);
 }
 exports.ApplicationContainer = ApplicationContainer;
