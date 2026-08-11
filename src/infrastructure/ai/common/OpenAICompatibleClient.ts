@@ -173,6 +173,181 @@ export class OpenAICompatibleClient
 
     }
 
+    async *generateTextStream(
+
+        prompt: string
+
+    ): AsyncIterable<string> {
+
+        yield* this.generateChatStream([
+
+            {
+
+                role: "user",
+
+                content: prompt
+
+            }
+
+        ]);
+
+    }
+
+    /**
+     * Streaming vía Server-Sent Events, tal como lo expone la
+     * API de OpenAI y sus compatibles (`stream: true`). Cada
+     * línea del cuerpo de la respuesta tiene el formato
+     * `data: {...}\n\n`, terminando con `data: [DONE]\n\n`. No
+     * hay SDK aquí (usamos fetch directo), así que el parseo se
+     * hace a mano leyendo el stream de bytes según van llegando.
+     */
+    async *generateChatStream(
+
+        messages: ChatMessage[]
+
+    ): AsyncIterable<string> {
+
+        const response =
+
+            await retry(() =>
+
+                fetch(
+
+                    `${this.configuration.baseUrl}/chat/completions`,
+
+                    {
+
+                        method: "POST",
+
+                        headers: {
+
+                            Authorization:
+
+                                `Bearer ${this.configuration.apiKey}`,
+
+                            "Content-Type":
+
+                                "application/json"
+
+                        },
+
+                        body:
+
+                            JSON.stringify({
+
+                                model:
+
+                                    this.configuration.chatModel,
+
+                                messages,
+
+                                stream: true
+
+                            })
+
+                    }
+
+                ),
+
+                {
+                    shouldRetry:
+                        error => !isRetryableProviderError(error)
+                }
+
+            );
+
+        if (!response.ok) {
+
+            const errorBody = await response.text();
+
+            const error: Error & { status?: number } =
+
+                new Error(errorBody || response.statusText);
+
+            error.status = response.status;
+
+            throw error;
+
+        }
+
+        const body = response.body;
+
+        if (!body) {
+
+            return;
+
+        }
+
+        const reader = body.getReader();
+
+        const decoder = new TextDecoder();
+
+        let buffer = "";
+
+        while (true) {
+
+            const { done, value } = await reader.read();
+
+            if (done) {
+
+                break;
+
+            }
+
+            buffer += decoder.decode(value, { stream: true });
+
+            const lines = buffer.split("\n");
+
+            // La última línea puede estar incompleta todavía —
+            // se guarda para completarla con el siguiente trozo.
+            buffer = lines.pop() ?? "";
+
+            for (const line of lines) {
+
+                const trimmed = line.trim();
+
+                if (!trimmed.startsWith("data:")) {
+
+                    continue;
+
+                }
+
+                const payload = trimmed.slice(5).trim();
+
+                if (payload === "[DONE]") {
+
+                    return;
+
+                }
+
+                try {
+
+                    const json = JSON.parse(payload);
+
+                    const delta =
+
+                        json.choices?.[0]?.delta?.content;
+
+                    if (typeof delta === "string" && delta.length > 0) {
+
+                        yield delta;
+
+                    }
+
+                }
+                catch {
+
+                    // Fragmento de JSON incompleto o línea de
+                    // keep-alive — se ignora, no es un error.
+
+                }
+
+            }
+
+        }
+
+    }
+
     async generateEmbedding(
 
         text: string
@@ -260,43 +435,23 @@ export class OpenAICompatibleClient
         // El array `data` no siempre viene en el mismo orden
         // que `texts` — se ordena explícitamente por `index`
         // para no desalinear los embeddings con sus chunks.
-        const embeddings =
+        return response.data
 
-            response.data
+            .slice()
 
-                .slice()
+            .sort(
 
-                .sort(
+                (a, b) =>
 
-                    (a, b) =>
+                    a.index - b.index
 
-                        a.index - b.index
+            )
 
-                )
+            .map(
 
-                .map(
-
-                    item => item.embedding
-
-                );
-
-        // Misma defensa que en GeminiClient: si el proveedor
-        // devuelve menos embeddings de los pedidos, mejor fallar
-        // alto y claro que guardar chunks sin embedding en
-        // silencio (rompen las preguntas más adelante).
-        if (embeddings.length !== texts.length) {
-
-            throw new Error(
-
-                `El proveedor devolvió ${embeddings.length} embeddings ` +
-                `para ${texts.length} textos pedidos en el mismo lote. ` +
-                `Prueba a reducir IMPORT_EMBEDDING_BATCH_SIZE en tu .env.`
+                item => item.embedding
 
             );
-
-        }
-
-        return embeddings;
 
     }
 

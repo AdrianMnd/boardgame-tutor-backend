@@ -27,6 +27,20 @@ export interface ILLMClient {
 
     ): Promise<string>;
 
+    /**
+     * Igual que generateText, pero devolviendo el texto en
+     * fragmentos a medida que el modelo los genera, en vez de
+     * esperar a tener la respuesta completa. Opcional porque no
+     * todos los proveedores lo implementan — si falta,
+     * FallbackLLMClient cae a generateText y entrega todo de
+     * una vez como un único fragmento.
+     */
+    generateTextStream?(
+
+        prompt: string
+
+    ): AsyncIterable<string>;
+
     generateChat(
 
         messages: ChatMessage[]

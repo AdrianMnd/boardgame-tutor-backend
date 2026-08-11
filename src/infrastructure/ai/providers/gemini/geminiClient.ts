@@ -41,36 +41,79 @@ implements ILLMClient {
 
     async generateText(
 
-    prompt: string
+        prompt: string
 
-): Promise<string> {
+    ): Promise<string> {
 
-    const response =
+        const response =
 
-        await retry(() =>
+            await retry(() =>
 
-            this.client.models.generateContent({
+                this.client.models.generateContent({
 
-                model:
+                    model:
 
-                    this.configuration.chatModel,
+                        this.configuration.chatModel,
 
-                contents:
+                    contents:
 
-                    prompt
+                        prompt
 
-            }),
+                }),
 
-            {
-                shouldRetry:
-                    error => !isRetryableProviderError(error)
+                {
+                    shouldRetry:
+                        error => !isRetryableProviderError(error)
+                }
+
+            );
+
+        return response.text ?? "";
+
+    }
+
+    async *generateTextStream(
+
+        prompt: string
+
+    ): AsyncIterable<string> {
+
+        const stream =
+
+            await retry(() =>
+
+                this.client.models.generateContentStream({
+
+                    model:
+
+                        this.configuration.chatModel,
+
+                    contents:
+
+                        prompt
+
+                }),
+
+                {
+                    shouldRetry:
+                        error => !isRetryableProviderError(error)
+                }
+
+            );
+
+        for await (const chunk of stream) {
+
+            const text = chunk.text;
+
+            if (text) {
+
+                yield text;
+
             }
 
-        );
+        }
 
-    return response.text ?? "";
-
-}
+    }
 
     async generateChat(
 
@@ -78,68 +121,86 @@ implements ILLMClient {
 
     ): Promise<string> {
 
-        const prompt =
-
-            messages
-
-                .map(
-
-                    message =>
-
-`${message.role.toUpperCase()}
-
-${message.content}`
-
-                )
-
-                .join("\n\n");
-
         return this.generateText(
 
-            prompt
+            this.buildPromptFromMessages(messages)
 
         );
 
     }
 
-    async generateEmbedding(
+    async *generateChatStream(
 
-    text: string
+        messages: ChatMessage[]
 
-): Promise<number[]> {
+    ): AsyncIterable<string> {
 
-    const response =
+        yield* this.generateTextStream(
 
-        await retry(() =>
-
-            this.client.models.embedContent({
-
-                model:
-
-                    this.configuration.embeddingModel,
-
-                contents:
-
-                    text
-
-            }),
-
-            {
-                shouldRetry:
-                    error => !isRetryableProviderError(error)
-            }
+            this.buildPromptFromMessages(messages)
 
         );
 
-    return (
+    }
 
-        response.embeddings?.[0]?.values
+    private buildPromptFromMessages(
 
-        ?? []
+        messages: ChatMessage[]
 
-    );
+    ): string {
 
-}
+        return messages
+
+            .map(
+
+                message =>
+
+                    `${message.role.toUpperCase()}\n${message.content}`
+
+            )
+
+            .join("\n\n");
+
+    }
+
+    async generateEmbedding(
+
+        text: string
+
+    ): Promise<number[]> {
+
+        const response =
+
+            await retry(() =>
+
+                this.client.models.embedContent({
+
+                    model:
+
+                        this.configuration.embeddingModel,
+
+                    contents:
+
+                        text
+
+                }),
+
+                {
+                    shouldRetry:
+                        error => !isRetryableProviderError(error)
+                }
+
+            );
+
+        return (
+
+            response.embeddings?.[0]?.values
+
+            ?? []
+
+        );
+
+    }
 
     async generateEmbeddingBatch(
 
@@ -180,25 +241,36 @@ ${message.content}`
 
             ?? [];
 
-        // Defensa crítica: si la API devuelve menos embeddings
-        // de los textos pedidos (puede pasar con lotes grandes,
-        // sin que llegue a ser un error HTTP), asignar por
-        // posición dejaría chunks con embedding "undefined" —
-        // que luego se guardan silenciosamente sin ese campo en
-        // knowledge.json (JSON.stringify elimina las claves
-        // undefined) y rompen CUALQUIER pregunta sobre ese juego
-        // más adelante, de forma muy difícil de diagnosticar.
-        // Mejor fallar aquí, alto y claro.
+        // Algunos modelos de embeddings no soportan pedir varios
+        // textos en una sola llamada — aceptan el array sin dar
+        // error, pero solo devuelven 1 resultado. En vez de
+        // fallar la importación entera por esto, se cae a pedir
+        // los embeddings uno a uno con el método individual (que
+        // sí funciona siempre), avisando una sola vez.
         if (embeddings.length !== texts.length) {
 
-            throw new Error(
+            console.warn(
 
-                `Gemini devolvió ${embeddings.length} embeddings ` +
-                `para ${texts.length} textos pedidos en el mismo lote. ` +
-                `Prueba a reducir IMPORT_EMBEDDING_BATCH_SIZE en tu .env ` +
-                `(por ejemplo, a la mitad del valor actual).`
+                `[Gemini] El modelo "${this.configuration.embeddingModel}" ` +
+                `no soportó pedir ${texts.length} embeddings en un solo ` +
+                `lote (devolvió ${embeddings.length}). Generando uno a uno ` +
+                `para este lote — más lento, pero funciona.`
 
             );
+
+            const fallbackResults: number[][] = [];
+
+            for (const text of texts) {
+
+                fallbackResults.push(
+
+                    await this.generateEmbedding(text)
+
+                );
+
+            }
+
+            return fallbackResults;
 
         }
 

@@ -17,7 +17,7 @@ export const GEMINI: GeminiConfiguration = {
     chatModel:
 
         process.env.GEMINI_CHAT_MODEL
-            ?? "gemini-2.5-flash",
+            ?? "gemini-3-flash",
 
     apiVersion:
 

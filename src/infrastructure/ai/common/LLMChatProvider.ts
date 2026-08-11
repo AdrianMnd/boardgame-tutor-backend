@@ -24,7 +24,56 @@ export class LLMChatProvider
 
     ): Promise<string> {
 
-        const prompt = `
+        return this.client.generateText(
+
+            this.buildPrompt(question, context)
+
+        );
+
+    }
+
+    async *answerStream(
+
+        question: string,
+
+        context: string
+
+    ): AsyncIterable<string> {
+
+        const prompt =
+
+            this.buildPrompt(question, context);
+
+        if (this.client.generateTextStream) {
+
+            yield* this.client.generateTextStream(prompt);
+
+            return;
+
+        }
+
+        // El cliente activo no soporta streaming: se entrega la
+        // respuesta completa como un único fragmento, para que
+        // quien consuma el stream no tenga que distinguir casos.
+        const text = await this.client.generateText(prompt);
+
+        if (text) {
+
+            yield text;
+
+        }
+
+    }
+
+    private buildPrompt(
+
+        question: string,
+
+        context: string
+
+    ): string {
+
+        return `
 Eres un experto en juegos de mesa.
 
 Tu única fuente de información es el contexto proporcionado.
@@ -48,12 +97,6 @@ ${question}
 
 Respuesta:
 `;
-
-        return this.client.generateText(
-
-            prompt
-
-        );
 
     }
 
