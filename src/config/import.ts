@@ -50,7 +50,7 @@ export const IMPORT_CONFIGURATION: ImportConfiguration = {
 
     embeddingBatchSize:
 
-        Number(process.env.IMPORT_EMBEDDING_BATCH_SIZE) || 100,
+        Number(process.env.IMPORT_EMBEDDING_BATCH_SIZE) || 40,
 
     retryCount: 3,
 

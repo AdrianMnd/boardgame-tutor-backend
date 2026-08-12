@@ -63,15 +63,10 @@ export class FileGameRepository
             "metadata.json"
         );
 
-    console.log("ROOT:", root);
-    console.log("METADATA:", metadataPath);
-
     const exists =
         await this.fileSystem.exists(
             metadataPath
         );
-
-    console.log("EXISTS:", exists);
 
     if (!exists) {
 
