@@ -24,7 +24,7 @@ app.set("trust proxy", 1);
 // localhost sin tener que tocar código.
 const allowedOrigins = [
 
-    "https://boardgame-tutor-frontend.vercel.app",
+    "https://boardgametutor.vercel.app",
 
     ...(
 
