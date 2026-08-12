@@ -3,6 +3,7 @@ import "dotenv/config";
 import express from "express";
 import path from "node:path";
 import cors from "cors";
+import { rateLimit } from "express-rate-limit";
 
 import gamesRoutes from "./presentation/api/routes/games.routes";
 import chatRoutes from "./presentation/api/routes/chat.routes";
@@ -11,14 +12,74 @@ import { ApiError } from "./presentation/api/errors/ApiError";
 
 const app = express();
 
-//Abierto para pruebas, pero luego se debe restringir a la URL del frontend
-//app.use(cors());
+// Necesario en Render (y cualquier plataforma detrás de un
+// proxy/balanceador): sin esto, express-rate-limit no puede
+// identificar la IP real de cada visitante a partir de la
+// cabecera X-Forwarded-For.
+app.set("trust proxy", 1);
+
+// Orígenes permitidos por CORS: la URL de producción (fija) más
+// cualquiera que se indique en FRONTEND_URL (separadas por
+// comas), para poder probar en local contra un frontend en
+// localhost sin tener que tocar código.
+const allowedOrigins = [
+
+    "https://boardgame-tutor-frontend.vercel.app",
+
+    ...(
+
+        process.env.FRONTEND_URL
+
+            ?.split(",")
+            .map(url => url.trim())
+            .filter(Boolean)
+
+        ?? []
+
+    )
+
+];
 
 app.use(cors({
-  origin: "https://boardgame-tutor-frontend.vercel.app"
+
+    origin: allowedOrigins
+
 }));
 
 app.use(express.json());
+
+// Cada pregunta encadena varias llamadas a proveedores de IA de
+// pago — sin límite, cualquiera podría agotar la cuota en
+// minutos mandando peticiones en bucle. 20 preguntas cada 15
+// minutos por IP es generoso para un uso normal, y bloquea un
+// abuso automatizado.
+const chatRateLimiter =
+
+    rateLimit({
+
+        windowMs: 15 * 60 * 1000,
+
+        limit:
+
+            Number(process.env.CHAT_RATE_LIMIT) || 20,
+
+        standardHeaders: true,
+
+        legacyHeaders: false,
+
+        message: {
+
+            error: "rate_limited",
+
+            message:
+
+                "Demasiadas preguntas seguidas. Espera unos minutos " +
+
+                "antes de volver a preguntar."
+
+        }
+
+    });
 
 app.use(
 
@@ -61,6 +122,8 @@ app.use(
 app.use(
 
     "/api/chat",
+
+    chatRateLimiter,
 
     chatRoutes
 

@@ -1,6 +1,20 @@
-# BoardGame Tutor
+# BoardGame Tutor — Backend
 
-BoardGame Tutor es una aplicación web que permite seleccionar un juego de mesa, consultar su reglamento mediante lenguaje natural y abrir el reglamento PDF para revisar las páginas utilizadas como fuente.
+[![CI](https://github.com/AdrianMnd/boardgame-tutor-backend/actions/workflows/ci.yml/badge.svg)](https://github.com/AdrianMnd/boardgame-tutor-backend/actions/workflows/ci.yml)
+
+API REST en Node.js/Express para **BoardGame Tutor**, una aplicación de preguntas y respuestas sobre reglamentos de juegos de mesa mediante RAG (*Retrieval-Augmented Generation*): el usuario pregunta en lenguaje natural, la API recupera los fragmentos más relevantes del PDF del reglamento y genera una respuesta citando las páginas exactas usadas como fuente.
+
+Repositorio del frontend: [boardgame-tutor-frontend](https://github.com/AdrianMnd/boardgame-tutor-frontend)
+
+## Características
+
+- **RAG completo**: extracción de PDF → *chunking* → embeddings → búsqueda por similitud coseno → generación de respuesta con contexto.
+- **Streaming de respuestas** (Server-Sent Events): el texto aparece progresivamente en vez de esperar a la respuesta completa.
+- **6 proveedores de IA soportados** (Gemini, OpenRouter, Mistral, OpenAI, DeepInfra, Together) con *fallback* automático ante fallos de cuota — y también un modelo de embeddings local (`transformers.js`) sin dependencias externas.
+- **Consistencia de embeddings garantizada por diseño**: a diferencia del chat (donde varios proveedores son intercambiables), los embeddings usan siempre un único proveedor fijo — mezclar proveedores distintos rompería la búsqueda por similitud, así que el sistema se niega a arrancar si no está configurado de forma inequívoca.
+- **Importación de juegos resiliente**: *checkpoints* para reanudar una importación interrumpida por cuota agotada, embeddings en lote (menos peticiones HTTP), y verificación automática de que no queden fragmentos con embeddings incompletos o inconsistentes.
+- **Rate limiting** por IP en el endpoint de chat, para proteger la cuota de los proveedores de pago.
+- Arquitectura por capas (dominio / aplicación / infraestructura / presentación), con inyección de dependencias manual.
 
 ## Arquitectura
 
@@ -8,15 +22,15 @@ BoardGame Tutor es una aplicación web que permite seleccionar un juego de mesa,
 ┌───────────────────────────────┐
 │ React + Vite                  │
 │ Frontend                      │
-│                               │
+│                                │
 │ Sidebar · Chat · PDF Viewer   │
 └───────────────┬───────────────┘
-                │ HTTP/JSON
+                │ HTTP/JSON + SSE
                 ▼
 ┌───────────────────────────────┐
 │ Node.js + Express             │
 │ Backend                       │
-│                               │
+│                                │
 │ API · RAG · IA · importador   │
 └───────────────┬───────────────┘
                 │
@@ -30,133 +44,30 @@ BoardGame Tutor es una aplicación web que permite seleccionar un juego de mesa,
         └── assets/cover.png
 ```
 
-## Tecnologías
-
-### Frontend
-
-- React 19
-- TypeScript 6
-- Vite 8
-- TanStack React Query
-- Axios (dependencia instalada; el cliente actual usa `fetch`)
-- React Router DOM (dependencia instalada; la aplicación actual no registra rutas)
-- `react-pdf` y `pdfjs-dist` (el visor actual utiliza un `iframe`)
-- React Markdown
-- remark-gfm
-- rehype-highlight / highlight.js
-- lucide-react
-
-### Backend
-
-- Node.js
-- TypeScript
-- Express 5
-- `tsx`
-- `pdf2json`
-- Vitest
-- Google GenAI SDK
-- clientes compatibles con la API de OpenAI para varios proveedores
-
-## Desarrollo local
-
-### Frontend
-
-```bash
-cd boardgame-tutor-frontend
-npm install
-npm run dev
-```
-
-La configuración entregada contiene:
-
-```env
-VITE_API_URL=http://localhost:3000
-API_PUBLIC_URL=http://localhost:3000
-```
-
-`VITE_API_URL` es la variable utilizada por el frontend para las llamadas HTTP.
-
-### Backend
-
-```bash
-cd boardgame-tutor-backend
-npm install
-npm run dev
-```
-
-El backend utiliza el puerto definido por `PORT` y, si no existe, usa `3000`.
-
-## Scripts
-
-### Frontend
-
-```bash
-npm run dev
-npm run build
-npm run lint
-npm run preview
-```
-
-### Backend
-
-```bash
-npm run dev
-npm run build
-npm run import <gameId>
-npm run ask <gameId> <pregunta>
-npm test
-npm run test:watch
-npm run test:coverage
-```
-
-También existen comandos de prueba individuales para los proveedores:
-
-```bash
-npm run test:gemini
-npm run test:openrouter
-npm run test:mistral
-npm run test:openai
-npm run test:deepinfra
-npm run test:together
-```
-
-## Juegos incluidos en la versión documentada
-
-- `catan`
-- `zombicide`
-- `nemesis`
-- `cdmd` (Cthulhu Death May Die)
-
-Cada juego se descubre leyendo la carpeta `games/`; no existe un registro obligatorio adicional para que `FileGameRepository` lo encuentre.
-
 ## Flujo de una pregunta
 
 ```text
 Frontend
   │
-  │ POST /api/chat
+  │ POST /api/chat/stream
   ▼
 ChatController
   │
   ▼
 AskQuestionUseCase
   │
-  ├── valida el juego
-  ├── genera embedding de la pregunta
-  ├── recupera chunks semánticos
-  ├── reordena contexto
-  ├── comprime contexto
-  ├── construye contexto
-  └── genera respuesta
+  ├── valida el juego            ─┐
+  ├── genera embedding            ├─ en paralelo
+  │                              ─┘
+  ├── recupera chunks por similitud
+  ├── reordena y recorta el contexto (1 sola llamada de IA)
+  └── genera la respuesta (streaming)
   │
   ▼
-ChatMapper
-  │
-  ▼
-answer + sources
+sources + respuesta en fragmentos (SSE)
 ```
 
-## Flujo de importación
+## Flujo de importación de un juego
 
 ```text
 PDF
@@ -167,37 +78,75 @@ TextCleaner
  ↓
 ChunkGenerator
  ↓
-EmbeddingGenerator
+EmbeddingGenerator (en lotes, con checkpoint de progreso)
  ↓
 KnowledgeWriter
  ↓
 generated/knowledge.json
 ```
 
-El proceso dispone de checkpoints para poder reanudar una importación interrumpida durante la generación de embeddings.
+## Tecnologías
 
-## Visor PDF
+- Node.js + TypeScript
+- Express 5
+- Vitest
+- `@google/genai` (Gemini)
+- `@huggingface/transformers` (embeddings locales, opcional)
+- `pdf2json`
+- `express-rate-limit`
 
-El frontend solicita:
+## Puesta en marcha local
+
+```bash
+npm install
+cp .env.example .env
+# Rellena .env con al menos una API key de un proveedor de IA
+npm run dev
+```
+
+El servidor arranca en el puerto definido por `PORT` (por defecto `3000`).
+
+**Importante**: revisa `AI_EMBEDDING_PROVIDER` en `.env.example` — es obligatoria, y debe tener el mismo valor en cualquier entorno donde importes juegos o sirvas preguntas (ver los comentarios del propio archivo para el porqué).
+
+## Scripts
+
+```bash
+npm run dev              # servidor en desarrollo (hot reload)
+npm run build             # compilar TypeScript
+npm start                 # ejecutar la build compilada
+npm run import <gameId>   # importar un juego (PDF → embeddings)
+npm run ask <gameId> <p>  # preguntar desde la CLI, sin pasar por HTTP
+npm run check:embeddings  # detectar juegos con embeddings dañados/inconsistentes
+npm test                  # tests (Vitest)
+npm run test:coverage     # tests con cobertura
+```
+
+Comandos de prueba individuales por proveedor: `test:gemini`, `test:openrouter`, `test:mistral`, `test:openai`, `test:deepinfra`, `test:together`, `test:local-embedding`.
+
+## Juegos incluidos
+
+Cada carpeta bajo `games/` se descubre automáticamente; no hace falta registrarla en ningún otro sitio. Actualmente incluye 10 juegos importados (Catan, Zombicide, Nemesis, Cthulhu: Death May Die, Arkham Horror LCG, Marvel Champions, Mansiones de la Locura, Terraforming Mars, Trivial Pursuit y Nemesis: Represalia).
+
+## Visor de PDF
 
 ```text
 GET /api/games/:id/manual
 ```
 
-El backend devuelve el PDF con `response.sendFile()`.
+El frontend renderiza el PDF con `pdf.js` directamente en la propia aplicación (no delegado al visor nativo del navegador), lo que garantiza que el salto a una página concreta funcione igual en cualquier dispositivo — incluidos navegadores móviles, donde el visor de PDF integrado no siempre respeta el estándar de apertura en una página específica.
 
-El frontend utiliza la URL resultante como fuente de un `iframe`. Las fuentes de las respuestas pueden abrir el visor en una página concreta.
+## Seguridad
 
-## Seguridad de configuración
+- Ninguna clave de API se sube nunca al repositorio (`.env` está en `.gitignore`).
+- Rate limiting configurable (`CHAT_RATE_LIMIT`) en el endpoint de chat.
+- CORS restringido a orígenes explícitos (`FRONTEND_URL` para desarrollo local, más el dominio de producción).
 
-No deben subirse valores de claves API al repositorio.
+## Limitaciones conocidas
 
-## Estado y límites conocidos
+- `npm audit` reporta 4 vulnerabilidades de severidad alta, todas en dependencias transitivas de `@huggingface/transformers` (el motor de embeddings locales, opcional) sin parche disponible todavía por parte de sus mantenedores. No afectan si no activas `LOCAL_EMBEDDING_ENABLED`.
+- El almacenamiento de juegos es el sistema de archivos local (`games/`); no hay base de datos.
+- La persistencia de conversaciones vive en `localStorage` del navegador, no en el backend.
 
-- El almacenamiento de juegos es filesystem local (`games/`).
-- La persistencia de conversaciones del frontend se realiza en `localStorage`.
-- El backend expone `games/` como contenido estático.
-- El frontend y backend están desacoplados por URL mediante `VITE_API_URL`.
-- El backend tiene fallback entre proveedores de IA.
-- OpenRouter está configurado como cliente de chat compatible con OpenAI, pero su cliente actual declara que no implementa embeddings.
-- Las APIs de importación y borrado que aparecen como métodos en `GamesService` del frontend no tienen rutas equivalentes en el backend entregado; la importación disponible actualmente es un comando CLI.
+## Licencia
+
+ISC — ver [LICENSE](./LICENSE).

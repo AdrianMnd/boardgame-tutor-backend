@@ -37,7 +37,7 @@ export class AskQuestionUseCase {
 
         question: string
 
-    ):Promise<AskQuestionResult> {
+    ): Promise<AskQuestionResult> {
 
         const { context, refined } =
 
@@ -49,8 +49,6 @@ export class AskQuestionUseCase {
 
             );
 
-        console.log("5. Generando respuesta...");
-
         const answer =
 
             await this.chatProvider.answer(
@@ -60,12 +58,6 @@ export class AskQuestionUseCase {
                 context
 
             );
-
-        console.log("✔ Respuesta generada");
-
-        console.log("");
-
-
 
         return {
 
@@ -104,8 +96,6 @@ export class AskQuestionUseCase {
 
         yield { type: "sources", sources: refined };
 
-        console.log("5. Generando respuesta (streaming)...");
-
         if (this.chatProvider.answerStream) {
 
             for await (const chunk of this.chatProvider.answerStream(
@@ -141,9 +131,6 @@ export class AskQuestionUseCase {
 
         }
 
-        console.log("✔ Respuesta generada");
-        console.log("");
-
         yield { type: "done" };
 
     }
@@ -163,8 +150,6 @@ export class AskQuestionUseCase {
 
     ): Promise<{ context: string; refined: RetrievedChunk[] }> {
 
-        console.log("1-2. Validando juego y generando embedding en paralelo...");
-
         const [game, embedding] =
 
             await Promise.all([
@@ -183,14 +168,6 @@ export class AskQuestionUseCase {
 
             ]);
 
-        console.log("✔ Juego validado y embedding generado");
-
-        console.log("");
-
-
-
-        console.log("3. Recuperando contexto...");
-
         const retrieved =
 
             await this.retriever.retrieve(
@@ -202,18 +179,6 @@ export class AskQuestionUseCase {
                 embedding
 
             );
-
-        console.log(
-
-            `✔ ${retrieved.length} fragmentos recuperados`
-
-        );
-
-        console.log("");
-
-
-
-        console.log("4. Reordenando y recortando contexto (1 sola llamada)...");
 
         const refined =
 
@@ -232,12 +197,6 @@ export class AskQuestionUseCase {
                 refined
 
             );
-
-        console.log("✔ Contexto listo");
-
-        console.log("");
-
-
 
         return { context, refined };
 

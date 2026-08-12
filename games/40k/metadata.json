@@ -1,0 +1,9 @@
+{
+    "id": "40k",
+    "name": "Warhammer 40k (11th Edición)",
+    "language": "es",
+    "version": "1.0",
+    "minPlayers": 2,
+    "maxPlayers": 2,
+    "year": 2026
+}
