@@ -1,0 +1,9 @@
+{
+    "id": "hotel",
+    "name": "Hotel",
+    "language": "es",
+    "version": "1.0",
+    "minPlayers": 2,
+    "maxPlayers": 4,
+    "year": 1974
+}
