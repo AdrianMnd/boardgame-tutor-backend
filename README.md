@@ -2,9 +2,13 @@
 
 [![CI](https://github.com/AdrianMnd/boardgame-tutor-backend/actions/workflows/ci.yml/badge.svg)](https://github.com/AdrianMnd/boardgame-tutor-backend/actions/workflows/ci.yml)
 
+🔗 **[Ver la aplicación en vivo](https://boardgametutor.vercel.app)** (este repositorio es la API — la interfaz está en el [repositorio del frontend](https://github.com/AdrianMnd/boardgame-tutor-frontend))
+
 API REST en Node.js/Express para **BoardGame Tutor**, una aplicación de preguntas y respuestas sobre reglamentos de juegos de mesa mediante RAG (*Retrieval-Augmented Generation*): el usuario pregunta en lenguaje natural, la API recupera los fragmentos más relevantes del PDF del reglamento y genera una respuesta citando las páginas exactas usadas como fuente.
 
 Repositorio del frontend: [boardgame-tutor-frontend](https://github.com/AdrianMnd/boardgame-tutor-frontend)
+
+![Ejemplo de conversación con fuentes citadas](docs/screenshots/conversacion.png)
 
 ## Características
 
@@ -150,3 +154,10 @@ El frontend renderiza el PDF con `pdf.js` directamente en la propia aplicación 
 ## Licencia
 
 ISC — ver [LICENSE](./LICENSE).
+
+## Más documentación
+
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — el pipeline RAG en detalle, el sistema de proveedores de IA (por qué embeddings y chat se tratan de forma distinta), streaming.
+- [`docs/API.md`](docs/API.md) — referencia completa de endpoints, incluido el protocolo SSE.
+- [`docs/CONFIGURATION.md`](docs/CONFIGURATION.md) — variables de entorno, despliegue, cómo importar un juego nuevo.
+- [`docs/ENGINEERING-NOTES.md`](docs/ENGINEERING-NOTES.md) — problemas reales de producción encontrados y resueltos durante el desarrollo.
