@@ -38,18 +38,67 @@ export class SemanticRetriever
                 game.paths.knowledge
             );
 
-        const results =
-            knowledge.chunks.map(chunk => ({
+        const documentNames =
+
+            new Map(
+
+                (knowledge.documents ?? []).map(
+
+                    document => [document.id, document.name]
+
+                )
+
+            );
+
+        const results: RetrievedChunk[] = [];
+
+        for (const chunk of knowledge.chunks) {
+
+            // Defensa: si este chunk se guardó sin embedding
+            // (ej. por un fallo del proveedor durante el import),
+            // se ignora en vez de tumbar la pregunta entera con
+            // un error 500 — simplemente no participa en la
+            // búsqueda.
+            if (
+
+                !Array.isArray(chunk.embedding) ||
+                chunk.embedding.length === 0
+
+            ) {
+
+                console.warn(
+
+                    `[SemanticRetriever] Chunk "${chunk.id}" del juego ` +
+                    `"${game.metadata.id}" no tiene embedding válido — se ` +
+                    `omite de la búsqueda. Vuelve a importar este juego ` +
+                    `para arreglarlo.`
+
+                );
+
+                continue;
+
+            }
+
+            results.push({
 
                 id: chunk.id,
 
                 gameId: chunk.gameId,
+
+                documentId: chunk.documentId,
+
+                documentName:
+
+                    documentNames.get(chunk.documentId)
+
+                    ?? chunk.documentId,
 
                 page: chunk.page,
 
                 text: chunk.text,
 
                 score:
+
                     this.similarity.calculate(
 
                         embedding,
@@ -58,7 +107,9 @@ export class SemanticRetriever
 
                     )
 
-            }));
+            });
+
+        }
 
         return results
 

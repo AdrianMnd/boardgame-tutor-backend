@@ -1,4 +1,5 @@
 import { EmbeddedChunk } from "../../../domain/importer/embeddedChunk";
+import { DocumentDescriptor } from "../../../domain/game/types/DocumentDescriptor";
 
 export interface KnowledgeIndex {
 
@@ -9,6 +10,8 @@ export interface KnowledgeIndex {
     totalChunks: number;
 
     embeddingModel: string;
+
+    documents: DocumentDescriptor[];
 
     chunks: EmbeddedChunk[];
 

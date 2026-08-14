@@ -33,6 +33,8 @@ export class KnowledgeWriter {
 
             embeddingModel: this.embeddingModel,
 
+            documents: game.documents,
+
             chunks
 
         };

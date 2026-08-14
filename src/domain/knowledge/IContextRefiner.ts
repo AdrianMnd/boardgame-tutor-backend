@@ -1,11 +1,10 @@
 import { RetrievedChunk } from "./RetrievedChunk";
 
 /**
- * Combina en un solo paso lo que antes eran dos pasos
- * independientes (reordenar por relevancia + recortar el
- * texto irrelevante de cada fragmento). Fusionarlos en una
- * única llamada al modelo reduce de 3 a 2 las peticiones de IA
- * necesarias para responder una pregunta.
+ * Reordena los fragmentos recuperados de más a menos relevantes
+ * para la pregunta, en una única llamada de IA — sin modificar
+ * el texto de ningún fragmento (ver los comentarios de
+ * LLMContextRefiner para el porqué).
  */
 export interface IContextRefiner {
 

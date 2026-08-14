@@ -61,6 +61,10 @@ export class KeywordRetriever {
 
                         gameId: chunk.gameId,
 
+                        documentId: chunk.documentId,
+
+                        documentName: chunk.documentId,
+
                         page: chunk.page,
 
                         text: chunk.text,

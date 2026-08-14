@@ -16,4 +16,12 @@ export interface GameResponse {
 
     coverUrl: string;
 
+    documents: {
+
+        id: string;
+
+        name: string;
+
+    }[];
+
 }

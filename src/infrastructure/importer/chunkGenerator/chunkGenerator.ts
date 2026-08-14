@@ -15,6 +15,8 @@ export class ChunkGenerator {
 
         gameId: string,
 
+        documentId: string,
+
         document: ExtractedDocument
 
     ): Chunk[] {
@@ -44,9 +46,11 @@ export class ChunkGenerator {
 
                     chunks.push({
 
-                        id: `${gameId}-p${page.page}-c${index}`,
+                        id: `${gameId}-${documentId}-p${page.page}-c${index}`,
 
                         gameId,
+
+                        documentId,
 
                         page: page.page,
 

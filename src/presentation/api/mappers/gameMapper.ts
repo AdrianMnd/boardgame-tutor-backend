@@ -36,7 +36,21 @@ export class GameMapper {
 
             coverUrl:
 
-                `${BASE_URL}/games/${game.metadata.id}/assets/cover.png`
+                `${BASE_URL}/games/${game.metadata.id}/assets/cover.png`,
+
+            documents:
+
+                game.documents.map(
+
+                    document => ({
+
+                        id: document.id,
+
+                        name: document.name
+
+                    })
+
+                )
 
         };
 

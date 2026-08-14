@@ -68,11 +68,21 @@ export class GamesController {
 
     }
 
+    const documentId =
+
+        typeof request.query.document === "string"
+
+            ? request.query.document
+
+            : undefined;
+
     const manualPath =
 
         await this.getGameManualUseCase.execute(
 
-            id
+            id,
+
+            documentId
 
         );
 
@@ -83,7 +93,7 @@ export class GamesController {
             .json({
 
                 message:
-                    "Juego no encontrado"
+                    "Juego o documento no encontrado"
 
             });
 

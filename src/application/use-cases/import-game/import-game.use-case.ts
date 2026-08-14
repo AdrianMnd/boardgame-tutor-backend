@@ -8,6 +8,7 @@ import { KnowledgeWriter } from "../../../infrastructure/importer/knowledgeWrite
 import { TextCleaner } from "../../../infrastructure/importer/textCleaner/textCleaner";
 import type { IPDFExtractor } from "../../../shared/contracts/IPDFExtractor";
 import type { IFileSystem } from "../../../shared/contracts/IFileSystem";
+import type { Chunk } from "../../../infrastructure/importer/chunkGenerator/chunk";
 import type { EmbeddedChunk } from "../../../domain/importer/embeddedChunk";
 import { IImportLogger } from "../../logger/IImportLogger";
 
@@ -53,59 +54,83 @@ export class ImportGameUseCase {
         const game =
             await this.validator.validate(gameId);
 
-        this.logger.success(
+        if (game.documents.length === 0) {
 
-            "Juego validado"
+            throw new Error(
 
-        );
+                `No se ha encontrado ningún PDF en ${game.paths.source} — ` +
 
-        this.logger.step(
+                "coloca al menos un archivo .pdf ahí antes de importar."
 
-            "2.Extrayendo PDF..."
-
-        );
-
-        const document =
-            await this.extractor.extract(
-                game.paths.rulebook
             );
 
+        }
+
         this.logger.success(
 
-            `${document.totalPages} páginas extraídas`
+            game.documents.length === 1
+
+                ? "Juego validado (1 documento)"
+
+                : `Juego validado (${game.documents.length} documentos)`
 
         );
 
         this.logger.step(
 
-            "3.Limpiando texto..."
+            "2-4.Extrayendo, limpiando y dividiendo en chunks..."
 
         );
 
-        const cleaned =
-            this.cleaner.clean(document);
+        const chunks: Chunk[] = [];
 
-        this.logger.success(
+        for (const documentDescriptor of game.documents) {
 
-            "Texto limpio"
+            const documentPath =
 
-        );
+                path.join(
 
-        this.logger.step(
+                    game.paths.source,
 
-            "4.Generando chunks..."
+                    documentDescriptor.filename
 
-        );
+                );
 
-        const chunks =
-            this.chunkGenerator.generate(
-                game.metadata.id,
-                cleaned
+            const extracted =
+                await this.extractor.extract(documentPath);
+
+            const cleaned =
+                this.cleaner.clean(extracted);
+
+            const documentChunks =
+
+                this.chunkGenerator.generate(
+
+                    game.metadata.id,
+
+                    documentDescriptor.id,
+
+                    cleaned
+
+                );
+
+            chunks.push(...documentChunks);
+
+            this.logger.info(
+
+                `   ${documentDescriptor.name}: ` +
+
+                `${extracted.totalPages} páginas, ` +
+
+                `${documentChunks.length} chunks`
+
             );
 
+        }
+
         this.logger.success(
 
-            `${chunks.length} chunks generados`
+            `${chunks.length} chunks generados en total`
 
         );
 
@@ -174,7 +199,6 @@ export class ImportGameUseCase {
                     alreadyEmbedded,
 
                     results =>
-
                         checkpoint.save(
 
                             results

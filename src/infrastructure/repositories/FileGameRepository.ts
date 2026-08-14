@@ -7,14 +7,28 @@ import { IGameRepository } from "../../domain/game/repositories/IGameRepository"
 import type { ValidatedGame } from "../../domain/game/types/ValidatedGame";
 import type { GameMetadata } from "../../domain/game/types/GameMetadata";
 
+import { SourceDocumentDiscovery } from "../../domain/game/services/SourceDocumentDiscovery";
+
 export class FileGameRepository
     implements IGameRepository {
+
+    private readonly documentDiscovery: SourceDocumentDiscovery;
 
     constructor(
 
         private readonly fileSystem: IFileSystem
 
-    ) {}
+    ) {
+
+        this.documentDiscovery =
+
+            new SourceDocumentDiscovery(
+
+                fileSystem
+
+            );
+
+    }
 
     async list(): Promise<ValidatedGame[]> {
 
@@ -47,94 +61,132 @@ export class FileGameRepository
 
     async findById(
 
-    gameId: string
+        gameId: string
 
-): Promise<ValidatedGame | null> {
+    ): Promise<ValidatedGame | null> {
 
-    const root =
-        path.resolve(
-            "games",
-            gameId
-        );
+        const root =
 
-    const metadataPath =
-        path.join(
-            root,
-            "metadata.json"
-        );
+            path.resolve(
 
-    const exists =
-        await this.fileSystem.exists(
-            metadataPath
-        );
+                "games",
 
-    if (!exists) {
+                gameId
 
-        return null;
+            );
 
-    }
+        const metadataPath =
 
-    const metadata =
+            path.join(
 
-        await this.fileSystem.readJson<GameMetadata>(
+                root,
 
-            metadataPath
+                "metadata.json"
 
-        );
+            );
 
-    return {
+        const exists =
 
-        metadata,
+            await this.fileSystem.exists(
 
-        paths: {
+                metadataPath
 
-            root,
+            );
 
-            metadata: metadataPath,
+        if (!exists) {
 
-            source:
-                path.join(
-                    root,
-                    "source"
-                ),
-
-            rulebook:
-                path.join(
-                    root,
-                    "source",
-                    "rulebook.pdf"
-                ),
-
-            generated:
-                path.join(
-                    root,
-                    "generated"
-                ),
-
-            chunks:
-                path.join(
-                    root,
-                    "generated",
-                    "chunks.json"
-                ),
-
-            knowledge:
-                path.join(
-                    root,
-                    "generated",
-                    "knowledge.json"
-                ),
-
-            assets:
-                path.join(
-                    root,
-                    "assets"
-                )
+            return null;
 
         }
 
-    };
+        const metadata =
 
-}
+            await this.fileSystem.readJson<GameMetadata>(
+
+                metadataPath
+
+            );
+
+        const sourceDir =
+
+            path.join(
+
+                root,
+
+                "source"
+
+            );
+
+        const documents =
+
+            await this.documentDiscovery.discover(
+
+                sourceDir
+
+            );
+
+        return {
+
+            metadata,
+
+            documents,
+
+            paths: {
+
+                root,
+
+                metadata: metadataPath,
+
+                source: sourceDir,
+
+                generated:
+
+                    path.join(
+
+                        root,
+
+                        "generated"
+
+                    ),
+
+                chunks:
+
+                    path.join(
+
+                        root,
+
+                        "generated",
+
+                        "chunks.json"
+
+                    ),
+
+                knowledge:
+
+                    path.join(
+
+                        root,
+
+                        "generated",
+
+                        "knowledge.json"
+
+                    ),
+
+                assets:
+
+                    path.join(
+
+                        root,
+
+                        "assets"
+
+                    )
+
+            }
+
+        };
+
+    }
 
 }
