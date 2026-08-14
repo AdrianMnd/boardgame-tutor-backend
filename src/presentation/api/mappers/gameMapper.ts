@@ -36,7 +36,11 @@ export class GameMapper {
 
             coverUrl:
 
-                `${BASE_URL}/games/${game.metadata.id}/assets/cover.png`,
+                game.coverPath
+
+                    ? `${BASE_URL}/api/games/${game.metadata.id}/cover`
+
+                    : undefined,
 
             documents:
 

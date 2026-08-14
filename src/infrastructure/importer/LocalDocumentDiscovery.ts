@@ -1,22 +1,10 @@
 import path from "node:path";
 
-import type { IFileSystem } from "../../../shared/contracts/IFileSystem";
+import type { IFileSystem } from "../../shared/contracts/IFileSystem";
 
-import type { DocumentDescriptor } from "../types/DocumentDescriptor";
+import type { LocalDocumentFile } from "../../domain/game/types/LocalDocumentFile";
 
-/**
- * Detecta automáticamente todos los PDF dentro de la carpeta
- * source/ de un juego. Sustituye a tener que declarar cada
- * documento a mano en metadata.json — pensado para juegos con
- * decenas de documentos (reglamento, FAQ, packs de facciones...)
- * donde eso sería inviable.
- *
- * rulebook.pdf, si existe, siempre queda primero en la lista —
- * es el documento "por defecto" que se abre cuando no se pide
- * ninguno en concreto, manteniendo el comportamiento de los
- * juegos que solo tienen un documento.
- */
-export class SourceDocumentDiscovery {
+export class LocalDocumentDiscovery {
 
     constructor(
 
@@ -28,7 +16,7 @@ export class SourceDocumentDiscovery {
 
         sourceDir: string
 
-    ): Promise<DocumentDescriptor[]> {
+    ): Promise<LocalDocumentFile[]> {
 
         const exists =
 
@@ -100,7 +88,7 @@ export class SourceDocumentDiscovery {
 
         filename: string
 
-    ): DocumentDescriptor {
+    ): LocalDocumentFile {
 
         const withoutExtension =
 
@@ -134,7 +122,7 @@ export class SourceDocumentDiscovery {
 
             .normalize("NFD")
 
-            .replace(/[\u0300-\u036f]/g, "") // quita acentos
+            .replace(/[\u0300-\u036f]/g, "")
 
             .toLowerCase()
 
@@ -162,10 +150,6 @@ export class SourceDocumentDiscovery {
 
                 word =>
 
-                    // Palabras que ya estaban en mayúsculas en
-                    // el nombre de archivo (siglas tipo FAQ,
-                    // PDF...) se respetan tal cual; el resto se
-                    // capitaliza normal.
                     word === word.toUpperCase() && /[A-Z]/.test(word)
 
                         ? word

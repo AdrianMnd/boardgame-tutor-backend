@@ -1,27 +1,31 @@
-import path from "node:path";
-
 import { IGameRepository } from "../../../domain/game/repositories/IGameRepository";
+import type { IFileStorage } from "../../../shared/contracts/IFileStorage";
+
+export interface ManualFile {
+
+    content: Buffer;
+
+    contentType: string;
+
+}
 
 export class GetGameManualUseCase {
 
     constructor(
-        private readonly repository: IGameRepository
+
+        private readonly repository: IGameRepository,
+
+        private readonly storage: IFileStorage
+
     ) {}
 
-    /**
-     * Devuelve la ruta al PDF de un documento concreto. Si no
-     * se especifica documentId, devuelve el documento "por
-     * defecto" (documents[0] — rulebook.pdf si existe), para
-     * mantener el comportamiento de siempre en juegos con un
-     * único documento.
-     */
     async execute(
 
         gameId: string,
 
         documentId?: string
 
-    ): Promise<string | null> {
+    ): Promise<ManualFile | null> {
 
         const game =
             await this.repository.findById(
@@ -52,11 +56,9 @@ export class GetGameManualUseCase {
 
         }
 
-        return path.join(
+        return this.storage.download(
 
-            game.paths.source,
-
-            document.filename
+            document.storagePath
 
         );
 

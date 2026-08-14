@@ -54,6 +54,18 @@ export class NodeFileSystem
 
     }
 
+    async readBuffer(
+        filePath: string
+    ): Promise<Buffer> {
+
+        return fs.readFile(
+
+            filePath
+
+        );
+
+    }
+
     async writeText(
 
         filePath: string,

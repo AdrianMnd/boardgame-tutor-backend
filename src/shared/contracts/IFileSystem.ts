@@ -5,6 +5,8 @@ export interface IFileSystem {
 
     readText(path: string): Promise<string>;
 
+    readBuffer(path: string): Promise<Buffer>;
+
     writeText(
         path: string,
         content: string

@@ -8,6 +8,7 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "import": "tsx src/application/commands/import-game.ts",
+    "migrate-to-db": "tsx src/application/commands/migrate-to-db.ts",
     "check:embeddings": "tsx src/application/commands/check-embeddings.ts",
     "ask": "tsx src/application/commands/ask-game.ts",
     "test:gemini": "tsx src/application/commands/test-gemini.ts",
@@ -26,19 +27,22 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1110.0",
     "@google/genai": "^2.15.0",
     "@huggingface/transformers": "^4.2.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-rate-limit": "^8.6.2",
-    "pdf2json": "^4.0.3"
+    "pdf2json": "^4.0.3",
+    "pg": "^8.23.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^26.1.2",
     "@types/pdf-parse": "^1.1.5",
+    "@types/pg": "^8.21.0",
     "@vitest/coverage-v8": "^4.1.10",
     "tsx": "^4.23.1",
     "typescript": "^5.9.2",
