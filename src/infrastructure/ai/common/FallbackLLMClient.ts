@@ -262,7 +262,17 @@ export class FallbackLLMClient
 
             try {
 
-                return await operation(client);
+                const result =
+                    await operation(client);
+
+                // DIAGNÓSTICO TEMPORAL
+                console.log(
+
+                    `[IA] ${operationName} respondido por: ${name}`
+
+                );
+
+                return result;
 
             }
             catch (error) {
@@ -336,6 +346,13 @@ export class FallbackLLMClient
             let yieldedAny = false;
 
             try {
+
+                // DIAGNÓSTICO TEMPORAL
+                console.log(
+
+                    `[IA] ${operationName} usando: ${name}`
+
+                );
 
                 for await (const chunk of getStream(client)) {
 

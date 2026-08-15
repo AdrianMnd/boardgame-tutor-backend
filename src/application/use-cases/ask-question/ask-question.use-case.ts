@@ -198,6 +198,18 @@ export class AskQuestionUseCase {
 
             );
 
+        // DIAGNÓSTICO TEMPORAL — quitar en cuanto se resuelva
+        // el problema de "no encontrado" con fuentes correctas.
+        console.log("");
+        console.log("========== DIAGNÓSTICO: contexto enviado a la IA ==========");
+        console.log(`Pregunta: ${question}`);
+        console.log(`Longitud del contexto: ${context.length} caracteres`);
+        console.log(`Número de fragmentos: ${refined.length}`);
+        console.log("--- Contexto completo ---");
+        console.log(context);
+        console.log("========== FIN DIAGNÓSTICO ==========");
+        console.log("");
+
         return { context, refined };
 
     }
