@@ -6,6 +6,9 @@ import { rateLimit } from "express-rate-limit";
 
 import gamesRoutes from "./presentation/api/routes/games.routes";
 import chatRoutes from "./presentation/api/routes/chat.routes";
+import authRoutes from "./presentation/api/routes/auth.routes";
+import favoritesRoutes from "./presentation/api/routes/favorites.routes";
+import categoriesRoutes from "./presentation/api/routes/categories.routes";
 
 import { ApiError } from "./presentation/api/errors/ApiError";
 
@@ -80,6 +83,39 @@ const chatRateLimiter =
 
     });
 
+// El login/registro son un objetivo habitual de ataques
+// automatizados (probar contraseñas en bucle, crear cuentas
+// masivamente) — un límite más estricto que el del chat, ya que
+// aquí no hay ningún motivo legítimo para hacer decenas de
+// intentos seguidos en pocos minutos.
+const authRateLimiter =
+
+    rateLimit({
+
+        windowMs: 15 * 60 * 1000,
+
+        limit:
+
+            Number(process.env.AUTH_RATE_LIMIT) || 10,
+
+        standardHeaders: true,
+
+        legacyHeaders: false,
+
+        message: {
+
+            error: "rate_limited",
+
+            message:
+
+                "Demasiados intentos. Espera unos minutos antes de " +
+
+                "volver a intentarlo."
+
+        }
+
+    });
+
 app.get(
 
     "/",
@@ -113,6 +149,32 @@ app.use(
     chatRateLimiter,
 
     chatRoutes
+
+);
+
+app.use(
+
+    "/api/auth",
+
+    authRateLimiter,
+
+    authRoutes
+
+);
+
+app.use(
+
+    "/api/favorites",
+
+    favoritesRoutes
+
+);
+
+app.use(
+
+    "/api/categories",
+
+    categoriesRoutes
 
 );
 

@@ -1,11 +1,17 @@
 import { IMPORT_CONFIGURATION } from "../../config/import";
 import { loadDatabaseConfiguration } from "../../config/database";
 import { loadStorageConfiguration } from "../../config/storage";
+import { loadAuthConfiguration } from "../../config/auth";
 
 import { createPool } from "../../infrastructure/database/pool";
 import { PostgresGameRepository } from "../../infrastructure/repositories/PostgresGameRepository";
+import { PostgresUserRepository } from "../../infrastructure/repositories/PostgresUserRepository";
+import { PostgresFavoritesRepository } from "../../infrastructure/repositories/PostgresFavoritesRepository";
+import { PostgresCategoryRepository } from "../../infrastructure/repositories/PostgresCategoryRepository";
 import { PgVectorRetriever } from "../../infrastructure/database/PgVectorRetriever";
 import { B2FileStorage } from "../../infrastructure/storage/B2FileStorage";
+import { PasswordHasher } from "../../infrastructure/auth/PasswordHasher";
+import { JwtService } from "../../infrastructure/auth/JwtService";
 
 import { AIProviderFactory } from "../../infrastructure/ai/factory/AIProviderFactory";
 
@@ -15,6 +21,10 @@ import { ContextBuilder } from "../../domain/ai/contextBuilder";
 import { AskQuestionUseCase } from "../use-cases/ask-question/ask-question.use-case";
 import { ListGamesUseCase } from "../use-cases/list-games/list-games.use-case";
 import { GetGameManualUseCase } from "../use-cases/get-game-manual/get-game-manual.use-case";
+import { RegisterUserUseCase } from "../use-cases/register-user/register-user.use-case";
+import { LoginUserUseCase } from "../use-cases/login-user/login-user.use-case";
+import { FavoritesUseCase } from "../use-cases/favorites/favorites.use-case";
+import { CategoriesUseCase } from "../use-cases/categories/categories.use-case";
 
 export class ApplicationContainer {
 
@@ -87,4 +97,65 @@ export class ApplicationContainer {
 
         );
 
+    // ==================== Autenticación ====================
+
+    readonly authConfiguration =
+        loadAuthConfiguration();
+
+    readonly userRepository =
+        new PostgresUserRepository(
+            this.pool
+        );
+
+    readonly passwordHasher =
+        new PasswordHasher();
+
+    readonly jwtService =
+        new JwtService(
+            this.authConfiguration
+        );
+
+    readonly registerUserUseCase =
+        new RegisterUserUseCase(
+
+            this.userRepository,
+
+            this.passwordHasher,
+
+            this.jwtService
+
+        );
+
+    readonly loginUserUseCase =
+        new LoginUserUseCase(
+
+            this.userRepository,
+
+            this.passwordHasher,
+
+            this.jwtService
+
+        );
+
+    readonly favoritesRepository =
+        new PostgresFavoritesRepository(
+            this.pool
+        );
+
+    readonly favoritesUseCase =
+        new FavoritesUseCase(
+            this.favoritesRepository
+        );
+
+    readonly categoryRepository =
+        new PostgresCategoryRepository(
+            this.pool
+        );
+
+    readonly categoriesUseCase =
+        new CategoriesUseCase(
+            this.categoryRepository
+        );
+
 }
+
