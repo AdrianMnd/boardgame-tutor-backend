@@ -4,11 +4,17 @@ import type { ValidatedGame }
 import type { GameResponse }
     from "../dto/gameResponse";
 
+// Se usa `||` en vez de `??` a propósito: una variable de
+// entorno puesta pero vacía (ej. "API_PUBLIC_URL=" sin nada
+// detrás en el .env) sigue contando como "tiene valor" para
+// `??`, y el resultado sería una URL relativa en vez de
+// absoluta — justo el tipo de fallo silencioso que rompe las
+// portadas sin dar ningún error visible.
 const BASE_URL =
 
     process.env.API_PUBLIC_URL
-    ?? process.env.RENDER_EXTERNAL_URL
-    ?? `http://localhost:${process.env.PORT ?? 3000}`;
+    || process.env.RENDER_EXTERNAL_URL
+    || `http://localhost:${process.env.PORT || 3000}`;
 
 export class GameMapper {
 
