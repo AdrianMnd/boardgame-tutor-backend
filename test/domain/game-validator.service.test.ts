@@ -27,6 +27,20 @@ function makeFakeGame(id: string): ValidatedGame {
 
         },
 
+        documents: [
+
+            {
+
+                id: "rulebook",
+
+                filename: "rulebook.pdf",
+
+                name: "Rulebook"
+
+            }
+
+        ],
+
         paths: {
 
             root: `/games/${id}`,
@@ -34,8 +48,6 @@ function makeFakeGame(id: string): ValidatedGame {
             metadata: `/games/${id}/metadata.json`,
 
             source: `/games/${id}/source`,
-
-            rulebook: `/games/${id}/source/rulebook.pdf`,
 
             generated: `/games/${id}/generated`,
 

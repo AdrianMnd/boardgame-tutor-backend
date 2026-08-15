@@ -4,6 +4,10 @@ export interface RetrievedChunk {
 
     gameId: string;
 
+    documentId: string;
+
+    documentName: string;
+
     page: number;
 
     text: string;

@@ -36,6 +36,10 @@ export class ChatMapper {
 
             gameId: source.gameId,
 
+            documentId: source.documentId,
+
+            documentName: source.documentName,
+
             page: source.page,
 
             text: source.text,

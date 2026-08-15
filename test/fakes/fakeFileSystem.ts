@@ -57,6 +57,25 @@ export class FakeFileSystem implements IFileSystem {
 
     }
 
+    async readBuffer(
+        path: string
+    ): Promise<Buffer> {
+
+        const content =
+            this.files.get(path);
+
+        if (content === undefined) {
+
+            throw new Error(
+                `Archivo no encontrado: ${path}`
+            );
+
+        }
+
+        return Buffer.from(content);
+
+    }
+
 
     async writeText(
         path: string,

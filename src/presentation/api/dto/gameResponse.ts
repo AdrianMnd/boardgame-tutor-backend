@@ -14,6 +14,14 @@ export interface GameResponse {
 
     year: number;
 
-    coverUrl: string;
+    coverUrl?: string;
+
+    documents: {
+
+        id: string;
+
+        name: string;
+
+    }[];
 
 }

@@ -11,7 +11,11 @@ const controller =
 
         container.listGamesUseCase,
 
-        container.getGameManualUseCase
+        container.getGameManualUseCase,
+
+        container.repository,
+
+        container.storage
 
     );
 
@@ -20,6 +24,14 @@ router.get(
     "/",
 
     controller.getGames
+
+);
+
+router.get(
+
+    "/:id/cover",
+
+    controller.getCover
 
 );
 

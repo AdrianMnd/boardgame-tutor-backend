@@ -6,8 +6,6 @@ export interface GamePaths {
 
     source: string;
 
-    rulebook: string;
-
     generated: string;
 
     chunks: string;

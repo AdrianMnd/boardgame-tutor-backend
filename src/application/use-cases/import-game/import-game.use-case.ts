@@ -1,42 +1,58 @@
 import path from "node:path";
 
-import { GameValidator } from "../../../domain/game/services/game-validator.service";
+import { LocalDocumentDiscovery } from "../../../infrastructure/importer/LocalDocumentDiscovery";
 import { ChunkGenerator } from "../../../infrastructure/importer/chunkGenerator/chunkGenerator";
 import { EmbeddingGenerator } from "../../../infrastructure/importer/embeddingGenerator/embeddingGenerator";
 import { EmbeddingCheckpoint } from "../../../infrastructure/importer/embeddingGenerator/EmbeddingCheckpoint";
-import { KnowledgeWriter } from "../../../infrastructure/importer/knowledgeWriter/knowledgeWriter";
 import { TextCleaner } from "../../../infrastructure/importer/textCleaner/textCleaner";
+import { PostgresKnowledgeWriter } from "../../../infrastructure/database/PostgresKnowledgeWriter";
 import type { IPDFExtractor } from "../../../shared/contracts/IPDFExtractor";
 import type { IFileSystem } from "../../../shared/contracts/IFileSystem";
-import type { EmbeddedChunk } from "../../../domain/importer/embeddedChunk";
+import type { IFileStorage } from "../../../shared/contracts/IFileStorage";
+import type { Chunk } from "../../../infrastructure/importer/chunkGenerator/chunk";
+import type { GameMetadata } from "../../../domain/game/types/GameMetadata";
 import { IImportLogger } from "../../logger/IImportLogger";
 
 const CHECKPOINT_FILENAME = "embeddings-checkpoint.json";
 
 export class ImportGameUseCase {
 
+    private readonly localDiscovery: LocalDocumentDiscovery;
+
     constructor(
 
-    private readonly logger: IImportLogger,
+        private readonly logger: IImportLogger,
 
-    private readonly validator: GameValidator,
+        private readonly extractor: IPDFExtractor,
 
-    private readonly extractor: IPDFExtractor,
+        private readonly cleaner: TextCleaner,
 
-    private readonly cleaner: TextCleaner,
+        private readonly chunkGenerator: ChunkGenerator,
 
-    private readonly chunkGenerator: ChunkGenerator,
+        private readonly embeddingGenerator: EmbeddingGenerator,
 
-    private readonly embeddingGenerator: EmbeddingGenerator,
+        private readonly fileSystem: IFileSystem,
 
-    private readonly knowledgeWriter: KnowledgeWriter,
+        private readonly storage: IFileStorage,
 
-    private readonly fileSystem: IFileSystem
+        private readonly writer: PostgresKnowledgeWriter
 
-) {}
+    ) {
+
+        this.localDiscovery =
+
+            new LocalDocumentDiscovery(
+
+                fileSystem
+
+            );
+
+    }
 
     async execute(
+
         gameId: string
+
     ): Promise<void> {
 
         const start =
@@ -44,76 +60,90 @@ export class ImportGameUseCase {
 
         this.logger.header(gameId);
 
-        this.logger.step(
+        const root =
+            path.resolve("games", gameId);
 
-            "1.Validando juego..."
+        const metadata =
+            await this.readMetadata(root);
 
-        );
+        const sourceDir =
+            path.join(root, "source");
 
-        const game =
-            await this.validator.validate(gameId);
+        this.logger.step("1.Detectando documentos locales...");
 
-        this.logger.success(
+        const localDocuments =
 
-            "Juego validado"
+            await this.localDiscovery.discover(
 
-        );
+                sourceDir
 
-        this.logger.step(
-
-            "2.Extrayendo PDF..."
-
-        );
-
-        const document =
-            await this.extractor.extract(
-                game.paths.rulebook
             );
 
-        this.logger.success(
+        if (localDocuments.length === 0) {
 
-            `${document.totalPages} páginas extraídas`
+            throw new Error(
 
-        );
+                `No se ha encontrado ningún PDF en ${sourceDir} — ` +
 
-        this.logger.step(
+                "coloca al menos un archivo .pdf ahí antes de importar."
 
-            "3.Limpiando texto..."
-
-        );
-
-        const cleaned =
-            this.cleaner.clean(document);
-
-        this.logger.success(
-
-            "Texto limpio"
-
-        );
-
-        this.logger.step(
-
-            "4.Generando chunks..."
-
-        );
-
-        const chunks =
-            this.chunkGenerator.generate(
-                game.metadata.id,
-                cleaned
             );
 
+        }
+
         this.logger.success(
 
-            `${chunks.length} chunks generados`
+            localDocuments.length === 1
+
+                ? "1 documento detectado"
+
+                : `${localDocuments.length} documentos detectados`
 
         );
 
-        this.logger.step(
+        this.logger.step("2-4.Extrayendo, limpiando y dividiendo en chunks...");
 
-            "5.Generando embeddings..."
+        const chunks: Chunk[] = [];
 
-        );
+        for (const document of localDocuments) {
+
+            const documentPath =
+
+                path.join(sourceDir, document.filename);
+
+            const extracted =
+                await this.extractor.extract(documentPath);
+
+            const cleaned =
+                this.cleaner.clean(extracted);
+
+            const documentChunks =
+
+                this.chunkGenerator.generate(
+
+                    gameId,
+
+                    document.id,
+
+                    cleaned
+
+                );
+
+            chunks.push(...documentChunks);
+
+            this.logger.info(
+
+                `   ${document.name}: ${extracted.totalPages} páginas, ` +
+
+                `${documentChunks.length} chunks`
+
+            );
+
+        }
+
+        this.logger.success(`${chunks.length} chunks generados en total`);
+
+        this.logger.step("5.Generando embeddings...");
 
         const checkpoint =
 
@@ -121,13 +151,7 @@ export class ImportGameUseCase {
 
                 this.fileSystem,
 
-                path.join(
-
-                    game.paths.generated,
-
-                    CHECKPOINT_FILENAME
-
-                )
+                path.join(root, "generated", CHECKPOINT_FILENAME)
 
             );
 
@@ -155,31 +179,15 @@ export class ImportGameUseCase {
 
                     chunks,
 
-                    (
+                    (completed, total) => {
 
-                        completed,
-
-                        total
-
-                    ) => {
-
-                        process.stdout.write(
-
-                            `\r   ${completed}/${total}`
-
-                        );
+                        process.stdout.write(`\r   ${completed}/${total}`);
 
                     },
 
                     alreadyEmbedded,
 
-                    results =>
-
-                        checkpoint.save(
-
-                            results
-
-                        )
+                    results => checkpoint.save(results)
 
                 );
 
@@ -189,10 +197,8 @@ export class ImportGameUseCase {
             this.logger.info(
 
                 "\n   Se ha guardado el progreso conseguido hasta el fallo. " +
-
-                `Vuelve a ejecutar "npm run import ${gameId}" ` +
-
-                "más tarde para continuar donde se ha quedado."
+                `Vuelve a ejecutar "npm run import ${gameId}" más tarde ` +
+                "para continuar donde se ha quedado."
 
             );
 
@@ -202,200 +208,120 @@ export class ImportGameUseCase {
 
         process.stdout.write("\n");
 
-        this.logger.success(
+        this.logger.success("✔ Embeddings generados");
 
-            "✔ Embeddings generados"
+        this.logger.step("6.Subiendo archivos al almacenamiento...");
 
-        );
+        const documentsToWrite = [];
 
-        await this.warnIfDimensionMismatch(
+        for (const document of localDocuments) {
 
-            game.paths.generated,
+            const documentPath =
+                path.join(sourceDir, document.filename);
 
-            embeddedChunks
+            const content =
+                await this.fileSystem.readBuffer(documentPath);
 
-        );
+            const storagePath =
+                `${gameId}/source/${document.filename}`;
 
-        this.logger.step(
+            await this.storage.upload(
 
-            "6.Guardando conocimiento..."
+                storagePath,
 
-        );
+                content,
 
-        await this.knowledgeWriter.write(
-            game,
-            embeddedChunks
-        );
+                "application/pdf"
 
-        // Importación completada con éxito: el checkpoint ya
-        // no hace falta, todo está en knowledge.json.
+            );
+
+            documentsToWrite.push({
+
+                id: document.id,
+
+                name: document.name,
+
+                storagePath
+
+            });
+
+        }
+
+        const coverPath =
+            await this.uploadCoverIfPresent(gameId, root);
+
+        this.logger.success("Archivos subidos");
+
+        this.logger.step("7.Guardando en la base de datos...");
+
+        await this.writer.upsertGame(metadata, coverPath);
+
+        for (const document of documentsToWrite) {
+
+            await this.writer.upsertDocument(gameId, document);
+
+        }
+
+        await this.writer.replaceChunks(gameId, embeddedChunks);
+
         await checkpoint.clear();
 
-        this.logger.success(
+        this.logger.success("Guardado en la base de datos");
 
-            "Conocimiento guardado"
+        this.logger.footer(Date.now() - start);
 
-        );
-
-        this.logger.footer(
-
-            Date.now() - start
-
-        );
     }
 
-    /**
-     * Comprueba que la dimensión de los embeddings recién
-     * generados coincide con la de otro juego ya importado.
-     * Si no coincide, avisa de forma bien visible en vez de
-     * dejar que el fallo aparezca más tarde como un 500 al
-     * preguntar en producción (el proveedor de embeddings usado
-     * al importar debe ser siempre el mismo que usa el servidor
-     * para las preguntas en vivo).
-     */
-    private async warnIfDimensionMismatch(
+    private async readMetadata(
 
-        generatedPath: string,
+        root: string
 
-        embeddedChunks: EmbeddedChunk[]
+    ): Promise<GameMetadata> {
 
-    ): Promise<void> {
+        const metadataPath =
+            path.join(root, "metadata.json");
 
-        const currentDimension =
+        if (!(await this.fileSystem.exists(metadataPath))) {
 
-            embeddedChunks[0]?.embedding.length;
+            throw new Error(
 
-        if (!currentDimension) {
-
-            return;
-
-        }
-
-        const gamesRoot =
-
-            path.resolve(
-
-                generatedPath,
-
-                "..",
-
-                ".."
+                `No se ha encontrado ${metadataPath} — crea la carpeta ` +
+                `games/<id>/ con su metadata.json antes de importar.`
 
             );
 
-        const currentGameId =
-
-            path.basename(
-
-                path.dirname(
-
-                    path.resolve(generatedPath)
-
-                )
-
-            );
-
-        let otherGameIds: string[];
-
-        try {
-
-            otherGameIds =
-
-                await this.fileSystem.listDirectories(
-
-                    gamesRoot
-
-                );
-
         }
-        catch {
 
-            return;
+        return this.fileSystem.readJson<GameMetadata>(metadataPath);
+
+    }
+
+    private async uploadCoverIfPresent(
+
+        gameId: string,
+
+        root: string
+
+    ): Promise<string | undefined> {
+
+        const coverPath =
+            path.join(root, "assets", "cover.png");
+
+        if (!(await this.fileSystem.exists(coverPath))) {
+
+            return undefined;
 
         }
 
-        for (const otherId of otherGameIds) {
+        const content =
+            await this.fileSystem.readBuffer(coverPath);
 
-            if (otherId === currentGameId) {
+        const storagePath =
+            `${gameId}/assets/cover.png`;
 
-                continue;
+        await this.storage.upload(storagePath, content, "image/png");
 
-            }
-
-            const otherKnowledgePath =
-
-                path.join(
-
-                    gamesRoot,
-
-                    otherId,
-
-                    "generated",
-
-                    "knowledge.json"
-
-                );
-
-            if (
-
-                !(await this.fileSystem.exists(otherKnowledgePath))
-
-            ) {
-
-                continue;
-
-            }
-
-            try {
-
-                const otherKnowledge =
-
-                    await this.fileSystem.readJson<{
-
-                        chunks: EmbeddedChunk[];
-
-                    }>(
-
-                        otherKnowledgePath
-
-                    );
-
-                const otherDimension =
-
-                    otherKnowledge.chunks[0]?.embedding.length;
-
-                if (
-
-                    otherDimension &&
-                    otherDimension !== currentDimension
-
-                ) {
-
-                    this.logger.warning(
-
-                        `\n⚠ Este juego se ha importado con embeddings de ` +
-                        `${currentDimension} dimensiones, pero "${otherId}" ` +
-                        `tiene ${otherDimension}. Si tu servidor en producción ` +
-                        `usa un proveedor distinto al que acabas de usar aquí, ` +
-                        `las preguntas sobre este juego fallarán con un error ` +
-                        `500. Revisa que AI_PROVIDER_ORDER / ` +
-                        `LOCAL_EMBEDDING_ENABLED sean iguales en tu entorno ` +
-                        `local y en el servidor desplegado.\n`
-
-                    );
-
-                    return;
-
-                }
-
-            }
-            catch {
-
-                continue;
-
-            }
-
-        }
+        return storagePath;
 
     }
 

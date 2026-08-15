@@ -1,12 +1,15 @@
 import { IMPORT_CONFIGURATION } from "../../config/import";
+import { loadDatabaseConfiguration } from "../../config/database";
+import { loadStorageConfiguration } from "../../config/storage";
 
-import { NodeFileSystem } from "../../infrastructure/filesystem/NodeFileSystem";
-import { FileGameRepository } from "../../infrastructure/repositories/FileGameRepository";
+import { createPool } from "../../infrastructure/database/pool";
+import { PostgresGameRepository } from "../../infrastructure/repositories/PostgresGameRepository";
+import { PgVectorRetriever } from "../../infrastructure/database/PgVectorRetriever";
+import { B2FileStorage } from "../../infrastructure/storage/B2FileStorage";
 
 import { AIProviderFactory } from "../../infrastructure/ai/factory/AIProviderFactory";
 
 import { GameValidator } from "../../domain/game/services/game-validator.service";
-import { SemanticRetriever } from "../../domain/knowledge/SemanticRetriever";
 import { ContextBuilder } from "../../domain/ai/contextBuilder";
 
 import { AskQuestionUseCase } from "../use-cases/ask-question/ask-question.use-case";
@@ -15,12 +18,19 @@ import { GetGameManualUseCase } from "../use-cases/get-game-manual/get-game-manu
 
 export class ApplicationContainer {
 
-    readonly fileSystem =
-        new NodeFileSystem();
+    readonly pool =
+        createPool(
+            loadDatabaseConfiguration()
+        );
+
+    readonly storage =
+        new B2FileStorage(
+            loadStorageConfiguration()
+        );
 
     readonly repository =
-        new FileGameRepository(
-            this.fileSystem
+        new PostgresGameRepository(
+            this.pool
         );
 
     readonly listGamesUseCase =
@@ -30,7 +40,8 @@ export class ApplicationContainer {
 
     readonly getGameManualUseCase =
         new GetGameManualUseCase(
-            this.repository
+            this.repository,
+            this.storage
         );
 
     readonly validator =
@@ -51,8 +62,8 @@ export class ApplicationContainer {
         this.ai.refiner;
 
     readonly retriever =
-        new SemanticRetriever(
-            this.fileSystem,
+        new PgVectorRetriever(
+            this.pool,
             IMPORT_CONFIGURATION
         );
 

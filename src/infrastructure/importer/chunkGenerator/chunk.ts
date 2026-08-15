@@ -4,6 +4,8 @@ export interface Chunk {
 
     gameId: string;
 
+    documentId: string;
+
     page: number;
 
     index: number;

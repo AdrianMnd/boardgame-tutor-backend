@@ -1,9 +1,8 @@
 import "dotenv/config";
+
 import { NodeFileSystem } from "../../infrastructure/filesystem/NodeFileSystem";
-import { GameValidator } from "../../domain/game/services/game-validator.service";
 import { ChunkGenerator } from "../../infrastructure/importer/chunkGenerator/chunkGenerator";
 import { EmbeddingGenerator } from "../../infrastructure/importer/embeddingGenerator/embeddingGenerator";
-import { KnowledgeWriter } from "../../infrastructure/importer/knowledgeWriter/knowledgeWriter";
 import { TextCleaner } from "../../infrastructure/importer/textCleaner/textCleaner";
 import { ImportGameUseCase } from "../use-cases/import-game/import-game.use-case";
 import { Pdf2JsonExtractor } from "../../infrastructure/importer/pdf/Pdf2JsonExtractor";
@@ -11,25 +10,22 @@ import { ConsoleImportLogger } from "../logger/ConsoleimportLogger";
 import { LLMEmbeddingProvider } from "../../infrastructure/ai/common/LLMEmbeddingProvider";
 import { AIProviderFactory } from "../../infrastructure/ai/factory/AIProviderFactory";
 import { IMPORT_CONFIGURATION } from "../../config/import";
-import { FileGameRepository } from "../../infrastructure/repositories/FileGameRepository";
+import { loadDatabaseConfiguration } from "../../config/database";
+import { loadStorageConfiguration } from "../../config/storage";
+import { createPool } from "../../infrastructure/database/pool";
+import { PostgresKnowledgeWriter } from "../../infrastructure/database/PostgresKnowledgeWriter";
+import { B2FileStorage } from "../../infrastructure/storage/B2FileStorage";
 
 async function main() {
-
-        console.log("CWD:", process.cwd());
-
 
     const gameId = process.argv[2];
 
     if (!gameId) {
 
         console.error("");
-
         console.error("Uso:");
-
         console.error("");
-
         console.error("npm run import <gameId>");
-
         console.error("");
 
         process.exit(1);
@@ -39,25 +35,10 @@ async function main() {
     const logger =
         new ConsoleImportLogger();
 
-    logger.info(
-
-            `Importando juego "${gameId}"...`
-
-        );
-
+    logger.info(`Importando juego "${gameId}"...`);
 
     const fileSystem =
-    new NodeFileSystem();
-
-const repository =
-    new FileGameRepository(
-        fileSystem
-    );
-
-const validator =
-    new GameValidator(
-        repository
-    );
+        new NodeFileSystem();
 
     const extractor =
         new Pdf2JsonExtractor();
@@ -69,33 +50,33 @@ const validator =
         new ChunkGenerator();
 
     const embeddingClient =
-
         AIProviderFactory.createEmbeddingClient();
 
     const embeddingProvider =
-     new LLMEmbeddingProvider(
-        embeddingClient
-    ); 
+        new LLMEmbeddingProvider(embeddingClient);
 
     const embeddingGenerator =
         new EmbeddingGenerator(
+
             embeddingProvider,
+
             IMPORT_CONFIGURATION
+
         );
+
+    const pool =
+        createPool(loadDatabaseConfiguration());
+
+    const storage =
+        new B2FileStorage(loadStorageConfiguration());
 
     const writer =
-        new KnowledgeWriter(
-            fileSystem,
-
-            process.env.EMBEDDING_MODEL || "unknown",
-        );
+        new PostgresKnowledgeWriter(pool);
 
     const importer =
         new ImportGameUseCase(
 
             logger,
-
-            validator,
 
             extractor,
 
@@ -105,32 +86,28 @@ const validator =
 
             embeddingGenerator,
 
-            writer,
+            fileSystem,
 
-            fileSystem
+            storage,
+
+            writer
 
         );
 
     await importer.execute(gameId);
 
-    logger.info(
+    await pool.end();
 
-            "Importación finalizada con éxito."
-
-        );
+    logger.info("Importación finalizada con éxito.");
 
 }
 
 main().catch(error => {
 
     console.error("");
-
     console.error("Error durante la importación:");
-
     console.error("");
-
     console.error(error);
-
     console.error("");
 
     process.exit(1);

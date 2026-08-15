@@ -1,7 +1,6 @@
 import "dotenv/config";
 
 import express from "express";
-import path from "node:path";
 import cors from "cors";
 import { rateLimit } from "express-rate-limit";
 
@@ -80,18 +79,6 @@ const chatRateLimiter =
         }
 
     });
-
-app.use(
-
-    "/games",
-
-    express.static(
-
-        path.resolve("games")
-
-    )
-
-);
 
 app.get(
 

@@ -1,10 +1,12 @@
 import { GameMetadata } from "./GameMetadata"
-import { GamePaths } from "./GamePaths"
+import { DocumentDescriptor } from "./DocumentDescriptor"
 
 export interface ValidatedGame {
 
     metadata: GameMetadata;
 
-    paths: GamePaths;
+    documents: DocumentDescriptor[];
+
+    coverPath?: string;
 
 }

@@ -1,9 +1,0 @@
-{
-    "id": "trivial",
-    "name": "Trivial Pursuit",
-    "language": "es",
-    "version": "1.0",
-    "minPlayers": 2,
-    "maxPlayers": 6,
-    "year": 1979
-}

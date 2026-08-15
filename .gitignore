@@ -2,6 +2,7 @@
 .env.local
 dist
 node_modules
+games/
 
 # Logs
 *.log

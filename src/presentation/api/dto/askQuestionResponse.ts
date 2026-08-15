@@ -12,6 +12,10 @@ export interface SourceResponse {
 
     gameId: string;
 
+    documentId: string;
+
+    documentName: string;
+
     page: number;
 
     score: number;
