@@ -80,3 +80,73 @@ CREATE INDEX IF NOT EXISTS idx_chunks_game_id
 
 CREATE INDEX IF NOT EXISTS idx_documents_game_id
     ON documents(game_id);
+
+-- ============================================================
+-- Usuarios, favoritos y categorías personalizadas
+--
+-- El login es opcional: sin cuenta, favoritos/categorías siguen
+-- funcionando en localStorage como hasta ahora (ver frontend).
+-- Con cuenta, se guardan aquí y así se conservan al cambiar de
+-- dispositivo (incluida la futura app de Android).
+-- ============================================================
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+CREATE TABLE IF NOT EXISTS users (
+
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    email           TEXT NOT NULL UNIQUE,
+
+    -- Nunca se guarda la contraseña en sí, solo su hash con
+    -- bcrypt (ver src/infrastructure/auth/PasswordHasher.ts).
+    password_hash   TEXT NOT NULL,
+
+    display_name    TEXT NOT NULL,
+
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+
+);
+
+CREATE TABLE IF NOT EXISTS user_favorites (
+
+    user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+
+    game_id     TEXT NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    PRIMARY KEY (user_id, game_id)
+
+);
+
+CREATE TABLE IF NOT EXISTS user_categories (
+
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+
+    name        TEXT NOT NULL,
+
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+
+);
+
+CREATE TABLE IF NOT EXISTS user_category_games (
+
+    category_id     UUID NOT NULL REFERENCES user_categories(id) ON DELETE CASCADE,
+
+    game_id         TEXT NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+
+    PRIMARY KEY (category_id, game_id)
+
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_favorites_user_id
+    ON user_favorites(user_id);
+
+CREATE INDEX IF NOT EXISTS idx_user_categories_user_id
+    ON user_categories(user_id);
+
+CREATE INDEX IF NOT EXISTS idx_user_category_games_category_id
+    ON user_category_games(category_id);
