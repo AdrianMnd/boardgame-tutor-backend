@@ -5,9 +5,12 @@ import type {
 
 import { RegisterUserUseCase } from "../../../application/use-cases/register-user/register-user.use-case";
 import { LoginUserUseCase } from "../../../application/use-cases/login-user/login-user.use-case";
+import { UpdateDisplayNameUseCase } from "../../../application/use-cases/update-profile/update-display-name.use-case";
+import { UpdateEmailUseCase } from "../../../application/use-cases/update-profile/update-email.use-case";
+import { UpdatePasswordUseCase } from "../../../application/use-cases/update-profile/update-password.use-case";
 
 import type { IUserRepository } from "../../../domain/user/repositories/IUserRepository";
-import type { RegisterRequest, LoginRequest, AuthResponse } from "../dto/authDto";
+import type { RegisterRequest, LoginRequest, AuthResponse, UpdateDisplayNameRequest, UpdateEmailRequest, UpdatePasswordRequest } from "../dto/authDto";
 import type { AuthenticatedRequest } from "../middleware/requireAuth";
 
 import { NotFoundError } from "../errors/NotFoundError";
@@ -21,7 +24,13 @@ export class AuthController {
 
         private readonly loginUseCase: LoginUserUseCase,
 
-        private readonly userRepository: IUserRepository
+        private readonly userRepository: IUserRepository,
+
+        private readonly updateDisplayNameUseCase: UpdateDisplayNameUseCase,
+
+        private readonly updateEmailUseCase: UpdateEmailUseCase,
+
+        private readonly updatePasswordUseCase: UpdatePasswordUseCase
 
     ) {}
 
@@ -170,6 +179,142 @@ export class AuthController {
             displayName: user.displayName
 
         });
+
+    };
+
+    updateDisplayName = async (
+
+        request: Request,
+
+        response: Response
+
+    ): Promise<void> => {
+
+        const { userId } = request as AuthenticatedRequest;
+
+        const body = request.body as Partial<UpdateDisplayNameRequest>;
+
+        if (typeof body.displayName !== "string") {
+
+            throw new BadRequestError(
+
+                "Falta el campo obligatorio: displayName."
+
+            );
+
+        }
+
+        const user =
+
+            await this.updateDisplayNameUseCase.execute(
+
+                userId,
+
+                body.displayName
+
+            );
+
+        response.json({
+
+            id: user.id,
+
+            email: user.email,
+
+            displayName: user.displayName
+
+        });
+
+    };
+
+    updateEmail = async (
+
+        request: Request,
+
+        response: Response
+
+    ): Promise<void> => {
+
+        const { userId } = request as AuthenticatedRequest;
+
+        const body = request.body as Partial<UpdateEmailRequest>;
+
+        if (
+
+            typeof body.email !== "string" ||
+            typeof body.currentPassword !== "string"
+
+        ) {
+
+            throw new BadRequestError(
+
+                "Faltan campos obligatorios: email, currentPassword."
+
+            );
+
+        }
+
+        const user =
+
+            await this.updateEmailUseCase.execute(
+
+                userId,
+
+                body.email,
+
+                body.currentPassword
+
+            );
+
+        response.json({
+
+            id: user.id,
+
+            email: user.email,
+
+            displayName: user.displayName
+
+        });
+
+    };
+
+    updatePassword = async (
+
+        request: Request,
+
+        response: Response
+
+    ): Promise<void> => {
+
+        const { userId } = request as AuthenticatedRequest;
+
+        const body = request.body as Partial<UpdatePasswordRequest>;
+
+        if (
+
+            typeof body.currentPassword !== "string" ||
+            typeof body.newPassword !== "string"
+
+        ) {
+
+            throw new BadRequestError(
+
+                "Faltan campos obligatorios: currentPassword, newPassword."
+
+            );
+
+        }
+
+        await this.updatePasswordUseCase.execute(
+
+            userId,
+
+            body.currentPassword,
+
+            body.newPassword
+
+        );
+
+        response.status(204).end();
 
     };
 

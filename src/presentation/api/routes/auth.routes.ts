@@ -14,7 +14,13 @@ const controller =
 
         container.loginUserUseCase,
 
-        container.userRepository
+        container.userRepository,
+
+        container.updateDisplayNameUseCase,
+
+        container.updateEmailUseCase,
+
+        container.updatePasswordUseCase
 
     );
 
@@ -41,6 +47,36 @@ router.get(
     requireAuth(container.jwtService),
 
     controller.me
+
+);
+
+router.patch(
+
+    "/me",
+
+    requireAuth(container.jwtService),
+
+    controller.updateDisplayName
+
+);
+
+router.patch(
+
+    "/me/email",
+
+    requireAuth(container.jwtService),
+
+    controller.updateEmail
+
+);
+
+router.patch(
+
+    "/me/password",
+
+    requireAuth(container.jwtService),
+
+    controller.updatePassword
 
 );
 

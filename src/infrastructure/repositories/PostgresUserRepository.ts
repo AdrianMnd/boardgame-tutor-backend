@@ -106,6 +106,40 @@ export class PostgresUserRepository
 
     }
 
+    async findByIdWithPassword(
+
+        id: string
+
+    ): Promise<UserRecord | null> {
+
+        const result =
+
+            await this.pool.query<UserRow>(
+
+                "SELECT * FROM users WHERE id = $1",
+
+                [id]
+
+            );
+
+        const row = result.rows[0];
+
+        if (!row) {
+
+            return null;
+
+        }
+
+        return {
+
+            ...toUser(row),
+
+            passwordHash: row.password_hash
+
+        };
+
+    }
+
     async create(
 
         email: string,
@@ -165,6 +199,100 @@ export class PostgresUserRepository
             throw error;
 
         }
+
+    }
+
+    async updateDisplayName(
+
+        id: string,
+
+        displayName: string
+
+    ): Promise<User> {
+
+        const result =
+
+            await this.pool.query<UserRow>(
+
+                `
+                UPDATE users
+                SET display_name = $1
+                WHERE id = $2
+                RETURNING *
+                `,
+
+                [displayName.trim(), id]
+
+            );
+
+        return toUser(result.rows[0]);
+
+    }
+
+    async updateEmail(
+
+        id: string,
+
+        email: string
+
+    ): Promise<User | null> {
+
+        try {
+
+            const result =
+
+                await this.pool.query<UserRow>(
+
+                    `
+                    UPDATE users
+                    SET email = $1
+                    WHERE id = $2
+                    RETURNING *
+                    `,
+
+                    [email.toLowerCase().trim(), id]
+
+                );
+
+            return toUser(result.rows[0]);
+
+        }
+        catch (error) {
+
+            if (
+
+                typeof error === "object" &&
+                error !== null &&
+                "code" in error &&
+                error.code === "23505"
+
+            ) {
+
+                return null;
+
+            }
+
+            throw error;
+
+        }
+
+    }
+
+    async updatePasswordHash(
+
+        id: string,
+
+        passwordHash: string
+
+    ): Promise<void> {
+
+        await this.pool.query(
+
+            "UPDATE users SET password_hash = $1 WHERE id = $2",
+
+            [passwordHash, id]
+
+        );
 
     }
 

@@ -23,6 +23,9 @@ import { ListGamesUseCase } from "../use-cases/list-games/list-games.use-case";
 import { GetGameManualUseCase } from "../use-cases/get-game-manual/get-game-manual.use-case";
 import { RegisterUserUseCase } from "../use-cases/register-user/register-user.use-case";
 import { LoginUserUseCase } from "../use-cases/login-user/login-user.use-case";
+import { UpdateDisplayNameUseCase } from "../use-cases/update-profile/update-display-name.use-case";
+import { UpdateEmailUseCase } from "../use-cases/update-profile/update-email.use-case";
+import { UpdatePasswordUseCase } from "../use-cases/update-profile/update-password.use-case";
 import { FavoritesUseCase } from "../use-cases/favorites/favorites.use-case";
 import { CategoriesUseCase } from "../use-cases/categories/categories.use-case";
 
@@ -134,6 +137,29 @@ export class ApplicationContainer {
             this.passwordHasher,
 
             this.jwtService
+
+        );
+
+    readonly updateDisplayNameUseCase =
+        new UpdateDisplayNameUseCase(
+            this.userRepository
+        );
+
+    readonly updateEmailUseCase =
+        new UpdateEmailUseCase(
+
+            this.userRepository,
+
+            this.passwordHasher
+
+        );
+
+    readonly updatePasswordUseCase =
+        new UpdatePasswordUseCase(
+
+            this.userRepository,
+
+            this.passwordHasher
 
         );
 
