@@ -6,8 +6,6 @@
 
 API REST en Node.js/Express para **BoardGame Tutor**, una aplicación de preguntas y respuestas sobre reglamentos de juegos de mesa mediante RAG (*Retrieval-Augmented Generation*): el usuario pregunta en lenguaje natural, la API recupera los fragmentos más relevantes del PDF del reglamento y genera una respuesta citando las páginas exactas usadas como fuente.
 
-Repositorio del frontend: [boardgame-tutor-frontend](https://github.com/AdrianMnd/boardgame-tutor-frontend)
-
 ![Ejemplo de conversación con fuentes citadas](docs/screenshots/conversacion.png)
 
 ## Características
