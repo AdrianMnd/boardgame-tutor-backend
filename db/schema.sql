@@ -150,3 +150,38 @@ CREATE INDEX IF NOT EXISTS idx_user_categories_user_id
 
 CREATE INDEX IF NOT EXISTS idx_user_category_games_category_id
     ON user_category_games(category_id);
+
+-- ============================================================
+-- Historial de conversación por (usuario, juego)
+--
+-- Solo hay UNA conversación activa por juego (igual que ya
+-- funciona en localStorage sin sesión) — no varios hilos
+-- guardados. "Nueva conversación" borra las filas de esa
+-- (usuario, juego) y empieza de cero. Igual que el resto de
+-- datos de usuario, el login es opcional: sin cuenta, sigue
+-- funcionando solo en localStorage.
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS conversation_messages (
+
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+
+    game_id     TEXT NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+
+    role        TEXT NOT NULL CHECK (role IN ('user', 'assistant')),
+
+    content     TEXT NOT NULL,
+
+    -- Solo relevante para role='assistant' — las fuentes citadas
+    -- en esa respuesta concreta, en el mismo formato que ya
+    -- devuelve /api/chat/stream.
+    sources     JSONB,
+
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+
+);
+
+CREATE INDEX IF NOT EXISTS idx_conversation_messages_user_game
+    ON conversation_messages(user_id, game_id, created_at);

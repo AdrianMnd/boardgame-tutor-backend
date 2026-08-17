@@ -9,6 +9,7 @@ import chatRoutes from "./presentation/api/routes/chat.routes";
 import authRoutes from "./presentation/api/routes/auth.routes";
 import favoritesRoutes from "./presentation/api/routes/favorites.routes";
 import categoriesRoutes from "./presentation/api/routes/categories.routes";
+import conversationsRoutes from "./presentation/api/routes/conversations.routes";
 
 import { ApiError } from "./presentation/api/errors/ApiError";
 
@@ -175,6 +176,14 @@ app.use(
     "/api/categories",
 
     categoriesRoutes
+
+);
+
+app.use(
+
+    "/api/conversations",
+
+    conversationsRoutes
 
 );
 
