@@ -16,6 +16,28 @@ export interface LoginRequest {
 
 }
 
+export interface UpdateDisplayNameRequest {
+
+    displayName: string;
+
+}
+
+export interface UpdateEmailRequest {
+
+    email: string;
+
+    currentPassword: string;
+
+}
+
+export interface UpdatePasswordRequest {
+
+    currentPassword: string;
+
+    newPassword: string;
+
+}
+
 export interface AuthResponse {
 
     token: string;
