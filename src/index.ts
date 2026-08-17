@@ -3,6 +3,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { rateLimit } from "express-rate-limit";
+import multer from "multer";
 
 import gamesRoutes from "./presentation/api/routes/games.routes";
 import chatRoutes from "./presentation/api/routes/chat.routes";
@@ -10,6 +11,7 @@ import authRoutes from "./presentation/api/routes/auth.routes";
 import favoritesRoutes from "./presentation/api/routes/favorites.routes";
 import categoriesRoutes from "./presentation/api/routes/categories.routes";
 import conversationsRoutes from "./presentation/api/routes/conversations.routes";
+import gameRequestRoutes from "./presentation/api/routes/gameRequest.routes";
 
 import { ApiError } from "./presentation/api/errors/ApiError";
 
@@ -117,6 +119,38 @@ const authRateLimiter =
 
     });
 
+// Cada solicitud sube archivos (a veces de hasta 150MB) y
+// manda un correo — un límite mucho más bajo que el resto de
+// endpoints, ya que aquí sí hay un coste real de recursos por
+// cada petición.
+const gameRequestRateLimiter =
+
+    rateLimit({
+
+        windowMs: 60 * 60 * 1000,
+
+        limit:
+
+            Number(process.env.GAME_REQUEST_RATE_LIMIT) || 5,
+
+        standardHeaders: true,
+
+        legacyHeaders: false,
+
+        message: {
+
+            error: "rate_limited",
+
+            message:
+
+                "Demasiadas solicitudes de juegos nuevos. Espera un " +
+
+                "poco antes de enviar otra."
+
+        }
+
+    });
+
 app.get(
 
     "/",
@@ -187,6 +221,16 @@ app.use(
 
 );
 
+app.use(
+
+    "/api/game-requests",
+
+    gameRequestRateLimiter,
+
+    gameRequestRoutes
+
+);
+
 // ==========================================================
 // MANEJO DE ERRORES GLOBAL
 //
@@ -222,6 +266,42 @@ app.use(
             error
 
         );
+
+        if (error instanceof multer.MulterError) {
+
+            const messages: Record<string, string> = {
+
+                LIMIT_FILE_SIZE:
+
+                    "Uno de los archivos supera el tamaño máximo permitido (150MB).",
+
+                LIMIT_FILE_COUNT:
+
+                    "Se ha superado el número máximo de archivos permitido (10).",
+
+                LIMIT_UNEXPECTED_FILE:
+
+                    "Campo de archivo inesperado."
+
+            };
+
+            response
+
+                .status(400)
+
+                .json({
+
+                    error: "BAD_REQUEST",
+
+                    message:
+
+                        messages[error.code] ?? error.message
+
+                });
+
+            return;
+
+        }
 
         if (error instanceof ApiError) {
 
