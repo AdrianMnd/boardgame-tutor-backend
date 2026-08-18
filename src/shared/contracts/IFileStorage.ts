@@ -28,4 +28,19 @@ export interface IFileStorage {
 
     ): Promise<boolean>;
 
+    /**
+     * Enlace de descarga temporal (el cubo es privado, así que
+     * no hay URL pública fija) — pensado para incluir en el
+     * correo de solicitud de un juego nuevo, donde hace falta un
+     * enlace en el que se pueda simplemente clicar, sin pasar
+     * por el backend de por medio.
+     */
+    getSignedDownloadUrl(
+
+        key: string,
+
+        expiresInSeconds: number
+
+    ): Promise<string>;
+
 }

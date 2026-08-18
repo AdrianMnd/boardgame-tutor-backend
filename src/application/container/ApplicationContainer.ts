@@ -1,6 +1,7 @@
 import { IMPORT_CONFIGURATION } from "../../config/import";
 import { loadDatabaseConfiguration } from "../../config/database";
 import { loadStorageConfiguration } from "../../config/storage";
+import { loadEmailConfiguration } from "../../config/email";
 import { loadAuthConfiguration } from "../../config/auth";
 
 import { createPool } from "../../infrastructure/database/pool";
@@ -8,8 +9,10 @@ import { PostgresGameRepository } from "../../infrastructure/repositories/Postgr
 import { PostgresUserRepository } from "../../infrastructure/repositories/PostgresUserRepository";
 import { PostgresFavoritesRepository } from "../../infrastructure/repositories/PostgresFavoritesRepository";
 import { PostgresCategoryRepository } from "../../infrastructure/repositories/PostgresCategoryRepository";
+import { PostgresConversationRepository } from "../../infrastructure/repositories/PostgresConversationRepository";
 import { PgVectorRetriever } from "../../infrastructure/database/PgVectorRetriever";
 import { B2FileStorage } from "../../infrastructure/storage/B2FileStorage";
+import { EmailService } from "../../infrastructure/email/EmailService";
 import { PasswordHasher } from "../../infrastructure/auth/PasswordHasher";
 import { JwtService } from "../../infrastructure/auth/JwtService";
 
@@ -28,6 +31,8 @@ import { UpdateEmailUseCase } from "../use-cases/update-profile/update-email.use
 import { UpdatePasswordUseCase } from "../use-cases/update-profile/update-password.use-case";
 import { FavoritesUseCase } from "../use-cases/favorites/favorites.use-case";
 import { CategoriesUseCase } from "../use-cases/categories/categories.use-case";
+import { ConversationsUseCase } from "../use-cases/conversations/conversations.use-case";
+import { GameRequestUseCase } from "../use-cases/game-request/game-request.use-case";
 
 export class ApplicationContainer {
 
@@ -181,6 +186,30 @@ export class ApplicationContainer {
     readonly categoriesUseCase =
         new CategoriesUseCase(
             this.categoryRepository
+        );
+
+    readonly conversationRepository =
+        new PostgresConversationRepository(
+            this.pool
+        );
+
+    readonly conversationsUseCase =
+        new ConversationsUseCase(
+            this.conversationRepository
+        );
+
+    readonly emailService =
+        new EmailService(
+            loadEmailConfiguration()
+        );
+
+    readonly gameRequestUseCase =
+        new GameRequestUseCase(
+
+            this.storage,
+
+            this.emailService
+
         );
 
 }

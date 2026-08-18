@@ -16,6 +16,8 @@ export interface GameResponse {
 
     coverUrl?: string;
 
+    createdAt: string;
+
     documents: {
 
         id: string;

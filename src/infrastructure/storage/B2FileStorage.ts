@@ -5,6 +5,8 @@ import {
     HeadObjectCommand
 } from "@aws-sdk/client-s3";
 
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+
 import type { IFileStorage } from "../../shared/contracts/IFileStorage";
 import type { StorageConfiguration } from "../../config/storage";
 
@@ -147,6 +149,32 @@ export class B2FileStorage
             return false;
 
         }
+
+    }
+
+    async getSignedDownloadUrl(
+
+        key: string,
+
+        expiresInSeconds: number
+
+    ): Promise<string> {
+
+        return getSignedUrl(
+
+            this.client,
+
+            new GetObjectCommand({
+
+                Bucket: this.bucket,
+
+                Key: key
+
+            }),
+
+            { expiresIn: expiresInSeconds }
+
+        );
 
     }
 

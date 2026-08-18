@@ -40,6 +40,15 @@ export class GameMapper {
 
             year: game.metadata.year,
 
+            // Siempre viene informado en la práctica — el
+            // repositorio lo rellena a partir de la columna
+            // created_at (NOT NULL) al leer un juego. Solo es
+            // opcional en el tipo de dominio porque el flujo de
+            // importación construye un GameMetadata sin conocer
+            // todavía esta fecha (la genera la propia base de
+            // datos al insertar).
+            createdAt: game.metadata.createdAt ?? "",
+
             coverUrl:
 
                 game.coverPath

@@ -23,6 +23,8 @@ interface GameRow {
 
     cover_path: string | null;
 
+    created_at: string;
+
 }
 
 interface DocumentRow {
@@ -204,7 +206,9 @@ export class PostgresGameRepository
 
                 maxPlayers: row.max_players,
 
-                year: row.year
+                year: row.year,
+
+                createdAt: row.created_at
 
             },
 

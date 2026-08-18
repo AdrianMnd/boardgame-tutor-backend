@@ -36,4 +36,13 @@ export interface GameMetadata {
      */
     year: number;
 
+    /**
+     * Fecha de alta en el catálogo — la genera la propia base de
+     * datos al insertar (DEFAULT now()), así que el flujo de
+     * importación local nunca la conoce de antemano. Solo se
+     * rellena al leer un juego ya existente desde el
+     * repositorio, nunca al construirlo para importarlo.
+     */
+    createdAt?: string;
+
 }
