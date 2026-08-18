@@ -1,8 +1,8 @@
 # Importación de juegos
 
-## Estructura necesaria
+Guía práctica del comando `npm run import`. Para el porqué de cada decisión de diseño del pipeline, ver [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md); para el formato de `metadata.json`, [`docs/CONFIGURATION.md`](./CONFIGURATION.md).
 
-Para un juego con ID `wingspan`:
+## Estructura necesaria (local, temporal)
 
 ```text
 games/
@@ -10,30 +10,13 @@ games/
     ├── metadata.json
     ├── source/
     │   └── rulebook.pdf
-    ├── assets/
-    │   └── cover.png
-    └── generated/
+    └── assets/
+        └── cover.png
 ```
 
-`metadata.json` debe contener:
-
-```json
-{
-  "id": "wingspan",
-  "name": "Wingspan",
-  "language": "es",
-  "version": "1.0",
-  "minPlayers": 1,
-  "maxPlayers": 5,
-  "year": 2019
-}
-```
-
-El `id` debe coincidir con el nombre de la carpeta.
+Esta carpeta es solo el punto de partida — no se despliega ni persiste en ningún sitio. Tras `npm run import`, todo el contenido relevante ya está en Postgres (metadatos, chunks con embeddings) y B2 (el PDF y la portada); la carpeta local se puede borrar sin perder nada.
 
 ## Ejecutar
-
-Desde el backend:
 
 ```bash
 npm run import wingspan
@@ -42,69 +25,37 @@ npm run import wingspan
 ## Pasos internos
 
 ```text
-1. Validación
-2. Extracción PDF
-3. Limpieza
-4. Chunks
-5. Embeddings
-6. knowledge.json
+1. Validar metadata.json
+2. Extraer texto del PDF (Pdf2JsonExtractor)
+3. Limpiar el texto (TextCleaner)
+4. Dividir en chunks (ChunkGenerator)
+5. Generar embeddings (en lotes, con checkpoint)
+6. Subir el PDF y la portada a B2
+7. Escribir el juego, documentos y chunks en Postgres
 ```
 
-## Checkpoint
+## Checkpoint de progreso
 
-Durante los embeddings se crea:
-
-```text
-games/<id>/generated/embeddings-checkpoint.json
-```
-
-Si el proceso falla, se conserva el progreso y el siguiente:
+Durante el paso de embeddings se guarda un archivo de checkpoint local temporal. Si el proceso falla (típicamente por cuota agotada), basta con volver a ejecutar el mismo comando:
 
 ```bash
-npm run import <gameId>
+npm run import wingspan
 ```
 
-puede reutilizar los embeddings ya generados.
+Retoma desde donde se quedó, **siempre que el proveedor de embeddings no haya cambiado** entre el primer intento y el reintento — si cambió, el checkpoint se descarta automáticamente y se regenera todo desde cero, para no mezclar embeddings de dimensiones distintas dentro del mismo juego. El checkpoint se elimina al completarse la importación con éxito.
 
-Cuando la importación termina correctamente, el checkpoint se elimina.
+## Problemas de cuota durante la importación
 
-## Problemas de cuota
+Los embeddings **no** tienen *fallback* entre proveedores (a diferencia del chat) — si `AI_EMBEDDING_PROVIDER` se queda sin cuota, la importación falla con ese proveedor concreto. El checkpoint permite reanudar más tarde, sin volver a procesar los chunks ya completados.
 
-Si un proveedor devuelve un error de cuota/rate-limit y está considerado reintentable:
+## Reimportar un juego desde cero
 
-```text
-FallbackLLMClient
-    ↓
-siguiente proveedor con soporte de embeddings
+Volver a ejecutar `npm run import <id>` sobrescribe el juego existente en Postgres (metadatos, documentos y chunks) y los archivos en B2. Útil tras cambiar `AI_EMBEDDING_PROVIDER`, o si se corrigió algo en el PDF de origen.
+
+## Verificar el estado de los juegos importados
+
+```bash
+npm run check:embeddings
 ```
 
-Si todos los proveedores capaces de embeddings fallan, la importación termina con error.
-
-## Importación desde cero
-
-Para regenerar conocimiento desde cero, eliminar el checkpoint correspondiente antes de volver a importar.
-
-Si también se desea regenerar todos los embeddings, hay que considerar el contenido actual de `generated/knowledge.json` y el modelo utilizado.
-
-## Portadas
-
-El backend genera:
-
-```text
-/games/<id>/assets/cover.png
-```
-
-como `coverUrl`.
-
-La imagen debe existir físicamente con ese nombre para que el `Sidebar` pueda mostrarla.
-
-## Juegos actuales
-
-La versión entregada contiene:
-
-| ID | Nombre | Jugadores | Año |
-|---|---|---:|---:|
-| catan | Catan | 3-4 | 1995 |
-| zombicide | Zombicide 2nd Edition | 1-6 | 2021 |
-| nemesis | nemesis | 1-5 | 2018 |
-| cdmd | Cthulhu Death May Die | 1-5 | 2019 |
+Recorre todos los juegos en la base de datos y avisa de cuáles tienen chunks sin embedding o con dimensiones inconsistentes — útil tras varias importaciones, o si se sospecha que alguna quedó a medias sin que se notara en su momento.

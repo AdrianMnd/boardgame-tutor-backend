@@ -8,10 +8,30 @@ El backend sigue una arquitectura por capas inspirada en Clean Architecture, con
 presentation/    → Express: rutas, controladores, DTOs, mappers, manejo de errores
 application/     → casos de uso, contenedor de dependencias, comandos CLI
 domain/          → lógica de negocio pura: entidades, interfaces, servicios de dominio
-infrastructure/  → implementaciones concretas: proveedores de IA, filesystem, PDF
+infrastructure/  → implementaciones concretas: Postgres, B2, IA, email, JWT
 ```
 
-La regla de dependencia es la habitual: `domain` no importa nada de las otras capas: define interfaces (`IGameRepository`, `IEmbeddingProvider`, `IContextRefiner`...) que `infrastructure` implementa. `application` orquesta casos de uso combinando piezas de `domain` e `infrastructure`.
+La regla de dependencia es la habitual: `domain` no importa nada de las otras capas — define interfaces (`IGameRepository`, `IUserRepository`, `IFavoritesRepository`, `ICategoryRepository`, `IConversationRepository`, `IEmbeddingProvider`, `IFileStorage`, `IContextRefiner`...) que `infrastructure` implementa. `application` orquesta casos de uso combinando piezas de `domain` e `infrastructure`. `ApplicationContainer` es el único sitio donde se construyen las instancias concretas y se conectan entre sí.
+
+## Almacenamiento: Postgres + B2
+
+Todo el estado vive en dos servicios externos:
+
+```text
+Postgres (Neon) + pgvector          Backblaze B2 (privado, API S3)
+├── games                            ├── <gameId>/source/rulebook.pdf
+├── documents                        ├── <gameId>/assets/cover.png
+├── chunks (con su embedding)        └── pending-requests/<uuid>/*.pdf
+├── users
+├── user_favorites                  (solicitudes de juegos nuevos,
+├── user_categories                  pendientes de revisión manual)
+├── user_category_games
+└── conversation_messages
+```
+
+El principio general: **Postgres guarda datos estructurados y metadatos** (incluida la *ruta* del archivo en B2), **B2 guarda los binarios en sí** (PDF, imágenes). Ningún archivo se sirve nunca directamente desde el sistema de archivos del servidor — el backend es completamente *stateless*, lo que simplifica el despliegue en un plan gratuito de hosting.
+
+El bucket de B2 es privado. Para portadas y manuales, el backend hace de intermediario (`GET /api/games/:id/cover` y `/manual` leen de B2 y sirven el contenido). Para las solicitudes de juegos, en vez de proxear cada descarga se generan **enlaces firmados** con `@aws-sdk/s3-request-presigner` (válidos 7 días) — así el correo de notificación puede incluir un enlace en el que simplemente se puede clicar.
 
 ## El pipeline RAG
 
@@ -31,98 +51,94 @@ Reordena y recorta el contexto (1 llamada de IA)
 Genera la respuesta, en streaming
 ```
 
-Todo esto vive en `AskQuestionUseCase`, con dos métodos públicos: `execute()` (respuesta completa) y `executeStream()` (igual, pero entregando la respuesta en fragmentos vía un generador asíncrono). Ambos comparten la preparación del contexto (`prepareContext()`); solo cambia el último paso.
+Todo esto vive en `AskQuestionUseCase`, con dos métodos públicos: `execute()` (respuesta completa) y `executeStream()` (igual, pero entregando la respuesta en fragmentos vía un generador asíncrono). Detalle completo del pipeline en [`docs/RAG.md`](./RAG.md).
 
 ### Por qué el embedding y la validación van en paralelo
 
-Ninguno depende del resultado del otro — validar que el juego existe es una lectura local de disco, generar el embedding es una llamada de red. Lanzarlos con `Promise.all` en vez de uno detrás de otro ahorra ese tiempo sin ningún riesgo.
+Ninguno depende del resultado del otro — validar que el juego existe es una consulta a Postgres, generar el embedding es una llamada de red a un proveedor de IA. Lanzarlos con `Promise.all` en vez de uno detrás de otro ahorra ese tiempo sin ningún riesgo.
 
 ### Reordenar y recortar en una sola llamada
 
-Al principio esto eran dos pasos independientes: un *reranker* que reordenaba los chunks por relevancia, y un *compressor* que recortaba cada uno a lo esencial. Cada paso era una llamada de IA completa — es decir, cada pregunta encadenaba **tres** llamadas de IA (reordenar → comprimir → responder), no una.
-
-Se fusionaron en `LLMContextRefiner`: un único prompt le pide al modelo que haga ambas cosas a la vez (reordenar y recortar), devolviendo el resultado en JSON. Esto reduce el pipeline a **dos** llamadas de IA por pregunta en vez de tres, con una mejora de latencia notable y sin pérdida de calidad apreciable.
+Al principio esto eran dos pasos independientes: un *reranker* que reordenaba los chunks por relevancia, y un *compressor* que recortaba cada uno a lo esencial — cada pregunta encadenaba **tres** llamadas de IA. Se fusionaron en `LLMContextRefiner`: un único prompt le pide al modelo que haga ambas cosas a la vez, devolviendo el resultado en JSON. Reduce el pipeline a **dos** llamadas de IA por pregunta, con una mejora de latencia notable.
 
 ## El sistema de proveedores de IA
 
 Hay dos necesidades muy distintas que fácilmente se confunden si no se piensa con cuidado:
 
-- **Generar texto** (responder preguntas, reordenar contexto): cada llamada es independiente. Si un proveedor falla por cuota, no pasa nada por usar otro distinto en la siguiente llamada.
-- **Generar embeddings**: los vectores de una misma base de conocimiento tienen que venir **siempre del mismo modelo**. Cada proveedor genera vectores en un espacio matemático distinto — comparar un embedding de Gemini con uno de OpenAI no tiene ningún sentido, por mucho que ambos tengan la "misma" dimensión.
-
-Por eso el backend trata ambos casos de forma distinta:
+- **Generar texto**: cada llamada es independiente. Si un proveedor falla por cuota, no pasa nada por usar otro distinto en la siguiente llamada.
+- **Generar embeddings**: los vectores de una misma base de conocimiento tienen que venir **siempre del mismo modelo**. Comparar un embedding de Gemini con uno de OpenAI no tiene ningún sentido, aunque tengan la "misma" dimensión.
 
 ```text
 Chat (generateText / generateChat / refine)
     → FallbackLLMClient: prueba varios proveedores en orden
-    → AI_PROVIDER_ORDER controla el orden
     → si uno falla por cuota, pasa automáticamente al siguiente
 
 Embeddings (generate / generateBatch)
     → un único proveedor fijo, sin fallback
-    → AI_EMBEDDING_PROVIDER lo determina explícitamente
     → si no está configurado, el servidor NO arranca
 ```
 
-Esta asimetría no es casualidad: viene de un bug real de producción (ver `ENGINEERING-NOTES.md`) en el que mezclar proveedores de embeddings entre el momento de importar un juego y el momento de responder una pregunta causaba errores 500 impredecibles.
+Esta asimetría viene de un bug real de producción (ver [`ENGINEERING-NOTES.md`](./ENGINEERING-NOTES.md)) en el que mezclar proveedores de embeddings causaba errores 500 impredecibles. Detalle de cada proveedor en [`docs/AI.md`](./AI.md).
 
 ### Streaming
 
-`ILLMClient` expone `generateTextStream()` como método opcional. Los proveedores que lo implementan (todos los actuales) lo hacen así:
+`ILLMClient` expone `generateTextStream()` como método opcional. **Gemini** usa `generateContentStream` del SDK oficial. Los **proveedores compatibles con OpenAI** (OpenRouter, Mistral, OpenAI, DeepInfra, Together) no tienen SDK propio, así que se hace `fetch` con `stream: true` y se parsea a mano el formato SSE de la API.
 
-- **Gemini**: usa `generateContentStream` del SDK oficial directamente.
-- **Proveedores compatibles con OpenAI** (OpenRouter, Mistral, OpenAI, DeepInfra, Together): no hay SDK, así que se hace `fetch` con `stream: true` y se parsea a mano el formato *Server-Sent Events* que devuelve la API.
+`FallbackLLMClient.generateTextStream()` trata el streaming distinto al resto: si un proveedor falla **antes** de emitir texto, prueba el siguiente. Si falla **a mitad** de una respuesta ya empezada, el error se propaga tal cual — no tiene sentido cambiar de proveedor cuando el usuario ya está viendo texto en pantalla.
 
-`FallbackLLMClient.generateTextStream()` trata el streaming de forma distinta al resto de operaciones: si un proveedor falla **antes** de emitir ningún fragmento, prueba el siguiente (igual que con las llamadas normales). Pero si falla **a mitad** de una respuesta ya empezada, el error se propaga tal cual — no tiene sentido "cambiar de proveedor" cuando el usuario ya está viendo texto en pantalla.
+## Autenticación
 
-## Recuperación semántica
+JWT con `bcrypt` para las contraseñas — sin sesiones en servidor: el propio token firmado (`userId` + expiración) es toda la prueba de identidad que necesita cada petición.
 
-`SemanticRetriever`:
+```text
+POST /api/auth/register
+    → PasswordHasher.hash() (bcrypt, 12 rondas)
+    → PostgresUserRepository.create()
+    → JwtService.sign({ userId })
 
-1. Carga `knowledge.json` del juego.
-2. Calcula similitud coseno entre el embedding de la pregunta y el de cada chunk.
-3. Ordena de mayor a menor similitud.
-4. Devuelve como máximo `maxRetrievedChunks` (5 por defecto).
+Cualquier ruta protegida
+    → requireAuth middleware → JwtService.verify(token) → userId
+```
 
-Un detalle a tener en cuenta: existe también un valor `minimumSimilarity` (0.70) en la configuración, pero el código actual no lo aplica como filtro — solo se usa el límite de cantidad. En la práctica no ha hecho falta, porque con 5 chunks de un único juego la relevancia siempre es razonable, pero es una mejora pendiente si el catálogo creciera mucho.
+Decisiones de seguridad concretas:
 
-Si algún chunk se guardó sin un embedding válido (por ejemplo, por un fallo pasado de un proveedor a mitad de una importación), se omite de la búsqueda con un aviso en los logs, en vez de romper la pregunta entera con un error 500.
+- **Mismo mensaje de error** tanto si el email no existe como si la contraseña es incorrecta — evita revelar qué emails están registrados.
+- **Comparación de contraseña simulada** (hash *dummy*) cuando el email no existe — evita un ataque de temporización.
+- **Cambiar email o contraseña exige la contraseña actual**, incluso con sesión ya iniciada — un token robado no basta por sí solo.
+- **Todas las mutaciones de favoritos/categorías/conversaciones filtran por `user_id` a nivel de SQL**, no solo de aplicación.
+
+## Favoritos, categorías y conversaciones
+
+Los tres siguen el mismo patrón: tablas propias con `user_id` como clave foránea y `ON DELETE CASCADE`. El **login es opcional** en el frontend — sin cuenta, estos datos funcionan en `localStorage`; con cuenta, se sincronizan aquí entre dispositivos.
+
+Particularidad de las conversaciones: solo existe **una** conversación activa por (usuario, juego), no varios hilos guardados — coincide con el modelo que ya tenía el frontend en local. "Nueva conversación" borra las filas de esa combinación y empieza de cero.
+
+## Solicitud de juegos nuevos
+
+```text
+POST /api/game-requests (multipart/form-data, requiere sesión)
+    ├─ valida nombre del juego y (si viene) el enlace a BGG
+    ├─ sube cada PDF a B2 bajo pending-requests/<uuid>/
+    ├─ genera un enlace de descarga firmado por archivo (7 días)
+    └─ EmailService.sendGameRequestNotification() (Resend)
+```
+
+Deliberadamente **no** se guarda nada de esto en una tabla de Postgres — la revisión es manual (se decide si el juego se importa "a mano" tras comprobar que los PDF son reglamentos válidos), y el correo con los enlaces ya cumple esa función sin necesitar un panel de administración. Ver [`docs/CONFIGURATION.md`](./CONFIGURATION.md) sobre por qué solo llega correo a la cuenta propia, no a quien hace la solicitud.
 
 ## Importación de un juego
 
 ```text
 PDF
- ↓ Pdf2JsonExtractor
-Texto por página
- ↓ TextCleaner
-Texto limpio
+ ↓ Pdf2JsonExtractor → texto por página
+ ↓ TextCleaner → texto limpio
  ↓ ChunkGenerator (600 caracteres, solape de 100)
 Chunks (id: <gameId>-p<página>-c<índice>)
  ↓ EmbeddingGenerator (en lotes, con checkpoint de progreso)
-Chunks con embedding
- ↓ KnowledgeWriter
-generated/knowledge.json
+ ↓ se sube el PDF y la portada a B2
+ ↓ se escribe el juego, los documentos y los chunks en Postgres
 ```
 
-El paso de embeddings tiene dos protecciones importantes:
+Dos protecciones importantes en el paso de embeddings:
 
-- **Checkpoint de progreso**: si la importación falla a mitad (típicamente por cuota agotada), el progreso se guarda en `embeddings-checkpoint.json`. Al reintentar, se retoma donde se quedó — pero solo si el proveedor de hoy genera la misma dimensión que el checkpoint de ayer; si no coincide, se descarta el checkpoint y se regenera todo desde cero con el proveedor actual, para no acabar mezclando dimensiones dentro del mismo juego.
-- **Lotes con auto-recuperación**: los chunks se agrupan en lotes (`IMPORT_EMBEDDING_BATCH_SIZE`, 40 por defecto) para reducir drásticamente el número de peticiones HTTP. Si un proveedor concreto no soporta pedir varios embeddings a la vez (algunos modelos aceptan el lote sin dar error, pero solo devuelven 1 resultado), el sistema lo detecta y cae automáticamente a pedirlos uno a uno para ese lote, en vez de fallar la importación entera o guardar datos corruptos en silencio.
-
-## Frontend
-
-Estructura por dominio dentro de `src/`:
-
-```text
-components/
-├── Chat/       conversación, mensajes, fuentes
-├── Header/      cabecera + menú móvil
-├── Layout/       estructura general y workspace
-├── Sidebar/       panel de juegos (drawer en móvil, favoritos)
-├── PdfViewer/      visor de PDF con pdf.js (no un <iframe>)
-└── Welcome/         pantalla de bienvenida
-hooks/       useChat, useConversation, useFavorites, useSpeechRecognition
-services/     clientes HTTP (games, chat)
-```
-
-El visor de PDF merece una mención aparte: al principio usaba un `<iframe>` apuntando al PDF con `#page=N` en la URL para saltar a una página concreta. Funcionaba perfecto en escritorio, pero fallaba en Android/Chromium — el visor de PDF integrado del sistema no siempre respeta ese fragmento de URL. La solución fue renderizar el PDF dentro de la propia aplicación con `pdf.js`, controlando la página mostrada por código en vez de depender de una convención de URL que el navegador puede o no respetar.
+- **Checkpoint de progreso**: si la importación falla a mitad (típicamente por cuota agotada), el progreso se guarda en un archivo temporal local. Al reintentar, se retoma donde se quedó — pero solo si el proveedor de hoy genera la misma dimensión que el checkpoint de ayer; si no coincide, se descarta y se regenera todo desde cero.
+- **Lotes con auto-recuperación**: los chunks se agrupan en lotes (`IMPORT_EMBEDDING_BATCH_SIZE`) para reducir peticiones HTTP. Si un proveedor no soporta pedir varios embeddings a la vez (algunos aceptan el lote sin error, pero devuelven solo 1 resultado), el sistema lo detecta y cae automáticamente a pedirlos uno a uno para ese lote.

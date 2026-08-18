@@ -2,160 +2,58 @@
 
 ## Objetivo
 
-El sistema responde preguntas utilizando el reglamento del juego como fuente de contexto.
-
-El prompt del proveedor de chat indica explícitamente que debe utilizar únicamente el contexto proporcionado y que, si la información no aparece claramente, debe responder:
+El sistema responde preguntas utilizando el reglamento del juego como fuente de contexto. El prompt del proveedor de chat indica explícitamente que debe utilizar únicamente el contexto proporcionado y que, si la información no aparece claramente, debe responder:
 
 ```text
 No he encontrado esa información en el reglamento.
 ```
 
-## Generación de conocimiento
+## Chunking (al importar)
 
-La importación produce `knowledge.json`.
-
-Cada chunk contiene:
+`ChunkGenerator` procesa el PDF página por página y divide el texto en fragmentos:
 
 ```text
-id
-gameId
-page
-index
-text
-embedding
+chunkSize = 600 caracteres
+chunkOverlap = 100 caracteres
 ```
 
-El índice contiene además:
-
-```text
-gameId
-createdAt
-totalChunks
-embeddingModel
-chunks
-```
-
-## Chunking
-
-La configuración actual es:
-
-```text
-chunkSize = 600
-chunkOverlap = 100
-```
-
-El `ChunkGenerator` procesa página por página.
-
-Los IDs tienen la forma:
-
-```text
-<gameId>-p<page>-c<index>
-```
-
-Ejemplo:
-
-```text
-catan-p12-c3
-```
+Los IDs tienen la forma `<gameId>-p<página>-c<índice>` (ej. `catan-p12-c3`). Cada chunk, junto con su embedding, se guarda como una fila en la tabla `chunks` de Postgres — no en un archivo, a diferencia de versiones anteriores del proyecto.
 
 ## Embeddings
 
-La pregunta del usuario se convierte en embedding antes de recuperar conocimiento.
+La pregunta del usuario se convierte en embedding **antes** de recuperar conocimiento (en paralelo con la validación del juego, ver [`ARCHITECTURE.md`](./ARCHITECTURE.md)). Durante la importación se genera un embedding para cada chunk, con el mismo proveedor fijado en `AI_EMBEDDING_PROVIDER`.
 
-Durante la importación se genera un embedding para cada chunk.
+## Recuperación: `PgVectorRetriever`
 
-La configuración permite:
+La búsqueda por similitud se hace **directamente en Postgres**, con el operador de distancia de `pgvector` (`<=>`, distancia coseno):
 
-```env
-IMPORT_EMBEDDING_CONCURRENCY
-IMPORT_EMBEDDING_REQUEST_DELAY
+```sql
+SELECT c.id, c.game_id, c.document_id, d.name AS document_name,
+       c.page, c.text,
+       1 - (c.embedding <=> $2::vector) AS score
+FROM chunks c
+JOIN documents d ON d.game_id = c.game_id AND d.id = c.document_id
+WHERE c.game_id = $1
+ORDER BY c.embedding <=> $2::vector ASC
+LIMIT $3
 ```
 
-Valores por defecto:
+`$1` es el juego (para no comparar contra chunks de otros juegos), `$2` el embedding de la pregunta, `$3` el máximo de resultados (`maxRetrievedChunks`, 5 por defecto). `score` se calcula como `1 - distancia` para que un número más alto signifique más parecido.
 
-```text
-concurrency = 2
-delay = 300 ms
-```
+No hay un índice vectorial (HNSW/IVF) sobre la columna `embedding`, a propósito: con el volumen de esta app (unos pocos miles de chunks por juego, y siempre filtrando primero por `game_id`), una búsqueda exacta ya es rapidísima — un índice aproximado añadiría complejidad sin beneficio real a esta escala.
 
-## Recuperación semántica
+### `HybridRetriever` (implementado, no activo)
 
-`SemanticRetriever`:
+Existe también una implementación `HybridRetriever` en `domain/knowledge/`, que combinaría búsqueda semántica con búsqueda por palabras clave (mediante *Reciprocal Rank Fusion*). El contenedor de dependencias actual (`ApplicationContainer`) instancia directamente `PgVectorRetriever`, así que el flujo activo de `AskQuestionUseCase` no pasa por el híbrido. Queda como posible mejora si la búsqueda puramente semántica se quedara corta en algún caso.
 
-1. carga `knowledge.json`;
-2. calcula similitud coseno entre el embedding de la pregunta y cada chunk;
-3. ordena de mayor a menor;
-4. devuelve como máximo `maxRetrievedChunks`.
+## Reranking y compresión
 
-Configuración:
+Los chunks recuperados pasan por `LLMContextRefiner`, que reordena por relevancia real para la pregunta concreta y recorta cada uno a lo esencial, en una única llamada de IA (ver el porqué de fusionar estos dos pasos en [`ARCHITECTURE.md`](./ARCHITECTURE.md)). Si hay cero o un chunk, se salta este paso.
 
-```text
-maxRetrievedChunks = 5
-minimumSimilarity = 0.70
-```
+## Construcción de contexto y respuesta
 
-Nota: en la implementación actual de `SemanticRetriever` se aplica el límite de chunks, pero no se observa un filtro explícito por `minimumSimilarity`.
-
-## Recuperación por palabras
-
-Existe `KeywordRetriever`, que:
-
-- separa la pregunta en palabras;
-- ignora palabras de longitud <= 2;
-- cuenta coincidencias en el texto;
-- ordena por número de coincidencias;
-- limita resultados.
-
-## HybridRetriever
-
-Existe una implementación `HybridRetriever` que combina:
-
-```text
-SemanticRetriever
-+
-KeywordRetriever
-```
-
-mediante `ReciprocalRankFusion`.
-
-Sin embargo, el `ApplicationContainer` actual instancia directamente:
-
-```text
-SemanticRetriever
-```
-
-por lo que el flujo activo de `AskQuestionUseCase` utiliza el recuperador semántico, no el híbrido.
-
-## Reranking
-
-Los chunks recuperados pasan a `LLMContextReranker`.
-
-Si hay cero o un chunk, devuelve el resultado directamente.
-
-Para varios chunks construye un prompt y procesa la respuesta del modelo.
-
-## Compresión
-
-`LLMContextCompressor` reduce el contexto antes de construir el prompt final.
-
-## Construcción de contexto
-
-`ContextBuilder` transforma los chunks seleccionados en el texto que recibe el proveedor de chat.
-
-## Respuesta
-
-`LLMChatProvider` construye un prompt con:
-
-- instrucciones;
-- contexto;
-- pregunta.
-
-El proveedor genera la respuesta final.
+`ContextBuilder` transforma los chunks ya reordenados en el texto que recibe el proveedor de chat. `LLMChatProvider` construye el prompt final con instrucciones + contexto + pregunta, y genera la respuesta.
 
 ## Compatibilidad de embeddings
 
-Los vectores almacenados deben ser comparables con los embeddings generados para las nuevas preguntas.
-
-Cambiar el modelo de embeddings requiere regenerar el conocimiento si las dimensiones o el espacio vectorial no son compatibles.
-
-Por este motivo, el campo `embeddingModel` de `knowledge.json` es importante para identificar con qué modelo se generó el índice.
+Los vectores almacenados deben ser comparables con los embeddings generados para las preguntas nuevas — por eso `AI_EMBEDDING_PROVIDER` tiene que ser el mismo en cualquier entorno que importe juegos o responda preguntas. La columna `embedding` de Postgres tiene una dimensión fija (`VECTOR(3072)`, la que produce `gemini-embedding-001`); cambiar a un proveedor con otra dimensión requeriría además una migración de esquema, no solo volver a importar.
