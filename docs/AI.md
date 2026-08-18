@@ -61,8 +61,8 @@ GEMINI_API_VERSION=
 Valores por defecto observados:
 
 ```text
-chatModel: gemini-2.5-flash
-embeddingModel: text-embedding-004
+chatModel: gemini-3.6-flash
+embeddingModel: gemini-embedding-001
 apiVersion: v1beta
 ```
 
@@ -117,7 +117,7 @@ OPENAI_EMBEDDING_MODEL=
 Valores por defecto:
 
 ```text
-chatModel: gpt-4o-mini
+chatModel: gpt-5-mini
 embeddingModel: text-embedding-3-small
 ```
 

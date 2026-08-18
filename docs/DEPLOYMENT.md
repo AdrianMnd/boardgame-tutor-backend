@@ -1,146 +1,67 @@
 # Despliegue
 
-Esta documentación describe lo que exige el código actual. La plataforma concreta de producción no se deduce de los ZIP.
+Cómo está desplegado en producción ahora mismo. Para el detalle de cada variable de entorno, ver [`docs/CONFIGURATION.md`](./CONFIGURATION.md).
 
-## Requisitos
+## Resumen
 
-El backend necesita:
+| Pieza | Dónde | Capa gratuita |
+|---|---|---|
+| Frontend | [Vercel](https://vercel.com) | Sí |
+| Backend | [Render](https://render.com) | Sí |
+| Base de datos | [Neon](https://neon.tech) (Postgres + `pgvector`) | Sí |
+| Archivos (PDF, portadas) | [Backblaze B2](https://www.backblaze.com/cloud-storage) | Sí |
+| Correo | [Resend](https://resend.com) | Sí |
 
-- Node.js compatible con las dependencias del proyecto.
-- acceso a las variables de entorno de IA;
-- filesystem con la carpeta `games/`;
-- PDFs y `knowledge.json` disponibles en ese filesystem.
+Todo el proyecto corre sobre capas gratuitas — ninguna pieza requiere tarjeta de crédito ni tiene coste mientras se mantenga dentro de esos límites.
 
-El frontend necesita una URL pública del backend mediante:
+## Backend (Render)
 
-```env
-VITE_API_URL=<URL_PUBLICA_API>
-```
+- Servicio web de tipo Node.
+- Build: `npm run build` (compila TypeScript a `dist/`).
+- Arranque: `npm start` (`node dist/index.js`).
+- Variables de entorno: todas las de `.env.example` se configuran en el panel de Render, igual que en el `.env` local — el proceso se niega a arrancar si falta alguna obligatoria.
+- `API_PUBLIC_URL` no hace falta configurarla explícitamente: se autodetecta con `RENDER_EXTERNAL_URL`, que Render define automáticamente.
 
-## Frontend
+Nota sobre el plan gratuito de Render: el servicio "duerme" tras un periodo sin tráfico, y la primera petición tras eso tarda más (arranque en frío) — normal en este tipo de capa gratuita, no es un fallo.
 
-Construcción:
+## Frontend (Vercel)
 
-```bash
-npm run build
-```
+- Build estático: `npm run build` genera `dist/`, que Vercel sirve directamente.
+- `VITE_API_URL` debe apuntar a la URL pública del backend en Render. Al ser una variable `VITE_*`, Vite la incrusta en el bundle **en tiempo de compilación** — cambiarla en el panel de Vercel no tiene efecto hasta el siguiente despliegue.
 
-El resultado de Vite se genera en:
+## Base de datos (Neon)
 
-```text
-dist/
-```
+1. Crear un proyecto en Neon (capa gratuita).
+2. Aplicar `db/schema.sql` una vez, desde el "SQL Editor" del panel — crea todas las tablas y la extensión `pgvector`.
+3. Copiar la cadena de conexión a `DATABASE_URL` en las variables de entorno de Render.
 
-El servidor estático de producción debe servir ese contenido.
+Neon en su capa gratuita también "duerme" la base de datos tras inactividad — la primera consulta tras eso es más lenta, se reactiva sola.
 
-## Backend
+## Almacenamiento (Backblaze B2)
 
-El backend arranca con:
+Bucket **privado** — nunca público. Las cuatro variables `B2_*` se configuran igual que el resto, solo en el backend (el frontend nunca habla con B2 directamente, siempre a través de la API).
 
-```bash
-npm run dev
-```
+## Correo (Resend)
 
-El script de producción no está definido en el `package.json` entregado.
-
-El build actual es:
-
-```bash
-npm run build
-```
-
-y solo ejecuta `tsc --noEmit`.
-
-Por tanto, la estrategia concreta para ejecutar TypeScript compilado en producción debe definirse antes de automatizar un despliegue basado en `npm run build`.
-
-## Variables
-
-Backend:
-
-```env
-PORT=
-API_PUBLIC_URL=
-
-AI_PROVIDER=
-AI_PROVIDER_ORDER=
-
-GEMINI_API_KEY=
-GEMINI_CHAT_MODEL=
-GEMINI_EMBEDDING_MODEL=
-GEMINI_API_VERSION=
-
-OPENAI_API_KEY=
-OPENAI_MODEL=
-OPENAI_EMBEDDING_MODEL=
-
-OPENROUTER_API_KEY=
-OPENROUTER_CHAT_MODEL=
-
-MISTRAL_API_KEY=
-MISTRAL_CHAT_MODEL=
-MISTRAL_EMBEDDING_MODEL=
-
-DEEPINFRA_API_KEY=
-DEEPINFRA_CHAT_MODEL=
-DEEPINFRA_EMBEDDING_MODEL=
-
-TOGETHER_API_KEY=
-TOGETHER_CHAT_MODEL=
-TOGETHER_EMBEDDING_MODEL=
-
-IMPORT_EMBEDDING_CONCURRENCY=
-IMPORT_EMBEDDING_REQUEST_DELAY=
-```
-
-Frontend:
-
-```env
-VITE_API_URL=
-```
+Solo necesario si se quiere que funcione la solicitud de juegos nuevos. Ver la limitación importante sobre el remitente de pruebas en [`docs/CONFIGURATION.md`](./CONFIGURATION.md) — sin ello, el resto de la aplicación sigue funcionando con normalidad.
 
 ## CORS
 
-Actualmente Express utiliza:
-
 ```ts
-app.use(cors());
+app.use(cors({ origin: [...] }));
 ```
 
-En producción se recomienda limitarlo al dominio real del frontend.
+Restringido a una lista explícita: el dominio de producción del frontend más lo que se añada en `FRONTEND_URL`. **Si se renombra el proyecto de Vercel** (cambia su URL `.vercel.app`), hay que actualizar también esta lista en `src/index.ts` y volver a desplegar el backend — si no, el navegador bloqueará las peticiones del frontend nuevo con un error de CORS.
 
 ## HTTPS
 
-El backend y frontend deberían publicarse mediante HTTPS.
+Tanto Render como Vercel sirven HTTPS por defecto, sin configuración adicional.
 
-## Persistencia
+## Checklist antes de desplegar un cambio
 
-No desplegar el backend en un entorno donde `games/` desaparezca al reiniciar si se pretende conservar:
-
-- PDFs;
-- portadas;
-- `knowledge.json`;
-- checkpoints.
-
-## Portadas y PDFs
-
-El backend expone:
-
-```text
-/games
+```bash
+npm run build
+npm test
 ```
 
-como contenido estático.
-
-Esto requiere que la carpeta `games/` exista en el entorno de producción.
-
-## Estado de conversaciones
-
-Las conversaciones viven en el navegador mediante `localStorage`.
-
-No se almacenan en el backend.
-
-## Variables públicas
-
-`VITE_API_URL` queda incorporada al bundle del frontend durante la compilación. No debe contener secretos.
-
-Las API keys de proveedores solo deben estar en el backend.
+En el backend. En el frontend, además: `npm run lint`, `npm run test`, y `npm run test:e2e` si el cambio afecta a un flujo cubierto por esos tests. Ambos repositorios tienen CI (GitHub Actions) que ejecuta esto mismo automáticamente en cada `push`/PR a `dev` o `master` — ver la pestaña "Actions" de cada repositorio.

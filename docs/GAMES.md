@@ -1,23 +1,18 @@
 # Juegos y almacenamiento
 
-## Estructura
+## Dónde vive cada cosa
 
 ```text
-games/
-└── <gameId>/
-    ├── metadata.json
-    ├── source/
-    │   └── rulebook.pdf
-    ├── generated/
-    │   ├── knowledge.json
-    │   └── embeddings-checkpoint.json
-    └── assets/
-        └── cover.png
+Postgres (tablas games, documents, chunks)   Backblaze B2
+├── metadatos (nombre, jugadores, año...)     ├── <gameId>/source/rulebook.pdf
+├── ruta del PDF (documents.storage_path)     └── <gameId>/assets/cover.png
+├── ruta de la portada (games.cover_path)
+└── texto + embedding de cada fragmento
 ```
 
-`chunks.json` forma parte del modelo de paths del dominio, aunque el flujo actual de `KnowledgeWriter` escribe `knowledge.json`.
+`PostgresGameRepository` implementa `IGameRepository` — es la única pieza que sabe cómo se guardan los juegos; el resto de la aplicación solo conoce la interfaz de dominio.
 
-## Metadata
+## Metadata de un juego (al importar)
 
 ```json
 {
@@ -31,97 +26,22 @@ games/
 }
 ```
 
-## Repositorio
+El campo `id` debe coincidir con el nombre de la carpeta local en `games/<id>/` en el momento de importar (ver [`docs/CONFIGURATION.md`](./CONFIGURATION.md)) — esa carpeta es solo el punto de partida para `npm run import`, no algo que persista después: tras importar, el juego vive enteramente en Postgres y B2.
 
-`FileGameRepository` no utiliza una base de datos.
+## Documentos
 
-Hace:
-
-```text
-listDirectories(games)
-    ↓
-findById(directory)
-    ↓
-metadata.json
-```
-
-Los directorios sin `metadata.json` se ignoran en el listado.
-
-## Juegos incluidos
-
-### Catan
-
-```text
-id: catan
-language: es
-version: 1.0
-players: 3-4
-year: 1995
-```
-
-### Zombicide 2nd Edition
-
-```text
-id: zombicide
-language: es
-version: 1.0
-players: 1-6
-year: 2021
-```
-
-El PDF actual se llama:
-
-```text
-Zombicide-2aedicion_reglamento_(spanish).pdf
-```
-
-El repositorio, sin embargo, construye el path estándar:
-
-```text
-source/rulebook.pdf
-```
-
-Por tanto, para que el flujo estándar del repositorio encuentre ese reglamento, el archivo debe estar disponible con el nombre esperado.
-
-### Nemesis
-
-```text
-id: nemesis
-language: es
-version: 1.0
-players: 1-5
-year: 2018
-```
-
-### Cthulhu Death May Die
-
-```text
-id: cdmd
-name: Cthulhu Death May Die
-language: es
-version: 1.0
-players: 1-5
-year: 2019
-```
+Un juego puede tener más de un documento (por ejemplo, reglamento + FAQ) — cada uno con su propio `id` *dentro* del juego (no global), nombre para mostrar, y ruta en B2. El importador actual crea siempre un documento con `id: "rulebook"` a partir de `source/rulebook.pdf`.
 
 ## Portadas
 
-La API devuelve siempre:
+`games.cover_path` guarda la ruta dentro del bucket de B2 (ej. `catan/assets/cover.png`), o `NULL` si el juego no tiene portada. La API nunca expone esa ruta interna directamente — `GET /api/games/:id/cover` es quien lee de B2 y sirve el archivo, y `coverUrl` en la respuesta de `/api/games` ya viene como una URL completa lista para usar.
 
-```text
-/games/<id>/assets/cover.png
+## Juegos incluidos actualmente
+
+Para ver el catálogo real y actualizado, la fuente de verdad es la propia base de datos — `GET /api/games` en cualquier momento, o:
+
+```sql
+SELECT id, name, min_players, max_players, year FROM games ORDER BY name;
 ```
 
-Por tanto, `cover.png` es el nombre canónico utilizado por el frontend actual.
-
-En la copia recibida, `nemesis` y `cdmd` contienen además `cover.jpg`, pero el mapper no utiliza ese archivo.
-
-## PDF
-
-El path canónico utilizado por `FileGameRepository` es:
-
-```text
-games/<id>/source/rulebook.pdf
-```
-
-Cualquier juego cuyo PDF tenga otro nombre debe adaptarse a esa convención o requeriría cambiar el repositorio.
+directamente en el "SQL Editor" de Neon.

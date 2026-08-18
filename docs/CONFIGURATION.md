@@ -1,18 +1,70 @@
-# Configuración, despliegue e importación de juegos
+# Configuración
 
-## Variables de entorno
+Ver `.env.example` para la lista completa con valores por defecto comentados. Aquí, las que requieren más contexto.
 
-Ver `.env.example` para la lista completa con valores por defecto comentados. Las que requieren más contexto:
+## Base de datos y almacenamiento (obligatorias)
 
-### `AI_EMBEDDING_PROVIDER` (obligatoria)
+### `DATABASE_URL`
 
-El único proveedor usado para generar embeddings — sin fallback. Tiene que valer exactamente lo mismo en cualquier entorno donde se importen juegos o se sirvan preguntas (tu máquina local y el servidor desplegado), o los juegos importados en un sitio no funcionarán en el otro. Si falta, el servidor no arranca.
+Cadena de conexión de [Neon](https://neon.tech) (Postgres + `pgvector`). Es la fuente de verdad de **todo**: juegos, documentos, fragmentos con sus embeddings, usuarios, favoritos, categorías y conversaciones — no hay nada en el sistema de archivos del servidor.
+
+Puesta en marcha de un proyecto Neon nuevo:
+
+1. Crea un proyecto en [neon.tech](https://neon.tech) (capa gratuita).
+2. Copia la cadena de conexión que te da al `DATABASE_URL` de tu `.env`.
+3. Pega el contenido de `db/schema.sql` en el "SQL Editor" del panel de Neon y ejecútalo — crea todas las tablas, incluida la extensión `pgvector`.
+
+### `B2_ENDPOINT` / `B2_BUCKET` / `B2_ACCESS_KEY_ID` / `B2_SECRET_ACCESS_KEY`
+
+Credenciales de un bucket de [Backblaze B2](https://www.backblaze.com/cloud-storage) (compatible con la API de S3). Aquí viven los PDF de los reglamentos, las portadas de los juegos, y los PDF de las solicitudes de juegos pendientes de revisar.
+
+**El bucket debe ser privado.** El backend es el único que accede directamente (para servir portadas/manuales, o generar enlaces de descarga firmados para las solicitudes) — nunca debe haber una URL pública fija hacia el contenido del bucket.
+
+## Autenticación (obligatorias)
+
+### `JWT_SECRET`
+
+Secreto usado para firmar los tokens de sesión. Mínimo 32 caracteres — genera uno con:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+**Nunca compartas este valor ni lo subas a git** — cualquiera que lo tenga podría fabricar tokens de sesión válidos para cualquier usuario, sin necesitar su contraseña.
+
+### `JWT_EXPIRES_IN`
+
+Cuánto dura la sesión antes de tener que volver a iniciar sesión. Acepta formatos de la librería `ms` (`30d`, `12h`...). Por defecto `30d`.
+
+### `AUTH_RATE_LIMIT`
+
+Máximo de intentos de login/registro por IP cada 15 minutos (10 por defecto) — protege contra fuerza bruta.
+
+## Correo — solicitud de juegos nuevos (opcionales)
+
+### `RESEND_API_KEY` / `NOTIFICATION_EMAIL`
+
+[Resend](https://resend.com) tiene capa gratuita (3.000 correos/mes, sin tarjeta). **Limitación importante**: sin un dominio propio verificado en Resend, el remitente de pruebas (`onboarding@resend.dev`) solo puede mandar correo de forma fiable a la propia cuenta de Resend — no a destinatarios arbitrarios.
+
+Por eso `NOTIFICATION_EMAIL` debe ser el mismo email con el que te registraste en Resend, y por eso quien solicita un juego nuevo **no recibe ningún correo de confirmación** — solo ve una confirmación en la propia pantalla. Si en algún momento se verifica un dominio propio, se podría extender `EmailService` para mandar también esa confirmación.
+
+Sin estas dos variables, el resto de la aplicación funciona con normalidad — solo falla específicamente el envío del correo al solicitar un juego.
+
+### `GAME_REQUEST_RATE_LIMIT`
+
+Máximo de solicitudes de juegos nuevos por IP cada hora (5 por defecto) — más bajo que el resto de límites, porque cada solicitud sube archivos potencialmente grandes y manda un correo.
+
+## Proveedor de embeddings (obligatoria)
+
+### `AI_EMBEDDING_PROVIDER`
+
+El único proveedor usado para generar embeddings — sin *fallback*. Tiene que valer **exactamente lo mismo** en cualquier entorno donde se importen juegos o se sirvan preguntas (tu máquina local y el servidor desplegado), o los juegos importados en un sitio no funcionarán en el otro — los vectores de proveedores distintos no son comparables entre sí, aunque tengan la misma dimensión numérica. Si falta, el servidor no arranca.
 
 Valores válidos: `local`, `gemini`, `mistral`, `openai`, `deepinfra`, `together` (`openrouter` no soporta embeddings).
 
 ### `AI_PROVIDER_ORDER`
 
-Orden de *fallback* para chat (no para embeddings). Por defecto: `local` primero (si está activado), luego el valor de `AI_PROVIDER` (legado), luego el resto.
+Orden de *fallback* para **chat** (no para embeddings, que no tiene *fallback* por el motivo de arriba). Por defecto: todos los proveedores conocidos en el orden declarado en `.env.example`. Los proveedores sin API key configurada se omiten automáticamente.
 
 ### `LOCAL_EMBEDDING_ENABLED` / `LOCAL_EMBEDDING_MODEL`
 
@@ -21,6 +73,8 @@ Modelo de embeddings local (`transformers.js`, gratis, sin límite de peticiones
 ### `IMPORT_EMBEDDING_BATCH_SIZE` / `_CONCURRENCY` / `_REQUEST_DELAY`
 
 Controlan cuántos chunks se agrupan por petición al importar un juego (40 por defecto), cuántos lotes en paralelo (1), y la espera entre peticiones (500 ms). Lotes más grandes = menos peticiones = menos riesgo de agotar límites de cuota, pero algunos proveedores devuelven silenciosamente menos resultados de los pedidos en lotes muy grandes (ver `ENGINEERING-NOTES.md`).
+
+## Servidor
 
 ### `API_PUBLIC_URL`
 
@@ -35,7 +89,7 @@ URL pública de este servicio, usada para construir las URLs de las portadas de 
 ```bash
 npm install
 cp .env.example .env
-# Rellena .env con al menos una API key y AI_EMBEDDING_PROVIDER
+# Rellena .env — ver el README para lo mínimo imprescindible
 npm run dev
 ```
 
@@ -45,26 +99,30 @@ El proyecto está desplegado así:
 
 - **Frontend**: Vercel, build estático (`npm run build` → sirve `dist/`). URL: [boardgametutor.vercel.app](https://boardgametutor.vercel.app).
 - **Backend**: Render, servicio web Node (`npm run build` compila TypeScript a `dist/`, `npm start` ejecuta `node dist/index.js`).
+- **Base de datos**: Neon (Postgres + `pgvector`).
+- **Almacenamiento de archivos**: Backblaze B2.
+- **Correo**: Resend.
 
 Puntos a tener en cuenta al desplegar:
 
-- `games/` tiene que persistir entre despliegues (PDFs, portadas, `knowledge.json`) — no vale un filesystem efímero que se resetee.
-- `AI_EMBEDDING_PROVIDER` (y la API key correspondiente) tienen que configurarse en el panel de variables de entorno del hosting, igual que en el `.env` local.
+- Todas las variables obligatorias (`DATABASE_URL`, `B2_*`, `JWT_SECRET`, `AI_EMBEDDING_PROVIDER` + su API key) tienen que configurarse en el panel de variables de entorno del hosting, igual que en el `.env` local — el backend se niega a arrancar si falta alguna.
 - El frontend necesita `VITE_API_URL` apuntando a la URL pública del backend — al ser una variable `VITE_*`, queda incrustada en el bundle en tiempo de compilación, así que cambiarla requiere volver a desplegar, no solo cambiar la variable.
 - Si renombras el proyecto de Vercel (cambia su URL `.vercel.app`), hay que actualizar también el origen permitido por CORS en `src/index.ts` del backend — si no, el navegador bloqueará las peticiones del frontend nuevo con un error de CORS.
+- A diferencia de versiones anteriores del proyecto, **ya no hace falta preocuparse de que `games/` persista entre despliegues** — no hay nada en el disco del servidor, todo vive en Neon y B2. El backend es completamente *stateless*.
+
+Ver [`docs/DEPLOYMENT.md`](./DEPLOYMENT.md) para más detalle sobre el propio proceso de despliegue.
 
 ## Importar un juego nuevo
 
-Estructura necesaria en `games/<id>/`:
+Estructura necesaria en `games/<id>/` (solo en tu máquina local — esta carpeta no se despliega ni persiste en el servidor, es solo el punto de partida para `npm run import`):
 
 ```text
 games/wingspan/
 ├── metadata.json
 ├── source/
 │   └── rulebook.pdf
-├── assets/
-│   └── cover.png
-└── generated/        ← se genera automáticamente
+└── assets/
+    └── cover.png
 ```
 
 `metadata.json`:
@@ -87,7 +145,7 @@ El campo `id` debe coincidir con el nombre de la carpeta. Con la estructura list
 npm run import wingspan
 ```
 
-Esto extrae el texto del PDF, lo divide en fragmentos, genera un embedding para cada uno (con checkpoint de progreso ante fallos de cuota) y escribe `generated/knowledge.json`.
+Esto extrae el texto del PDF, lo divide en fragmentos, genera un embedding para cada uno (con checkpoint de progreso ante fallos de cuota), sube el PDF y la portada a B2, y escribe el juego, los documentos y los fragmentos en Postgres.
 
 Tras importar varios juegos, o si sospechas que alguno quedó con datos inconsistentes:
 
@@ -95,23 +153,4 @@ Tras importar varios juegos, o si sospechas que alguno quedó con datos inconsis
 npm run check:embeddings
 ```
 
-Recorre todos los juegos y avisa de cuáles tienen fragmentos sin embedding o con dimensiones mezcladas.
-
-## Juegos incluidos actualmente
-
-| ID | Nombre | Jugadores | Año |
-|---|---|---:|---:|
-| `40k` | Warhammer 40k (11ª edición) | 2 | 2026 |
-| `arkhamlcg` | Arkham Horror: El juego de cartas | 1–4 | 2016 |
-| `catan` | Catan | 3–4 | 1995 |
-| `cdmd` | Cthulhu: Death May Die | 1–5 | 2019 |
-| `hotel` | Hotel | 2–4 | 1974 |
-| `mansiones` | Mansiones de la Locura (2ª ed.) | 1–5 | 2016 |
-| `marvelchampions` | Marvel Champions | 1–4 | 2019 |
-| `nemesis` | Nemesis | 1–5 | 2018 |
-| `nemesisrepresalia` | Nemesis: Represalia | 1–5 | 2026 |
-| `terraforming` | Terraforming Mars | 1–5 | 2016 |
-| `trivial` | Trivial Pursuit | 2–6 | 1979 |
-| `zombicide` | Zombicide (2ª ed.) | 1–6 | 2021 |
-
-Cada carpeta bajo `games/` se descubre automáticamente al listar — no hace falta registrar el juego en ningún otro sitio.
+Recorre todos los juegos en la base de datos y avisa de cuáles tienen fragmentos sin embedding o con dimensiones mezcladas.

@@ -1,126 +1,57 @@
 # Desarrollo
 
-## Flujo recomendado
-
-Mantener dos entornos conceptuales:
-
-```text
-Desarrollo
-├── frontend → Vite
-└── backend  → Express
-
-Producción
-├── frontend → build estático
-└── backend  → Node/Express
-```
-
-La configuración local recibida apunta a:
-
-```text
-Frontend API → http://localhost:3000
-Backend      → puerto 3000
-```
-
-## Cambios en frontend
-
-Después de modificar React:
+## Puesta en marcha
 
 ```bash
-npm run build
+npm install
+cp .env.example .env
+# Rellena .env — ver el README para lo mínimo imprescindible
+npm run dev
 ```
 
-y opcionalmente:
+Arranca en el puerto `PORT` (por defecto `3000`), con recarga automática al modificar TypeScript. Necesitas el [frontend](https://github.com/AdrianMnd/boardgame-tutor-frontend) corriendo en paralelo (`npm run dev`, por defecto en `http://localhost:5173`) apuntando a este backend (`VITE_API_URL=http://localhost:3000` en el `.env.local` del frontend) para probar la aplicación completa.
+
+## Tras modificar código
 
 ```bash
-npm run lint
+npm run build   # compila TypeScript — falla si hay errores de tipos
+npm test         # tests unitarios (Vitest)
 ```
 
-## Cambios en backend
+`npm run build` es el que se ejecuta en CI y en el despliegue de producción — cualquier error de tipos que no se detecte aquí en local se detectará ahí.
 
-Después de modificar TypeScript:
+## Añadir un juego nuevo
+
+Ver [`docs/CONFIGURATION.md`](./CONFIGURATION.md#importar-un-juego-nuevo) para la estructura completa de `metadata.json`. En resumen:
+
+```bash
+mkdir -p games/<id>/source games/<id>/assets
+# añade metadata.json, source/rulebook.pdf, assets/cover.png
+npm run import <id>
+```
+
+## Probar el pipeline RAG sin pasar por HTTP
+
+```bash
+npm run ask <id> "<pregunta>"
+```
+
+Útil para depurar la calidad de las respuestas sin necesitar el frontend ni hacer peticiones HTTP manuales.
+
+## Diagnóstico de problemas frecuentes
+
+Ver [`docs/TROUBLESHOOTING.md`](./TROUBLESHOOTING.md) para una lista más completa. Los más comunes durante el desarrollo:
+
+- **Juego no encontrado**: comprueba que existe en la tabla `games` de Postgres (`npm run import` lo habría creado) y que el `id` de la URL coincide exactamente.
+- **Portada no visible**: comprueba que `cover_path` no sea `NULL` en la fila del juego, y que las credenciales de B2 en `.env` tengan permiso de lectura sobre esa ruta.
+- **Preguntas sin buenos resultados / "no he encontrado esa información"**: comprueba que el juego tenga chunks en la tabla `chunks` (`npm run check:embeddings` detecta juegos con embeddings incompletos), y que `AI_EMBEDDING_PROVIDER` sea el mismo que se usó al importar ese juego en concreto.
+- **Error 429 / cuota agotada**: revisa `AI_PROVIDER_ORDER` y añade más proveedores con API key configurada — el sistema pasa automáticamente al siguiente ante fallos de cuota (solo para chat, no para embeddings).
+
+## Antes de dar por buena una entrega
 
 ```bash
 npm run build
 npm test
 ```
 
-## Añadir un juego
-
-1. Crear `games/<id>/`.
-2. Añadir `metadata.json`.
-3. Añadir el PDF en `source/rulebook.pdf`.
-4. Añadir `assets/cover.png`.
-5. Ejecutar:
-
-```bash
-npm run import <id>
-```
-
-## Probar RAG por CLI
-
-```bash
-npm run ask <id> "<pregunta>"
-```
-
-## Probar API
-
-```text
-GET  /
-GET  /api/games
-GET  /api/games/<id>/manual
-POST /api/chat
-```
-
-## Errores habituales
-
-### Juego no encontrado
-
-Comprobar:
-
-```text
-games/<id>/metadata.json
-```
-
-y que el nombre de la carpeta coincida con `metadata.id`.
-
-### Portada no visible
-
-Comprobar:
-
-```text
-games/<id>/assets/cover.png
-```
-
-y la URL devuelta por `/api/games`.
-
-### Embeddings agotados
-
-Comprobar:
-
-- `AI_PROVIDER_ORDER`;
-- API keys disponibles;
-- proveedores que soportan embeddings;
-- `IMPORT_EMBEDDING_CONCURRENCY`;
-- `IMPORT_EMBEDDING_REQUEST_DELAY`;
-- checkpoint existente.
-
-### Respuestas pobres del RAG
-
-Comprobar:
-
-- que exista `generated/knowledge.json`;
-- que el embedding del índice sea compatible con el embedding de la consulta;
-- número de chunks recuperados;
-- score de similitud;
-- reranker/compressor;
-- contenido del reglamento extraído.
-
-## No cambiar arquitectura sin comprobar
-
-La aplicación depende actualmente del filesystem de `games/`. Cualquier migración a almacenamiento externo debe contemplar simultáneamente:
-
-- repositorio de juegos;
-- PDFs;
-- portadas;
-- conocimiento generado;
-- checkpoints.
+Si el cambio toca el frontend también, comprobar allí: `npm run build`, `npm run lint`, `npm run test`, y `npm run test:e2e` si el cambio afecta a un flujo de usuario cubierto por esos tests.
