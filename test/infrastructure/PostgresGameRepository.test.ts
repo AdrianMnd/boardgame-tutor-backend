@@ -40,7 +40,8 @@ describe("PostgresGameRepository", () => {
                         min_players: 3,
                         max_players: 4,
                         year: 1995,
-                        cover_path: "catan/assets/cover.png"
+                        cover_path: "catan/assets/cover.png",
+                        created_at: "2026-01-15T10:30:00.000Z"
 
                     }]
 
@@ -78,7 +79,8 @@ describe("PostgresGameRepository", () => {
                 version: "1.0",
                 minPlayers: 3,
                 maxPlayers: 4,
-                year: 1995
+                year: 1995,
+                createdAt: "2026-01-15T10:30:00.000Z"
 
             },
 
