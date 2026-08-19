@@ -11,7 +11,7 @@ domain/          → lógica de negocio pura: entidades, interfaces, servicios d
 infrastructure/  → implementaciones concretas: Postgres, B2, IA, email, JWT
 ```
 
-La regla de dependencia es la habitual: `domain` no importa nada de las otras capas — define interfaces (`IGameRepository`, `IUserRepository`, `IFavoritesRepository`, `ICategoryRepository`, `IConversationRepository`, `IEmbeddingProvider`, `IFileStorage`, `IContextRefiner`...) que `infrastructure` implementa. `application` orquesta casos de uso combinando piezas de `domain` e `infrastructure`. `ApplicationContainer` es el único sitio donde se construyen las instancias concretas y se conectan entre sí.
+La regla de dependencia es la habitual: `domain` no importa nada de las otras capas — define interfaces (`IGameRepository`, `IUserRepository`, `IFavoritesRepository`, `ICategoryRepository`, `IConversationRepository`, `IEmbeddingProvider`, `IFileStorage`...) que `infrastructure` implementa. `application` orquesta casos de uso combinando piezas de `domain` e `infrastructure`. `ApplicationContainer` es el único sitio donde se construyen las instancias concretas y se conectan entre sí.
 
 ## Almacenamiento: Postgres + B2
 
@@ -46,20 +46,18 @@ Pregunta del usuario
         ▼
 Recupera los chunks más similares (similitud coseno)
         ▼
-Reordena y recorta el contexto (1 llamada de IA)
-        ▼
 Genera la respuesta, en streaming
 ```
 
-Todo esto vive en `AskQuestionUseCase`, con dos métodos públicos: `execute()` (respuesta completa) y `executeStream()` (igual, pero entregando la respuesta en fragmentos vía un generador asíncrono). Detalle completo del pipeline en [`docs/RAG.md`](./RAG.md).
+Todo esto vive en `AskQuestionUseCase`, con dos métodos públicos: `execute()` (respuesta completa) y `executeStream()` (igual, pero entregando la respuesta en fragmentos vía un generador asíncrono).
 
 ### Por qué el embedding y la validación van en paralelo
 
 Ninguno depende del resultado del otro — validar que el juego existe es una consulta a Postgres, generar el embedding es una llamada de red a un proveedor de IA. Lanzarlos con `Promise.all` en vez de uno detrás de otro ahorra ese tiempo sin ningún riesgo.
 
-### Reordenar y recortar en una sola llamada
+### Por qué ya no hay un paso de reordenar el contexto
 
-Al principio esto eran dos pasos independientes: un *reranker* que reordenaba los chunks por relevancia, y un *compressor* que recortaba cada uno a lo esencial — cada pregunta encadenaba **tres** llamadas de IA. Se fusionaron en `LLMContextRefiner`: un único prompt le pide al modelo que haga ambas cosas a la vez, devolviendo el resultado en JSON. Reduce el pipeline a **dos** llamadas de IA por pregunta, con una mejora de latencia notable.
+Hubo un paso intermedio (`LLMContextRefiner`) que reordenaba los chunks recuperados por relevancia con una llamada de IA extra, antes de generar la respuesta — llegó a fusionar dos pasos en uno (reordenar + recortar) para bajar de tres llamadas de IA por pregunta a dos. Se eliminó por completo: `ContextBuilder` siempre incluía **todos** los chunks recuperados en el contexto final, reordenados o no, así que ese paso no cambiaba qué información llegaba a la respuesta — solo el orden en que la IA la leía, un efecto sutil. El coste, en cambio, era una llamada de IA completa y sin streaming que bloqueaba el inicio de cualquier respuesta, notándose en tiempos de espera de 30+ segundos en reglamentos densos. Ahora la generación empieza en cuanto termina la recuperación por vectores (que ya devuelve los chunks ordenados por similitud), sin ese paso intermedio.
 
 ## El sistema de proveedores de IA
 

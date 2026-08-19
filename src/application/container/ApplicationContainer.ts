@@ -76,9 +76,6 @@ export class ApplicationContainer {
     readonly chatProvider =
         this.ai.chatProvider;
 
-    readonly refiner =
-        this.ai.refiner;
-
     readonly retriever =
         new PgVectorRetriever(
             this.pool,
@@ -96,8 +93,6 @@ export class ApplicationContainer {
             this.embeddingProvider,
 
             this.retriever,
-
-            this.refiner,
 
             this.contextBuilder,
 

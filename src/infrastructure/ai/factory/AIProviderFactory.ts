@@ -22,7 +22,6 @@ import { FallbackLLMClient, type NamedLLMClient } from "../common/FallbackLLMCli
 
 import { LLMChatProvider } from "../common/LLMChatProvider";
 import { LLMEmbeddingProvider } from "../common/LLMEmbeddingProvider";
-import { LLMContextRefiner } from "../common/LLMContextRefiner";
 
 const PROVIDER_BUILDERS: Record<
 
@@ -165,11 +164,7 @@ export class AIProviderFactory {
 
             chatProvider:
 
-                new LLMChatProvider(chatClient),
-
-            refiner:
-
-                new LLMContextRefiner(chatClient)
+                new LLMChatProvider(chatClient)
 
         };
 

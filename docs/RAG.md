@@ -2,11 +2,11 @@
 
 ## Objetivo
 
-El sistema responde preguntas utilizando el reglamento del juego como fuente de contexto. El prompt del proveedor de chat indica explícitamente que debe utilizar únicamente el contexto proporcionado y que, si la información no aparece claramente, debe responder:
+El sistema responde preguntas utilizando el reglamento del juego como fuente de contexto. El prompt del proveedor de chat indica explícitamente que debe utilizar únicamente el contexto proporcionado, con tres casos posibles:
 
-```text
-No he encontrado esa información en el reglamento.
-```
+1. **Respuesta directa**: el contexto responde razonablemente a la pregunta (combinando fragmentos si hace falta) → responde con esa información.
+2. **Relacionado pero no específico**: el contexto trata el tema pero no responde exactamente a lo preguntado → empieza con "No se ha encontrado una respuesta específica a tu pregunta, pero esto es lo que se ha encontrado relacionado con el reglamento:" y resume lo relacionado que sí aparece.
+3. **Nada relacionado**: el contexto no trata el tema en absoluto → responde exactamente "No he encontrado esa información en el reglamento."
 
 ## Chunking (al importar)
 
@@ -46,13 +46,11 @@ No hay un índice vectorial (HNSW/IVF) sobre la columna `embedding`, a propósit
 
 Existe también una implementación `HybridRetriever` en `domain/knowledge/`, que combinaría búsqueda semántica con búsqueda por palabras clave (mediante *Reciprocal Rank Fusion*). El contenedor de dependencias actual (`ApplicationContainer`) instancia directamente `PgVectorRetriever`, así que el flujo activo de `AskQuestionUseCase` no pasa por el híbrido. Queda como posible mejora si la búsqueda puramente semántica se quedara corta en algún caso.
 
-## Reranking y compresión
-
-Los chunks recuperados pasan por `LLMContextRefiner`, que reordena por relevancia real para la pregunta concreta y recorta cada uno a lo esencial, en una única llamada de IA (ver el porqué de fusionar estos dos pasos en [`ARCHITECTURE.md`](./ARCHITECTURE.md)). Si hay cero o un chunk, se salta este paso.
-
 ## Construcción de contexto y respuesta
 
-`ContextBuilder` transforma los chunks ya reordenados en el texto que recibe el proveedor de chat. `LLMChatProvider` construye el prompt final con instrucciones + contexto + pregunta, y genera la respuesta.
+`ContextBuilder` transforma directamente los chunks recuperados (ya vienen ordenados por similitud desde `PgVectorRetriever`) en el texto que recibe el proveedor de chat. `LLMChatProvider` construye el prompt final con instrucciones + contexto + pregunta, y genera la respuesta.
+
+Hubo un paso intermedio de reordenar los chunks con una llamada de IA extra antes de este — se eliminó por no aportar suficiente valor para su coste en tiempo de espera. Ver el porqué en [`ARCHITECTURE.md`](./ARCHITECTURE.md#por-qué-ya-no-hay-un-paso-de-reordenar-el-contexto).
 
 ## Compatibilidad de embeddings
 
