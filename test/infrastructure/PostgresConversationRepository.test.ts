@@ -126,6 +126,28 @@ describe("PostgresConversationRepository", () => {
 
     });
 
+    it("addMessage recorta los mensajes más antiguos si se supera el límite por conversación", async () => {
+
+        const query = vi.fn().mockResolvedValue({ rows: [fakeRow] });
+
+        const repository =
+
+            new PostgresConversationRepository(
+
+                { query } as unknown as import("pg").Pool
+
+            );
+
+        await repository.addMessage("user-1", "catan", "user", "¿Cómo se gana?");
+
+        // Segunda llamada a query: la del recorte, después del INSERT
+        const [sql, params] = query.mock.calls[1];
+        expect(sql).toContain("DELETE FROM conversation_messages");
+        expect(sql).toContain("OFFSET $3");
+        expect(params).toEqual(["user-1", "catan", 30]);
+
+    });
+
     it("clearConversation filtra por user_id Y game_id — nunca podría borrar la conversación de otro usuario", async () => {
 
         const query = vi.fn().mockResolvedValue({ rows: [] });

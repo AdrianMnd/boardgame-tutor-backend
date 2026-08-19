@@ -4,8 +4,6 @@ import { IEmbeddingProvider } from "../../../domain/embeddings/IEmbeddingProvide
 
 import { IKnowledgeRetriever } from "../../../domain/knowledge/IknowledgeRetriever";
 
-import { IContextRefiner } from "../../../domain/knowledge/IContextRefiner";
-
 import { ContextBuilder } from "../../../domain/ai/contextBuilder";
 
 import { ChatProvider } from "../../../domain/ai/chatProvider";
@@ -22,8 +20,6 @@ export class AskQuestionUseCase {
         private readonly embeddingProvider: IEmbeddingProvider,
 
         private readonly retriever: IKnowledgeRetriever,
-
-        private readonly refiner: IContextRefiner,
 
         private readonly contextBuilder: ContextBuilder,
 
@@ -138,9 +134,20 @@ export class AskQuestionUseCase {
     /**
      * Pasos comunes a execute() y executeStream(): validar el
      * juego y generar el embedding de la pregunta en paralelo
-     * (no dependen entre sí), recuperar los fragmentos
-     * relevantes, y refinarlos (reordenar + recortar en una
-     * sola llamada de IA).
+     * (no dependen entre sí), y recuperar los fragmentos
+     * relevantes.
+     *
+     * Antes había un paso más aquí (reordenar los fragmentos con
+     * una llamada de IA extra, antes de construir el contexto):
+     * se quitó porque no cambiaba QUÉ información llega a la
+     * respuesta final (ContextBuilder ya incluye siempre todos
+     * los fragmentos recuperados, reordenados o no) — solo el
+     * orden en que la IA los lee. El beneficio era sutil, pero
+     * el coste era una llamada de IA completa entera, sin
+     * streaming, bloqueando el inicio de cualquier respuesta.
+     * Con reglamentos densos, esto se notaba en tiempos de
+     * espera de 30+ segundos en algunos casos — se prioriza la
+     * experiencia de usuario aquí.
      */
     private async prepareContext(
 
@@ -180,25 +187,15 @@ export class AskQuestionUseCase {
 
             );
 
-        const refined =
+        const context =
 
-            await this.refiner.refine(
-
-                question,
+            this.contextBuilder.build(
 
                 retrieved
 
             );
 
-        const context =
-
-            this.contextBuilder.build(
-
-                refined
-
-            );
-
-        return { context, refined };
+        return { context, refined: retrieved };
 
     }
 
