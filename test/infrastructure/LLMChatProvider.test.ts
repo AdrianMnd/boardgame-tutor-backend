@@ -58,6 +58,47 @@ describe("LLMChatProvider", () => {
 
     });
 
+    it("incluye en el prompt la instrucción para el caso de respuesta relacionada pero no específica", async () => {
+
+        let promptRecibido = "";
+
+        const client =
+
+            makeFakeClient(prompt => {
+
+                promptRecibido = prompt;
+
+                return "respuesta de prueba";
+
+            });
+
+        const provider = new LLMChatProvider(client);
+
+        await provider.answer(
+
+            "¿cuántos puntos necesito para ganar en el modo avanzado?",
+
+            "El juego básico termina al llegar a 10 puntos de victoria."
+
+        );
+
+        expect(promptRecibido).toContain(
+
+            "No se ha encontrado una respuesta específica a tu pregunta, pero esto es lo que se ha encontrado relacionado con el reglamento:"
+
+        );
+
+        // La frase para el caso "sin nada relacionado en absoluto"
+        // sigue existiendo — no se ha sustituido, solo se le ha
+        // añadido un caso intermedio antes.
+        expect(promptRecibido).toContain(
+
+            "No he encontrado esa información en el reglamento."
+
+        );
+
+    });
+
     it("simula un contexto en inglés + pregunta en español y comprueba que el prompt se lo indica a la IA", async () => {
 
         // No podemos ejecutar un modelo de verdad en un test —

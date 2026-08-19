@@ -99,8 +99,21 @@ Normas:
   razonablemente respondida, contesta con esa información — no hace
   falta que un único fragmento por sí solo contenga la respuesta
   completa.
-- Solo si el contexto no trata en absoluto el tema preguntado,
-  responde exactamente:
+- Si el contexto trata el tema de forma relacionada pero NO responde
+  de forma específica o completa a lo que se pregunta exactamente
+  (por ejemplo, habla de una situación parecida pero no de este caso
+  concreto), no uses el mensaje de "no encontrado" — en su lugar,
+  empieza tu respuesta EXACTAMENTE con esta frase, tal cual, sin
+  modificarla:
+
+"No se ha encontrado una respuesta específica a tu pregunta, pero esto es lo que se ha encontrado relacionado con el reglamento:"
+
+  Después de esa frase, en un párrafo aparte, resume con tus propias
+  palabras la información relacionada que sí aparece en el contexto
+  — sin inventar nada que no esté ahí, y dejando claro que es
+  información relacionada, no una respuesta directa a la pregunta.
+- Solo si el contexto no trata en absoluto el tema preguntado (ni de
+  forma directa ni de forma relacionada), responde exactamente:
 
 "No he encontrado esa información en el reglamento."
 
