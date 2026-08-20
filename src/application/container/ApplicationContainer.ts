@@ -36,6 +36,7 @@ import { ConversationsUseCase } from "../use-cases/conversations/conversations.u
 import { GameRequestUseCase } from "../use-cases/game-request/game-request.use-case";
 import { ListGameRequestsUseCase } from "../use-cases/game-request/list-game-requests.use-case";
 import { MarkGameRequestReviewedUseCase } from "../use-cases/game-request/mark-game-request-reviewed.use-case";
+import { AdminResetPasswordUseCase } from "../use-cases/admin/admin-reset-password.use-case";
 
 export class ApplicationContainer {
 
@@ -230,6 +231,15 @@ export class ApplicationContainer {
         new MarkGameRequestReviewedUseCase(
 
             this.gameRequestRepository
+
+        );
+
+    readonly adminResetPasswordUseCase =
+        new AdminResetPasswordUseCase(
+
+            this.userRepository,
+
+            this.passwordHasher
 
         );
 

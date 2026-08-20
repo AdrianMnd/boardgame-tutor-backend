@@ -54,6 +54,19 @@ app.use(cors({
 
 app.use(express.json());
 
+// Sin autenticación, sin base de datos, sin proveedores de IA —
+// solo confirma que el proceso está vivo. Pensado para un
+// servicio externo gratuito (UptimeRobot, cron-job.org...) que
+// le haga ping cada pocos minutos, reduciendo los arranques en
+// frío del plan gratuito de Render. Se monta antes de cualquier
+// límite de tasa a propósito, para que ese ping periódico nunca
+// cuente contra ningún límite pensado para tráfico real.
+app.get("/health", (_request, response) => {
+
+    response.json({ status: "ok" });
+
+});
+
 // Cada pregunta encadena varias llamadas a proveedores de IA de
 // pago — sin límite, cualquiera podría agotar la cuota en
 // minutos mandando peticiones en bucle. 20 preguntas cada 15

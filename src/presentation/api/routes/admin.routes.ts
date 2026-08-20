@@ -13,7 +13,9 @@ const controller =
 
         container.listGameRequestsUseCase,
 
-        container.markGameRequestReviewedUseCase
+        container.markGameRequestReviewedUseCase,
+
+        container.adminResetPasswordUseCase
 
     );
 
@@ -42,6 +44,14 @@ router.patch(
     "/game-requests/:id/reviewed",
 
     controller.markGameRequestReviewed
+
+);
+
+router.post(
+
+    "/users/reset-password",
+
+    controller.resetUserPassword
 
 );
 
