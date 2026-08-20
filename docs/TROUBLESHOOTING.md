@@ -68,6 +68,14 @@ Límites: 150MB por archivo, 10 archivos por solicitud (`multer`). El error `400
 
 El origen del frontend no está en la lista permitida. Revisar `FRONTEND_URL` (desarrollo local) o que el dominio de producción del frontend siga siendo el mismo que está permitido explícitamente en `src/index.ts` — si se renombra el proyecto de Vercel, hay que actualizar esa lista.
 
+## No se puede acceder al panel de administración (401 con sesión iniciada)
+
+`ADMIN_EMAIL` no está configurada, o no coincide exactamente con el email de la cuenta (la comparación no distingue mayúsculas/minúsculas, pero sí tiene que ser la misma cuenta). Confirmar con `GET /api/auth/me` — la respuesta incluye `isAdmin`, que debe ser `true`.
+
+## `npm run fetch-bgg` falla o devuelve datos incompletos
+
+No se ha podido probar esta integración contra la API real de BoardGameGeek durante el desarrollo (ver el aviso en [`docs/IMPORT.md`](./IMPORT.md)). Si el id/URL es correcto y el juego existe en BGG pero el comando sigue fallando, revisar si BGG ha cambiado el formato de su XML — en ese caso, `metadata.json` se puede seguir rellenando a mano como siempre, este comando es solo una ayuda opcional.
+
 ## Verificación completa antes de dar por buena una entrega
 
 ```bash

@@ -109,7 +109,16 @@ Decisiones de seguridad concretas:
 
 Los tres siguen el mismo patrón: tablas propias con `user_id` como clave foránea y `ON DELETE CASCADE`. El **login es opcional** en el frontend — sin cuenta, estos datos funcionan en `localStorage`; con cuenta, se sincronizan aquí entre dispositivos.
 
-Particularidad de las conversaciones: solo existe **una** conversación activa por (usuario, juego), no varios hilos guardados — coincide con el modelo que ya tenía el frontend en local. "Nueva conversación" borra las filas de esa combinación y empieza de cero.
+Particularidad de las conversaciones: solo existe **una** conversación activa por (usuario, juego), no varios hilos guardados — coincide con el modelo que ya tenía el frontend en local. "Nueva conversación" borra las filas de esa combinación y empieza de cero. Cada conversación guarda como máximo los **30 mensajes más recientes** — al añadir uno que supere el límite, se borra automáticamente el más antiguo de esa misma conversación (recorte por cantidad, no por antigüedad, para no penalizar a quien vuelve tras un tiempo sin preguntar).
+
+## Memoria conversacional y modo de jugadores
+
+Dos señales opcionales que se pueden mandar junto a cada pregunta, sin que ninguna cambie nada si no se indican:
+
+- **Historial** (`history`): los últimos turnos de la conversación, para que preguntas de seguimiento como "¿y con 5 jugadores?" tengan sentido. El *prompt* dice explícitamente que el historial es solo para entender el contexto de la pregunta, nunca una fuente de reglas por sí mismo — el reglamento (el `context` recuperado) sigue siendo la única fuente de verdad, así que la IA no puede dar por buena una afirmación de su propia respuesta anterior si no está respaldada por el contexto actual.
+- **Número de jugadores** (`playerCount`): si el reglamento distingue reglas según cuántos jugadores hay, se aplican específicamente las que correspondan.
+
+Ambas se recortan/validan en el servidor sin importar lo que mande el cliente: el historial se queda con los últimos 6 turnos como mucho (evita que una conversación de 30 mensajes infle el *prompt* de cada pregunta nueva), y `playerCount` se descarta silenciosamente si no es un entero razonable (1–99).
 
 ## Solicitud de juegos nuevos
 
@@ -118,10 +127,28 @@ POST /api/game-requests (multipart/form-data, requiere sesión)
     ├─ valida nombre del juego y (si viene) el enlace a BGG
     ├─ sube cada PDF a B2 bajo pending-requests/<uuid>/
     ├─ genera un enlace de descarga firmado por archivo (7 días)
+    ├─ guarda la solicitud en Postgres (game_requests) — ANTES de mandar el correo,
+    │  para que la solicitud no se pierda si el correo llegara a fallar
     └─ EmailService.sendGameRequestNotification() (Resend)
 ```
 
-Deliberadamente **no** se guarda nada de esto en una tabla de Postgres — la revisión es manual (se decide si el juego se importa "a mano" tras comprobar que los PDF son reglamentos válidos), y el correo con los enlaces ya cumple esa función sin necesitar un panel de administración. Ver [`docs/CONFIGURATION.md`](./CONFIGURATION.md) sobre por qué solo llega correo a la cuenta propia, no a quien hace la solicitud.
+Se guarda en Postgres (a diferencia de una versión anterior de este mismo diseño, que deliberadamente no lo hacía) porque ahora existe un panel de administración que necesita poder **listar** las solicitudes, no solo recibir un correo puntual por cada una. Se guarda la *ruta* de cada PDF en B2 (`pdf_keys`), no una URL firmada — las firmadas caducan a los 7 días, así que el panel regenera enlaces frescos cada vez que se lista (ver `ListGameRequestsUseCase`). Ver [`docs/CONFIGURATION.md`](./CONFIGURATION.md) sobre por qué el correo de confirmación solo llega a la cuenta propia, no a quien hace la solicitud.
+
+## Valoración de respuestas
+
+`POST /api/ratings` guarda pregunta, respuesta, juego y si fue 👍/👎 en una tabla independiente de `conversation_messages` — a propósito, porque esa tabla solo existe para usuarios con sesión iniciada, y aquí interesa poder valorar con o sin cuenta. Usa `optionalAuth` (no `requireAuth`): con sesión, se guarda de quién es la valoración; sin sesión, se guarda igualmente, solo que sin `user_id`.
+
+`optionalAuth` es el primer *middleware* del proyecto que nunca rechaza la petición — intenta leer un token si lo hay, pero sigue adelante igual si no hay ninguno o es inválido, tratando la petición como de un invitado. Reutilizable para cualquier futuro endpoint con sesión opcional, no solo este.
+
+## Panel de administración
+
+Un único administrador, identificado por email (`ADMIN_EMAIL`) — no hay roles ni permisos más finos porque no hacen falta todavía. `requireAdmin` (que va después de `requireAuth` en la cadena de *middlewares*) consulta el email **actual** del usuario en la base de datos en cada petición, no uno guardado en el token — así, si el administrador cambiara de email, el cambio se aplica sin esperar a que caduquen los tokens ya emitidos.
+
+Tres funciones, todas bajo `/api/admin`:
+
+- **Revisar solicitudes de juegos**: listar (con enlaces de descarga regenerados en el momento) y marcar como revisada.
+- **Restablecer contraseñas manualmente**: como no hay recuperación de contraseña por correo (la misma limitación de Resend que afecta a las solicitudes de juegos), el panel genera una contraseña temporal aleatoria que el administrador comunica por su propio canal personal — nunca por la app.
+- **Resumen de valoraciones**: agregado de 👍/👎 por juego, más las últimas respuestas peor valoradas con su pregunta y respuesta completas, para detectar de un vistazo qué reglamentos necesitan revisión.
 
 ## Importación de un juego
 

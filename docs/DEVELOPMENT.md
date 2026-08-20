@@ -30,6 +30,8 @@ mkdir -p games/<id>/source games/<id>/assets
 npm run import <id>
 ```
 
+Para no escribir `metadata.json` a mano, `npm run fetch-bgg <id> <idOrUrlBGG>` lo rellena automáticamente con datos de BoardGameGeek (nombre, año, jugadores) — ver [`docs/IMPORT.md`](./IMPORT.md#rellenar-metadatajson-automáticamente-desde-boardgamegeek-opcional).
+
 ## Probar el pipeline RAG sin pasar por HTTP
 
 ```bash

@@ -82,8 +82,21 @@ Responde a una pregunta de una vez (sin streaming). Se mantiene por compatibilid
 
 ```json
 // Petición
-{ "gameId": "catan", "question": "¿Cómo se gana la partida?" }
+{
+  "gameId": "catan",
+  "question": "¿Cómo se gana la partida?",
+  "history": [
+    { "role": "user", "content": "¿cómo se gana?" },
+    { "role": "assistant", "content": "Se gana al llegar a 10 puntos de victoria." }
+  ],
+  "playerCount": 4
+}
 ```
+
+`history` y `playerCount` son ambos **opcionales**. Sin ellos, la respuesta se comporta exactamente igual que antes de que existieran — ninguno cambia nada por defecto.
+
+- `history`: últimos mensajes de la conversación, para entender preguntas de seguimiento ("¿y con 5 jugadores?"). El servidor se queda solo con los últimos 6 turnos, sin importar cuántos se manden — no hace falta recortarlo en el cliente.
+- `playerCount`: con cuántos jugadores se está jugando esta partida. Si el reglamento distingue reglas según el número de jugadores, la respuesta las aplica específicamente. Entero entre 1 y 99; cualquier otro valor se descarta silenciosamente (no da error, simplemente se ignora).
 
 ```json
 // Respuesta
@@ -95,9 +108,11 @@ Responde a una pregunta de una vez (sin streaming). Se mantiene por compatibilid
 }
 ```
 
+Si el contexto recuperado no responde de forma específica a la pregunta pero sí tiene algo relacionado, `answer` empieza con la frase "No se ha encontrado una respuesta específica a tu pregunta, pero esto es lo que se ha encontrado relacionado con el reglamento:", seguida de un resumen de lo relacionado. Solo si no hay nada relacionado en absoluto, `answer` es exactamente "No he encontrado esa información en el reglamento."
+
 ### `POST /api/chat/stream`
 
-Igual petición que arriba. La respuesta es *Server-Sent Events* (`Content-Type: text/event-stream`):
+Misma petición que arriba (incluidos `history` y `playerCount`, igual de opcionales). La respuesta es *Server-Sent Events* (`Content-Type: text/event-stream`):
 
 ```text
 event: sources
@@ -263,6 +278,8 @@ Todos requieren sesión. Solo hay **una** conversación activa por (usuario, jue
 
 `role` es `"user"` o `"assistant"`. `sources` es opcional (solo tiene sentido para `"assistant"`). Respuesta `201` con el mensaje guardado.
 
+Cada conversación (usuario + juego) guarda como máximo los **30 mensajes más recientes** — al añadir uno que supere ese límite, se borra automáticamente el más antiguo de esa misma conversación. Es transparente para quien usa la API: no hay ningún error ni aviso, simplemente el historial no crece sin límite.
+
 ### `DELETE /api/conversations/:gameId`
 
 Borra todos los mensajes de esa conversación ("Nueva conversación"). `204` sin cuerpo.
@@ -288,6 +305,103 @@ Al recibirse: cada PDF se sube a B2 bajo `pending-requests/<uuid>/`, se genera u
 Respuesta `204` sin cuerpo si todo va bien.
 
 Rate limit: `GAME_REQUEST_RATE_LIMIT` peticiones/hora por IP (5 por defecto) — más bajo que el resto, ya que cada petición sube archivos y manda un correo.
+
+---
+
+## Valoración de respuestas
+
+### `POST /api/ratings`
+
+Sesión **opcional** — funciona igual con o sin cuenta, pero si hay sesión iniciada se guarda de quién es la valoración.
+
+```json
+{
+  "gameId": "catan",
+  "question": "¿Cómo se gana?",
+  "answer": "Se gana al llegar a 10 puntos de victoria.",
+  "rating": "up"
+}
+```
+
+`rating` es `"up"` o `"down"`. Respuesta `204` sin cuerpo. No hay ningún endpoint para consultar o cambiar una valoración ya enviada — es una señal de un solo sentido, pensada para que el mantenedor revise qué respuestas fallan más (ver `GET /api/admin/ratings/summary`).
+
+---
+
+## Administración 🔒👑
+
+Todos los endpoints bajo `/api/admin` requieren sesión **y** que el email de la cuenta coincida con `ADMIN_EMAIL` — con sesión pero sin ser el administrador, responden `401` igual que sin sesión en absoluto (no se distingue el motivo, para no dar pistas de que el endpoint existe).
+
+### `GET /api/admin/game-requests`
+
+Lista las solicitudes de juegos nuevos, no revisadas primero. Cada elemento incluye enlaces de descarga **firmados en el momento de la petición** (no los que se mandaron por correo en su día, que ya podrían haber caducado a los 7 días).
+
+```json
+[
+  {
+    "id": "...",
+    "requesterName": "Ana",
+    "requesterEmail": "ana@example.com",
+    "gameName": "Wingspan",
+    "bggUrl": "https://boardgamegeek.com/boardgame/266192/wingspan",
+    "pdfLinks": ["https://..."],
+    "reviewed": false,
+    "createdAt": "..."
+  }
+]
+```
+
+### `PATCH /api/admin/game-requests/:id/reviewed`
+
+Marca una solicitud como revisada. `204` sin cuerpo. No hay endpoint para "desmarcar" — es intencionado, no un descuido.
+
+### `POST /api/admin/users/reset-password`
+
+```json
+{ "email": "usuario@example.com" }
+```
+
+Genera una contraseña temporal aleatoria, la guarda (hasheada) para esa cuenta, y la **devuelve una única vez** en la respuesta:
+
+```json
+{ "temporaryPassword": "Xk29fpQzR1a" }
+```
+
+No hay recuperación de contraseña por correo (ver la limitación de Resend en [`CONFIGURATION.md`](./CONFIGURATION.md)) — este endpoint existe para que el administrador comunique la contraseña temporal manualmente, por su propio correo personal. `404` si no existe ninguna cuenta con ese email.
+
+### `GET /api/admin/ratings/summary`
+
+```json
+{
+  "byGame": [
+    { "gameId": "catan", "gameName": "Catan", "up": 12, "down": 3 }
+  ],
+  "recentNegative": [
+    {
+      "gameId": "catan",
+      "gameName": "Catan",
+      "question": "¿Cómo se comercia con el banco?",
+      "answer": "No he encontrado esa información en el reglamento.",
+      "createdAt": "..."
+    }
+  ]
+}
+```
+
+`byGame` ordenado con más valoraciones negativas primero. `recentNegative` son las últimas 15 respuestas marcadas con 👎, con la pregunta y la respuesta completas — pensado para detectar de un vistazo qué reglamentos necesitan revisión.
+
+---
+
+## Salud
+
+### `GET /health`
+
+Sin autenticación, sin base de datos, sin proveedores de IA — solo confirma que el proceso está vivo. Pensado para un servicio externo de monitorización (UptimeRobot, cron-job.org...) que le haga ping periódicamente y reduzca los arranques en frío del plan gratuito de Render.
+
+```json
+{ "status": "ok" }
+```
+
+No cuenta contra ningún límite de tasa.
 
 ---
 
