@@ -5,6 +5,7 @@ import { EmailService } from "../../../infrastructure/email/EmailService";
 import { BadRequestError } from "../../../presentation/api/errors/BadRequestError";
 
 import type { IFileStorage } from "../../../shared/contracts/IFileStorage";
+import type { IGameRequestRepository } from "../../../domain/gameRequest/IGameRequestRepository";
 
 const MAX_GAME_NAME_LENGTH = 150;
 
@@ -40,7 +41,9 @@ export class GameRequestUseCase {
 
         private readonly storage: IFileStorage,
 
-        private readonly emailService: EmailService
+        private readonly emailService: EmailService,
+
+        private readonly repository: IGameRequestRepository
 
     ) {}
 
@@ -86,6 +89,8 @@ export class GameRequestUseCase {
 
         const requestId = randomUUID();
 
+        const pdfKeys: string[] = [];
+
         const pdfLinks: string[] = [];
 
         for (const file of input.files) {
@@ -113,9 +118,30 @@ export class GameRequestUseCase {
 
                 );
 
+            pdfKeys.push(key);
+
             pdfLinks.push(signedUrl);
 
         }
+
+        // Se guarda ANTES de mandar el correo — si el correo
+        // fallara (ver la limitación de Resend sin dominio
+        // propio en CONFIGURATION.md), la solicitud sigue
+        // apareciendo en el panel de administración, no se
+        // pierde silenciosamente.
+        await this.repository.create({
+
+            requesterName: input.requesterName,
+
+            requesterEmail: input.requesterEmail,
+
+            gameName,
+
+            bggUrl,
+
+            pdfKeys
+
+        });
 
         await this.emailService.sendGameRequestNotification({
 

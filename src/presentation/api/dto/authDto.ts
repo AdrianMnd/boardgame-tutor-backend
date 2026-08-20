@@ -50,6 +50,8 @@ export interface AuthResponse {
 
         displayName: string;
 
+        isAdmin: boolean;
+
     };
 
 }

@@ -12,6 +12,7 @@ import favoritesRoutes from "./presentation/api/routes/favorites.routes";
 import categoriesRoutes from "./presentation/api/routes/categories.routes";
 import conversationsRoutes from "./presentation/api/routes/conversations.routes";
 import gameRequestRoutes from "./presentation/api/routes/gameRequest.routes";
+import adminRoutes from "./presentation/api/routes/admin.routes";
 
 import { ApiError } from "./presentation/api/errors/ApiError";
 
@@ -228,6 +229,14 @@ app.use(
     gameRequestRateLimiter,
 
     gameRequestRoutes
+
+);
+
+app.use(
+
+    "/api/admin",
+
+    adminRoutes
 
 );
 

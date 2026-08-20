@@ -185,3 +185,39 @@ CREATE TABLE IF NOT EXISTS conversation_messages (
 
 CREATE INDEX IF NOT EXISTS idx_conversation_messages_user_game
     ON conversation_messages(user_id, game_id, created_at);
+
+-- ============================================================
+-- Solicitudes de juegos nuevos — panel de administración
+--
+-- Antes solo se mandaba un correo, sin guardar nada aquí. Con
+-- el panel, hace falta un listado real. Se guardan nombre/email
+-- de quien solicita como texto plano (no una referencia a
+-- users) para que la solicitud siga teniendo sentido aunque esa
+-- cuenta cambie de email o se borre más adelante.
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS game_requests (
+
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    requester_name  TEXT NOT NULL,
+
+    requester_email TEXT NOT NULL,
+
+    game_name       TEXT NOT NULL,
+
+    bgg_url         TEXT,
+
+    -- Rutas dentro del bucket de B2 (no URLs firmadas — esas
+    -- caducan a los 7 días; se regeneran al vuelo cada vez que
+    -- se lista, a partir de estas rutas).
+    pdf_keys        TEXT[] NOT NULL DEFAULT '{}',
+
+    reviewed        BOOLEAN NOT NULL DEFAULT false,
+
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+
+);
+
+CREATE INDEX IF NOT EXISTS idx_game_requests_reviewed
+    ON game_requests(reviewed, created_at);

@@ -9,6 +9,7 @@ import { PostgresGameRepository } from "../../infrastructure/repositories/Postgr
 import { PostgresUserRepository } from "../../infrastructure/repositories/PostgresUserRepository";
 import { PostgresFavoritesRepository } from "../../infrastructure/repositories/PostgresFavoritesRepository";
 import { PostgresCategoryRepository } from "../../infrastructure/repositories/PostgresCategoryRepository";
+import { PostgresGameRequestRepository } from "../../infrastructure/repositories/PostgresGameRequestRepository";
 import { PostgresConversationRepository } from "../../infrastructure/repositories/PostgresConversationRepository";
 import { PgVectorRetriever } from "../../infrastructure/database/PgVectorRetriever";
 import { B2FileStorage } from "../../infrastructure/storage/B2FileStorage";
@@ -33,6 +34,8 @@ import { FavoritesUseCase } from "../use-cases/favorites/favorites.use-case";
 import { CategoriesUseCase } from "../use-cases/categories/categories.use-case";
 import { ConversationsUseCase } from "../use-cases/conversations/conversations.use-case";
 import { GameRequestUseCase } from "../use-cases/game-request/game-request.use-case";
+import { ListGameRequestsUseCase } from "../use-cases/game-request/list-game-requests.use-case";
+import { MarkGameRequestReviewedUseCase } from "../use-cases/game-request/mark-game-request-reviewed.use-case";
 
 export class ApplicationContainer {
 
@@ -198,12 +201,35 @@ export class ApplicationContainer {
             loadEmailConfiguration()
         );
 
+    readonly gameRequestRepository =
+        new PostgresGameRequestRepository(
+            this.pool
+        );
+
     readonly gameRequestUseCase =
         new GameRequestUseCase(
 
             this.storage,
 
-            this.emailService
+            this.emailService,
+
+            this.gameRequestRepository
+
+        );
+
+    readonly listGameRequestsUseCase =
+        new ListGameRequestsUseCase(
+
+            this.gameRequestRepository,
+
+            this.storage
+
+        );
+
+    readonly markGameRequestReviewedUseCase =
+        new MarkGameRequestReviewedUseCase(
+
+            this.gameRequestRepository
 
         );
 
