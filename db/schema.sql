@@ -221,3 +221,33 @@ CREATE TABLE IF NOT EXISTS game_requests (
 
 CREATE INDEX IF NOT EXISTS idx_game_requests_reviewed
     ON game_requests(reviewed, created_at);
+
+-- ============================================================
+-- Valoración rápida de respuestas (👍/👎)
+--
+-- Independiente de conversation_messages a propósito — esa tabla
+-- solo existe para usuarios con sesión iniciada, y aquí se
+-- quiere poder valorar con o sin cuenta. user_id es opcional y
+-- solo informativo (no hace falta para nada funcional).
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS message_ratings (
+
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    game_id     TEXT NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+
+    user_id     UUID REFERENCES users(id) ON DELETE SET NULL,
+
+    question    TEXT NOT NULL,
+
+    answer      TEXT NOT NULL,
+
+    rating      TEXT NOT NULL CHECK (rating IN ('up', 'down')),
+
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+
+);
+
+CREATE INDEX IF NOT EXISTS idx_message_ratings_game_rating
+    ON message_ratings(game_id, rating);

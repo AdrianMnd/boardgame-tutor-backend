@@ -10,6 +10,7 @@ import { PostgresUserRepository } from "../../infrastructure/repositories/Postgr
 import { PostgresFavoritesRepository } from "../../infrastructure/repositories/PostgresFavoritesRepository";
 import { PostgresCategoryRepository } from "../../infrastructure/repositories/PostgresCategoryRepository";
 import { PostgresGameRequestRepository } from "../../infrastructure/repositories/PostgresGameRequestRepository";
+import { PostgresMessageRatingRepository } from "../../infrastructure/repositories/PostgresMessageRatingRepository";
 import { PostgresConversationRepository } from "../../infrastructure/repositories/PostgresConversationRepository";
 import { PgVectorRetriever } from "../../infrastructure/database/PgVectorRetriever";
 import { B2FileStorage } from "../../infrastructure/storage/B2FileStorage";
@@ -37,6 +38,7 @@ import { GameRequestUseCase } from "../use-cases/game-request/game-request.use-c
 import { ListGameRequestsUseCase } from "../use-cases/game-request/list-game-requests.use-case";
 import { MarkGameRequestReviewedUseCase } from "../use-cases/game-request/mark-game-request-reviewed.use-case";
 import { AdminResetPasswordUseCase } from "../use-cases/admin/admin-reset-password.use-case";
+import { RateMessageUseCase } from "../use-cases/rating/rate-message.use-case";
 
 export class ApplicationContainer {
 
@@ -240,6 +242,20 @@ export class ApplicationContainer {
             this.userRepository,
 
             this.passwordHasher
+
+        );
+
+    readonly messageRatingRepository =
+        new PostgresMessageRatingRepository(
+
+            this.pool
+
+        );
+
+    readonly rateMessageUseCase =
+        new RateMessageUseCase(
+
+            this.messageRatingRepository
 
         );
 

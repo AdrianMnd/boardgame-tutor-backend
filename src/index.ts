@@ -13,6 +13,7 @@ import categoriesRoutes from "./presentation/api/routes/categories.routes";
 import conversationsRoutes from "./presentation/api/routes/conversations.routes";
 import gameRequestRoutes from "./presentation/api/routes/gameRequest.routes";
 import adminRoutes from "./presentation/api/routes/admin.routes";
+import ratingRoutes from "./presentation/api/routes/rating.routes";
 
 import { ApiError } from "./presentation/api/errors/ApiError";
 
@@ -250,6 +251,14 @@ app.use(
     "/api/admin",
 
     adminRoutes
+
+);
+
+app.use(
+
+    "/api/ratings",
+
+    ratingRoutes
 
 );
 
