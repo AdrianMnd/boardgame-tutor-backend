@@ -8,6 +8,7 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "import": "tsx src/application/commands/import-game.ts",
+    "fetch-bgg": "tsx src/application/commands/fetch-bgg-metadata.ts",
     "migrate-to-db": "tsx src/application/commands/migrate-to-db.ts",
     "check:embeddings": "tsx src/application/commands/check-embeddings.ts",
     "ask": "tsx src/application/commands/ask-game.ts",

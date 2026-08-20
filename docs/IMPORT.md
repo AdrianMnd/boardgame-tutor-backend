@@ -16,7 +16,20 @@ games/
 
 Esta carpeta es solo el punto de partida — no se despliega ni persiste en ningún sitio. Tras `npm run import`, todo el contenido relevante ya está en Postgres (metadatos, chunks con embeddings) y B2 (el PDF y la portada); la carpeta local se puede borrar sin perder nada.
 
-## Ejecutar
+## Rellenar `metadata.json` automáticamente desde BoardGameGeek (opcional)
+
+```bash
+npm run fetch-bgg <idLocal> <idOrUrlDeBGG>
+
+# Ejemplos:
+npm run fetch-bgg catan 13
+npm run fetch-bgg catan https://boardgamegeek.com/boardgame/13/catan
+```
+
+Consulta la API pública de BGG y escribe (o completa) `games/<idLocal>/metadata.json` con el nombre, año y número de jugadores — crea también las carpetas `source/` y `assets/` si no existían. **Nunca pisa un campo que ya estuviera relleno a mano** — así que si ya se había corregido algo (o si ya se ejecutó antes y solo hace falta rellenar lo que falta), no hay que preocuparse de perderlo. El idioma y la versión del reglamento **no** los rellena (BGG no los conoce) — siempre quedan con un valor por defecto (`es`, `1.0`) la primera vez, a revisar a mano.
+
+> **Aviso**: esta integración no se ha podido probar contra la API real de BoardGameGeek durante el desarrollo (el entorno donde se escribió no tenía acceso a `boardgamegeek.com`). El formato del XML que se parsea está basado en la documentación pública de `/xmlapi2/thing`, pero conviene probarlo con un id real antes de confiar en él del todo — si BGG cambiara ese formato, o si hay algún caso no contemplado, `npm run fetch-bgg` fallaría con un mensaje de error claro (no escribiría datos incorrectos en silencio), pero merece una primera prueba manual.
+
 
 ```bash
 npm run import wingspan
