@@ -140,6 +140,7 @@ npm run dev              # servidor en desarrollo (hot reload)
 npm run build             # compilar TypeScript
 npm start                 # ejecutar la build compilada
 npm run import <gameId>   # importar un juego (PDF → embeddings → Postgres + B2)
+npm run fetch-bgg <id> <bgg>  # rellenar metadata.json desde BoardGameGeek (opcional)
 npm run ask <gameId> <p>  # preguntar desde la CLI, sin pasar por HTTP
 npm run check:embeddings  # detectar juegos con embeddings dañados/inconsistentes
 npm test                  # tests (Vitest)

@@ -16,6 +16,8 @@ import type { AuthenticatedRequest } from "../middleware/requireAuth";
 import { NotFoundError } from "../errors/NotFoundError";
 import { BadRequestError } from "../errors/BadRequestError";
 
+import { toUserResponse } from "../mappers/userMapper";
+
 export class AuthController {
 
     constructor(
@@ -76,15 +78,9 @@ export class AuthController {
 
             token,
 
-            user: {
+            user:
 
-                id: user.id,
-
-                email: user.email,
-
-                displayName: user.displayName
-
-            }
+                toUserResponse(user)
 
         };
 
@@ -131,15 +127,9 @@ export class AuthController {
 
             token,
 
-            user: {
+            user:
 
-                id: user.id,
-
-                email: user.email,
-
-                displayName: user.displayName
-
-            }
+                toUserResponse(user)
 
         };
 
@@ -170,15 +160,11 @@ export class AuthController {
 
         }
 
-        response.json({
+        response.json(
 
-            id: user.id,
+            toUserResponse(user)
 
-            email: user.email,
-
-            displayName: user.displayName
-
-        });
+        );
 
     };
 
@@ -214,15 +200,11 @@ export class AuthController {
 
             );
 
-        response.json({
+        response.json(
 
-            id: user.id,
+            toUserResponse(user)
 
-            email: user.email,
-
-            displayName: user.displayName
-
-        });
+        );
 
     };
 
@@ -265,15 +247,11 @@ export class AuthController {
 
             );
 
-        response.json({
+        response.json(
 
-            id: user.id,
+            toUserResponse(user)
 
-            email: user.email,
-
-            displayName: user.displayName
-
-        });
+        );
 
     };
 

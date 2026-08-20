@@ -185,3 +185,69 @@ CREATE TABLE IF NOT EXISTS conversation_messages (
 
 CREATE INDEX IF NOT EXISTS idx_conversation_messages_user_game
     ON conversation_messages(user_id, game_id, created_at);
+
+-- ============================================================
+-- Solicitudes de juegos nuevos — panel de administración
+--
+-- Antes solo se mandaba un correo, sin guardar nada aquí. Con
+-- el panel, hace falta un listado real. Se guardan nombre/email
+-- de quien solicita como texto plano (no una referencia a
+-- users) para que la solicitud siga teniendo sentido aunque esa
+-- cuenta cambie de email o se borre más adelante.
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS game_requests (
+
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    requester_name  TEXT NOT NULL,
+
+    requester_email TEXT NOT NULL,
+
+    game_name       TEXT NOT NULL,
+
+    bgg_url         TEXT,
+
+    -- Rutas dentro del bucket de B2 (no URLs firmadas — esas
+    -- caducan a los 7 días; se regeneran al vuelo cada vez que
+    -- se lista, a partir de estas rutas).
+    pdf_keys        TEXT[] NOT NULL DEFAULT '{}',
+
+    reviewed        BOOLEAN NOT NULL DEFAULT false,
+
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+
+);
+
+CREATE INDEX IF NOT EXISTS idx_game_requests_reviewed
+    ON game_requests(reviewed, created_at);
+
+-- ============================================================
+-- Valoración rápida de respuestas (👍/👎)
+--
+-- Independiente de conversation_messages a propósito — esa tabla
+-- solo existe para usuarios con sesión iniciada, y aquí se
+-- quiere poder valorar con o sin cuenta. user_id es opcional y
+-- solo informativo (no hace falta para nada funcional).
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS message_ratings (
+
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    game_id     TEXT NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+
+    user_id     UUID REFERENCES users(id) ON DELETE SET NULL,
+
+    question    TEXT NOT NULL,
+
+    answer      TEXT NOT NULL,
+
+    rating      TEXT NOT NULL CHECK (rating IN ('up', 'down')),
+
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+
+);
+
+CREATE INDEX IF NOT EXISTS idx_message_ratings_game_rating
+    ON message_ratings(game_id, rating);

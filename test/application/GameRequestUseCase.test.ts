@@ -5,6 +5,7 @@ import { BadRequestError } from "../../src/presentation/api/errors/BadRequestErr
 
 import type { IFileStorage } from "../../src/shared/contracts/IFileStorage";
 import type { EmailService } from "../../src/infrastructure/email/EmailService";
+import type { IGameRequestRepository } from "../../src/domain/gameRequest/IGameRequestRepository";
 
 function makeFakeStorage(
 
@@ -38,6 +39,36 @@ function makeFakeEmailService(): EmailService {
 
 }
 
+function makeFakeRepository(): IGameRequestRepository {
+
+    return {
+
+        create: vi.fn().mockResolvedValue({
+
+            id: "request-1",
+
+            requesterName: "Ana",
+
+            requesterEmail: "ana@example.com",
+
+            gameName: "Wingspan",
+
+            pdfKeys: [],
+
+            reviewed: false,
+
+            createdAt: new Date().toISOString()
+
+        }),
+
+        list: vi.fn().mockResolvedValue([]),
+
+        markReviewed: vi.fn().mockResolvedValue(undefined)
+
+    };
+
+}
+
 describe("GameRequestUseCase", () => {
 
     it("envía la notificación con los datos correctos, sin archivos", async () => {
@@ -46,7 +77,9 @@ describe("GameRequestUseCase", () => {
 
         const emailService = makeFakeEmailService();
 
-        const useCase = new GameRequestUseCase(storage, emailService);
+        const repository = makeFakeRepository();
+
+        const useCase = new GameRequestUseCase(storage, emailService, repository);
 
         await useCase.execute({
 
@@ -95,7 +128,9 @@ describe("GameRequestUseCase", () => {
 
         const emailService = makeFakeEmailService();
 
-        const useCase = new GameRequestUseCase(storage, emailService);
+        const repository = makeFakeRepository();
+
+        const useCase = new GameRequestUseCase(storage, emailService, repository);
 
         await useCase.execute({
 
@@ -136,7 +171,9 @@ describe("GameRequestUseCase", () => {
 
         const emailService = makeFakeEmailService();
 
-        const useCase = new GameRequestUseCase(storage, emailService);
+        const repository = makeFakeRepository();
+
+        const useCase = new GameRequestUseCase(storage, emailService, repository);
 
         await expect(
 
@@ -165,7 +202,9 @@ describe("GameRequestUseCase", () => {
 
         const emailService = makeFakeEmailService();
 
-        const useCase = new GameRequestUseCase(storage, emailService);
+        const repository = makeFakeRepository();
+
+        const useCase = new GameRequestUseCase(storage, emailService, repository);
 
         await expect(
 
@@ -195,7 +234,9 @@ describe("GameRequestUseCase", () => {
 
         const emailService = makeFakeEmailService();
 
-        const useCase = new GameRequestUseCase(storage, emailService);
+        const repository = makeFakeRepository();
+
+        const useCase = new GameRequestUseCase(storage, emailService, repository);
 
         await useCase.execute({
 
@@ -214,6 +255,126 @@ describe("GameRequestUseCase", () => {
             expect.objectContaining({ bggUrl: undefined })
 
         );
+
+    });
+
+    it("guarda la solicitud en el repositorio, con las rutas de B2 (no las URLs firmadas)", async () => {
+
+        const storage = makeFakeStorage();
+
+        const emailService = makeFakeEmailService();
+
+        const repository = makeFakeRepository();
+
+        const useCase = new GameRequestUseCase(storage, emailService, repository);
+
+        await useCase.execute({
+
+            requesterName: "Ana",
+
+            requesterEmail: "ana@example.com",
+
+            gameName: "Wingspan",
+
+            bggUrl: "https://boardgamegeek.com/boardgame/266192/wingspan",
+
+            files: [
+
+                { originalName: "reglamento.pdf", buffer: Buffer.from("a"), contentType: "application/pdf" }
+
+            ]
+
+        });
+
+        expect(repository.create).toHaveBeenCalledWith(
+
+            expect.objectContaining({
+
+                requesterName: "Ana",
+
+                requesterEmail: "ana@example.com",
+
+                gameName: "Wingspan",
+
+                bggUrl: "https://boardgamegeek.com/boardgame/266192/wingspan",
+
+                pdfKeys: [
+
+                    expect.stringContaining("reglamento.pdf")
+
+                ]
+
+            })
+
+        );
+
+    });
+
+    it("guarda la solicitud en el repositorio ANTES de mandar el correo", async () => {
+
+        const storage = makeFakeStorage();
+
+        const emailService = makeFakeEmailService();
+
+        const repository = makeFakeRepository();
+
+        const llamadas: string[] = [];
+
+        repository.create =
+
+            vi.fn().mockImplementation(async () => {
+
+                llamadas.push("repository.create");
+
+                return {
+
+                    id: "request-1",
+
+                    requesterName: "Ana",
+
+                    requesterEmail: "ana@example.com",
+
+                    gameName: "Wingspan",
+
+                    pdfKeys: [],
+
+                    reviewed: false,
+
+                    createdAt: new Date().toISOString()
+
+                };
+
+            });
+
+        emailService.sendGameRequestNotification =
+
+            vi.fn().mockImplementation(async () => {
+
+                llamadas.push("emailService.sendGameRequestNotification");
+
+            });
+
+        const useCase = new GameRequestUseCase(storage, emailService, repository);
+
+        await useCase.execute({
+
+            requesterName: "Ana",
+
+            requesterEmail: "ana@example.com",
+
+            gameName: "Wingspan",
+
+            files: []
+
+        });
+
+        expect(llamadas).toEqual([
+
+            "repository.create",
+
+            "emailService.sendGameRequestNotification"
+
+        ]);
 
     });
 

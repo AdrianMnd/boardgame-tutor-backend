@@ -16,6 +16,88 @@ import type {
 
 import { ChatMapper } from "../mappers/chatMapper";
 
+import type { ChatTurn } from "../../../domain/ai/chatTurn";
+import type { ChatContextOptions } from "../../../domain/ai/chatProvider";
+
+/**
+ * El historial llega del cliente sin garantías de formato — se
+ * descarta cualquier entrada que no tenga la forma esperada, en
+ * vez de dejar que un dato malformado rompa la petición o se
+ * cuele tal cual en el prompt.
+ */
+function sanitizeHistory(
+
+    value: unknown
+
+): ChatTurn[] {
+
+    if (!Array.isArray(value)) {
+
+        return [];
+
+    }
+
+    return value.filter(
+
+        (item): item is ChatTurn =>
+
+            typeof item === "object" &&
+
+            item !== null &&
+
+            (item.role === "user" || item.role === "assistant") &&
+
+            typeof item.content === "string"
+
+    );
+
+}
+
+/**
+ * Con cuántos jugadores se está jugando, saneado — solo se
+ * acepta un entero positivo y razonable (hasta 99). Cualquier
+ * otra cosa (texto, negativo, decimal, un número disparatado) se
+ * descarta en vez de colarse tal cual en el prompt.
+ */
+function sanitizePlayerCount(
+
+    value: unknown
+
+): number | undefined {
+
+    if (
+
+        typeof value !== "number" ||
+        !Number.isInteger(value) ||
+        value < 1 ||
+        value > 99
+
+    ) {
+
+        return undefined;
+
+    }
+
+    return value;
+
+}
+
+function buildChatOptions(
+
+    body: AskQuestionRequest
+
+): ChatContextOptions {
+
+    return {
+
+        history: sanitizeHistory(body.history),
+
+        playerCount: sanitizePlayerCount(body.playerCount)
+
+    };
+
+}
+
 export class ChatController {
 
     constructor(
@@ -42,7 +124,9 @@ export class ChatController {
 
                 body.gameId,
 
-                body.question
+                body.question,
+
+                buildChatOptions(body)
 
             );
 
@@ -128,7 +212,9 @@ export class ChatController {
 
                 body.gameId,
 
-                body.question
+                body.question,
+
+                buildChatOptions(body)
 
             )) {
 
