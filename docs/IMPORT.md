@@ -30,6 +30,8 @@ Consulta la API pública de BGG y escribe (o completa) `games/<idLocal>/metadata
 
 > **Aviso**: esta integración no se ha podido probar contra la API real de BoardGameGeek durante el desarrollo (el entorno donde se escribió no tenía acceso a `boardgamegeek.com`). El formato del XML que se parsea está basado en la documentación pública de `/xmlapi2/thing`, pero conviene probarlo con un id real antes de confiar en él del todo — si BGG cambiara ese formato, o si hay algún caso no contemplado, `npm run fetch-bgg` fallaría con un mensaje de error claro (no escribiría datos incorrectos en silencio), pero merece una primera prueba manual.
 
+**Si el `id` de dentro de `metadata.json` no coincide con el nombre de la carpeta** (por ejemplo, al usar `fetch-bgg` con un id local distinto al que luego se usa para importar), `npm run import` **ya no falla** — el identificador real del juego (usado en Postgres y B2) es siempre el `id` de dentro de `metadata.json`, nunca el nombre de la carpeta, que solo sirve para localizar los archivos en disco. Si hay un desajuste, se muestra un aviso informativo (no un error) por si no era intencionado.
+
 
 ```bash
 npm run import wingspan

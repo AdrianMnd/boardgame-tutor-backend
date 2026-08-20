@@ -66,6 +66,19 @@ export class ImportGameUseCase {
         const metadata =
             await this.readMetadata(root, gameId);
 
+        // A partir de aquí, "gameId" (el argumento de la línea
+        // de comandos / nombre de la carpeta) solo sirve para
+        // localizar archivos en disco — nunca para escribir en
+        // la base de datos. El identificador real del juego,
+        // usado en TODAS partes en Postgres y B2, es siempre
+        // metadata.id. Así, el nombre de la carpeta y el id de
+        // dentro del metadata.json pueden coincidir o no, sin
+        // que eso rompa nunca la importación — antes sí podía
+        // pasar (un mismatch causaba un error de clave foránea
+        // al escribir documentos/chunks con un id distinto al
+        // del juego ya creado).
+        const dbGameId = metadata.id;
+
         const sourceDir =
             path.join(root, "source");
 
@@ -121,7 +134,7 @@ export class ImportGameUseCase {
 
                 this.chunkGenerator.generate(
 
-                    gameId,
+                    dbGameId,
 
                     document.id,
 
@@ -223,7 +236,7 @@ export class ImportGameUseCase {
                 await this.fileSystem.readBuffer(documentPath);
 
             const storagePath =
-                `${gameId}/source/${document.filename}`;
+                `${dbGameId}/source/${document.filename}`;
 
             await this.storage.upload(
 
@@ -248,7 +261,7 @@ export class ImportGameUseCase {
         }
 
         const coverPath =
-            await this.uploadCoverIfPresent(gameId, root);
+            await this.uploadCoverIfPresent(dbGameId, root);
 
         this.logger.success("Archivos subidos");
 
@@ -258,11 +271,11 @@ export class ImportGameUseCase {
 
         for (const document of documentsToWrite) {
 
-            await this.writer.upsertDocument(gameId, document);
+            await this.writer.upsertDocument(dbGameId, document);
 
         }
 
-        await this.writer.replaceChunks(gameId, embeddedChunks);
+        await this.writer.replaceChunks(dbGameId, embeddedChunks);
 
         await checkpoint.clear();
 
@@ -297,26 +310,20 @@ export class ImportGameUseCase {
         const metadata =
             await this.fileSystem.readJson<GameMetadata>(metadataPath);
 
-        // El "id" de dentro de metadata.json y el nombre de la
-        // carpeta (con el que se ejecuta "npm run import <id>")
-        // tienen que ser exactamente el mismo valor — el juego
-        // se guarda en la base de datos con el id del archivo,
-        // pero los documentos y chunks usan el de la carpeta. Si
-        // no coinciden, el juego se crea con un id y los
-        // documentos intentan apuntar a otro, lo que revienta
-        // más adelante con un error de clave foránea mucho menos
-        // claro que este. Suele pasar al usar "npm run fetch-bgg"
+        // Ya no es un error — ver dbGameId en execute() para el
+        // porqué. Solo se avisa, por si el desajuste no fuera
+        // intencionado (por ejemplo, al usar "npm run fetch-bgg"
         // con un id local distinto al que luego se usa para
-        // importar.
+        // importar).
         if (metadata.id !== gameId) {
 
-            throw new Error(
+            this.logger.warning(
 
-                `El "id" dentro de ${metadataPath} es "${metadata.id}", pero ` +
-                `se ha pedido importar "${gameId}" (el nombre de la carpeta). ` +
-                `Deben coincidir exactamente — corrige el campo "id" del ` +
-                `metadata.json, o vuelve a ejecutar la importación con el id ` +
-                `correcto: npm run import ${metadata.id}`
+                `El "id" dentro de metadata.json ("${metadata.id}") no ` +
+                `coincide con el nombre de la carpeta ("${gameId}") — no ` +
+                `es un problema, se usará "${metadata.id}" como identificador ` +
+                `del juego en todas partes. Si no era intencionado, revisa ` +
+                `metadata.json.`
 
             );
 
