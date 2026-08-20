@@ -9,6 +9,7 @@ import { ContextBuilder } from "../../../domain/ai/contextBuilder";
 import { ChatProvider } from "../../../domain/ai/chatProvider";
 import { AskQuestionResult } from "./askQuestionResult";
 import type { AskQuestionStreamEvent } from "./askQuestionStreamEvent";
+import type { ChatTurn } from "../../../domain/ai/chatTurn";
 import type { RetrievedChunk } from "../../../domain/knowledge/RetrievedChunk";
 
 export class AskQuestionUseCase {
@@ -31,7 +32,9 @@ export class AskQuestionUseCase {
 
         gameId: string,
 
-        question: string
+        question: string,
+
+        history: ChatTurn[] = []
 
     ): Promise<AskQuestionResult> {
 
@@ -51,7 +54,9 @@ export class AskQuestionUseCase {
 
                 question,
 
-                context
+                context,
+
+                history
 
             );
 
@@ -76,7 +81,9 @@ export class AskQuestionUseCase {
 
         gameId: string,
 
-        question: string
+        question: string,
+
+        history: ChatTurn[] = []
 
     ): AsyncIterable<AskQuestionStreamEvent> {
 
@@ -98,7 +105,9 @@ export class AskQuestionUseCase {
 
                 question,
 
-                context
+                context,
+
+                history
 
             )) {
 
@@ -119,7 +128,9 @@ export class AskQuestionUseCase {
 
                     question,
 
-                    context
+                    context,
+
+                    history
 
                 );
 

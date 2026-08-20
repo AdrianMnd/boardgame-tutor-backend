@@ -16,6 +16,42 @@ import type {
 
 import { ChatMapper } from "../mappers/chatMapper";
 
+import type { ChatTurn } from "../../../domain/ai/chatTurn";
+
+/**
+ * El historial llega del cliente sin garantías de formato — se
+ * descarta cualquier entrada que no tenga la forma esperada, en
+ * vez de dejar que un dato malformado rompa la petición o se
+ * cuele tal cual en el prompt.
+ */
+function sanitizeHistory(
+
+    value: unknown
+
+): ChatTurn[] {
+
+    if (!Array.isArray(value)) {
+
+        return [];
+
+    }
+
+    return value.filter(
+
+        (item): item is ChatTurn =>
+
+            typeof item === "object" &&
+
+            item !== null &&
+
+            (item.role === "user" || item.role === "assistant") &&
+
+            typeof item.content === "string"
+
+    );
+
+}
+
 export class ChatController {
 
     constructor(
@@ -42,7 +78,9 @@ export class ChatController {
 
                 body.gameId,
 
-                body.question
+                body.question,
+
+                sanitizeHistory(body.history)
 
             );
 
@@ -128,7 +166,9 @@ export class ChatController {
 
                 body.gameId,
 
-                body.question
+                body.question,
+
+                sanitizeHistory(body.history)
 
             )) {
 

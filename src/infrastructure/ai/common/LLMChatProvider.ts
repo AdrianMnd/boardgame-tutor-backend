@@ -1,6 +1,17 @@
 import { ChatProvider } from "../../../domain/ai/chatProvider";
 
+import type { ChatTurn } from "../../../domain/ai/chatTurn";
 import type { ILLMClient } from "./ILLMClient";
+
+// Máximo de turnos previos que se incluyen en el prompt, sin
+// importar cuántos mande el cliente — una conversación guardada
+// puede llegar a tener hasta 30 mensajes (ver el límite de la
+// base de datos), y mandarlos todos en cada pregunta inflaría el
+// prompt y el tiempo de respuesta en cada turno nuevo, justo lo
+// contrario de lo que se ganó al quitar el paso de refinado.
+// 3 intercambios (6 turnos) es de sobra para entender una
+// pregunta de seguimiento sin arrastrar toda la conversación.
+const MAX_HISTORY_TURNS = 6;
 
 /**
  * ChatProvider genérico: funciona con cualquier ILLMClient,
@@ -20,13 +31,15 @@ export class LLMChatProvider
 
         question: string,
 
-        context: string
+        context: string,
+
+        history: ChatTurn[] = []
 
     ): Promise<string> {
 
         return this.client.generateText(
 
-            this.buildPrompt(question, context)
+            this.buildPrompt(question, context, history)
 
         );
 
@@ -36,13 +49,15 @@ export class LLMChatProvider
 
         question: string,
 
-        context: string
+        context: string,
+
+        history: ChatTurn[] = []
 
     ): AsyncIterable<string> {
 
         const prompt =
 
-            this.buildPrompt(question, context);
+            this.buildPrompt(question, context, history);
 
         if (this.client.generateTextStream) {
 
@@ -69,14 +84,50 @@ export class LLMChatProvider
 
         question: string,
 
-        context: string
+        context: string,
+
+        history: ChatTurn[]
 
     ): string {
+
+        const recentHistory =
+
+            history.slice(-MAX_HISTORY_TURNS);
+
+        const historySection =
+
+            recentHistory.length === 0
+
+                ? ""
+
+                : `
+Conversación previa (solo para entender a qué se refiere una
+pregunta de seguimiento, por ejemplo "¿y con 5 jugadores?" — el
+contexto de más abajo sigue siendo la ÚNICA fuente de verdad para
+las reglas en sí; no des por buena ninguna afirmación de tus
+propias respuestas anteriores si no está respaldada por el
+contexto actual):
+
+${
+    recentHistory
+
+        .map(
+
+            turn =>
+
+                `${turn.role === "user" ? "Usuario" : "Tú"}: ${turn.content}`
+
+        )
+
+        .join("\n")
+}
+`;
 
         return `
 Eres un experto en juegos de mesa.
 
-Tu única fuente de información es el contexto proporcionado.
+Tu única fuente de información sobre las reglas es el contexto
+proporcionado más abajo.
 
 Normas:
 
@@ -116,7 +167,7 @@ Normas:
   forma directa ni de forma relacionada), responde exactamente:
 
 "No he encontrado esa información en el reglamento."
-
+${historySection}
 Contexto:
 
 ${context}

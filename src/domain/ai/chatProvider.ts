@@ -1,8 +1,11 @@
+import type { ChatTurn } from "./chatTurn";
+
 export interface ChatProvider {
 
     answer(
         question: string,
-        context: string
+        context: string,
+        history?: ChatTurn[]
     ): Promise<string>;
 
     /**
@@ -14,7 +17,8 @@ export interface ChatProvider {
      */
     answerStream?(
         question: string,
-        context: string
+        context: string,
+        history?: ChatTurn[]
     ): AsyncIterable<string>;
 
 }

@@ -99,6 +99,118 @@ describe("LLMChatProvider", () => {
 
     });
 
+    it("incluye el historial de la conversación en el prompt cuando se pasa", async () => {
+
+        let promptRecibido = "";
+
+        const client =
+
+            makeFakeClient(prompt => {
+
+                promptRecibido = prompt;
+
+                return "respuesta de prueba";
+
+            });
+
+        const provider = new LLMChatProvider(client);
+
+        await provider.answer(
+
+            "¿y con 5 jugadores?",
+
+            "El juego termina al llegar a 10 puntos.",
+
+            [
+
+                { role: "user", content: "¿cómo se gana la partida?" },
+
+                { role: "assistant", content: "Se gana al llegar a 10 puntos de victoria." }
+
+            ]
+
+        );
+
+        expect(promptRecibido).toContain("Usuario: ¿cómo se gana la partida?");
+        expect(promptRecibido).toContain("Tú: Se gana al llegar a 10 puntos de victoria.");
+
+    });
+
+    it("no añade la sección de historial si no se pasa ninguno", async () => {
+
+        let promptRecibido = "";
+
+        const client =
+
+            makeFakeClient(prompt => {
+
+                promptRecibido = prompt;
+
+                return "respuesta de prueba";
+
+            });
+
+        const provider = new LLMChatProvider(client);
+
+        await provider.answer(
+
+            "¿cómo se gana?",
+
+            "El juego termina al llegar a 10 puntos."
+
+        );
+
+        expect(promptRecibido).not.toContain("Conversación previa");
+
+    });
+
+    it("recorta el historial a los últimos turnos, aunque se manden muchos más", async () => {
+
+        let promptRecibido = "";
+
+        const client =
+
+            makeFakeClient(prompt => {
+
+                promptRecibido = prompt;
+
+                return "respuesta de prueba";
+
+            });
+
+        const provider = new LLMChatProvider(client);
+
+        const historialLargo =
+
+            Array.from({ length: 20 }, (_, i) => ({
+
+                role: (i % 2 === 0 ? "user" : "assistant") as const,
+
+                content: `mensaje-${i}`
+
+            }));
+
+        await provider.answer(
+
+            "pregunta actual",
+
+            "contexto",
+
+            historialLargo
+
+        );
+
+        // Los mensajes más antiguos no deben llegar al prompt —
+        // solo los últimos MAX_HISTORY_TURNS (6).
+        expect(promptRecibido).not.toContain("mensaje-0");
+        expect(promptRecibido).not.toContain("mensaje-10");
+
+        // Los últimos sí.
+        expect(promptRecibido).toContain("mensaje-19");
+        expect(promptRecibido).toContain("mensaje-14");
+
+    });
+
     it("simula un contexto en inglés + pregunta en español y comprueba que el prompt se lo indica a la IA", async () => {
 
         // No podemos ejecutar un modelo de verdad en un test —
