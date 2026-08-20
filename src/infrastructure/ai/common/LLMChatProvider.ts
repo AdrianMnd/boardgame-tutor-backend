@@ -1,5 +1,6 @@
 import { ChatProvider } from "../../../domain/ai/chatProvider";
 
+import type { ChatContextOptions } from "../../../domain/ai/chatProvider";
 import type { ChatTurn } from "../../../domain/ai/chatTurn";
 import type { ILLMClient } from "./ILLMClient";
 
@@ -33,13 +34,13 @@ export class LLMChatProvider
 
         context: string,
 
-        history: ChatTurn[] = []
+        options: ChatContextOptions = {}
 
     ): Promise<string> {
 
         return this.client.generateText(
 
-            this.buildPrompt(question, context, history)
+            this.buildPrompt(question, context, options)
 
         );
 
@@ -51,13 +52,13 @@ export class LLMChatProvider
 
         context: string,
 
-        history: ChatTurn[] = []
+        options: ChatContextOptions = {}
 
     ): AsyncIterable<string> {
 
         const prompt =
 
-            this.buildPrompt(question, context, history);
+            this.buildPrompt(question, context, options);
 
         if (this.client.generateTextStream) {
 
@@ -86,7 +87,7 @@ export class LLMChatProvider
 
         context: string,
 
-        history: ChatTurn[]
+        { history = [], playerCount }: ChatContextOptions
 
     ): string {
 
@@ -113,7 +114,7 @@ ${
 
         .map(
 
-            turn =>
+            (turn: ChatTurn) =>
 
                 `${turn.role === "user" ? "Usuario" : "Tú"}: ${turn.content}`
 
@@ -121,6 +122,23 @@ ${
 
         .join("\n")
 }
+`;
+
+        const playerCountSection =
+
+            !playerCount
+
+                ? ""
+
+                : `
+Esta partida se está jugando con ${playerCount} jugadores. Si el
+reglamento distingue reglas según el número de jugadores (por
+ejemplo, variantes para 2 jugadores, o cambios a partir de cierto
+número), aplica específicamente las que correspondan a ${playerCount}
+jugadores, y dilo explícitamente si una regla cambia según el
+número de jugadores. Si el reglamento no distingue nada según el
+número de jugadores para lo que se pregunta, ignora este dato y
+responde con normalidad.
 `;
 
         return `
@@ -167,7 +185,7 @@ Normas:
   forma directa ni de forma relacionada), responde exactamente:
 
 "No he encontrado esa información en el reglamento."
-${historySection}
+${historySection}${playerCountSection}
 Contexto:
 
 ${context}

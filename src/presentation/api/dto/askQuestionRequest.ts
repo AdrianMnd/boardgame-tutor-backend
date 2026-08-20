@@ -20,4 +20,11 @@ export interface AskQuestionRequest {
 
     }[];
 
+    /**
+     * Opcional — con cuántos jugadores se está jugando esta
+     * partida concreta. Si no se manda, la respuesta no asume
+     * ningún número de jugadores.
+     */
+    playerCount?: number;
+
 }

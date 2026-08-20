@@ -121,13 +121,17 @@ describe("LLMChatProvider", () => {
 
             "El juego termina al llegar a 10 puntos.",
 
-            [
+            {
 
-                { role: "user", content: "¿cómo se gana la partida?" },
+                history: [
 
-                { role: "assistant", content: "Se gana al llegar a 10 puntos de victoria." }
+                    { role: "user", content: "¿cómo se gana la partida?" },
 
-            ]
+                    { role: "assistant", content: "Se gana al llegar a 10 puntos de victoria." }
+
+                ]
+
+            }
 
         );
 
@@ -196,7 +200,7 @@ describe("LLMChatProvider", () => {
 
             "contexto",
 
-            historialLargo
+            { history: historialLargo }
 
         );
 
@@ -208,6 +212,64 @@ describe("LLMChatProvider", () => {
         // Los últimos sí.
         expect(promptRecibido).toContain("mensaje-19");
         expect(promptRecibido).toContain("mensaje-14");
+
+    });
+
+    it("incluye el número de jugadores en el prompt cuando se pasa", async () => {
+
+        let promptRecibido = "";
+
+        const client =
+
+            makeFakeClient(prompt => {
+
+                promptRecibido = prompt;
+
+                return "respuesta de prueba";
+
+            });
+
+        const provider = new LLMChatProvider(client);
+
+        await provider.answer(
+
+            "¿cómo se gana?",
+
+            "El juego termina al llegar a 10 puntos.",
+
+            { playerCount: 5 }
+
+        );
+
+        expect(promptRecibido).toContain("Esta partida se está jugando con 5 jugadores.");
+
+    });
+
+    it("no menciona el número de jugadores si no se pasa", async () => {
+
+        let promptRecibido = "";
+
+        const client =
+
+            makeFakeClient(prompt => {
+
+                promptRecibido = prompt;
+
+                return "respuesta de prueba";
+
+            });
+
+        const provider = new LLMChatProvider(client);
+
+        await provider.answer(
+
+            "¿cómo se gana?",
+
+            "El juego termina al llegar a 10 puntos."
+
+        );
+
+        expect(promptRecibido).not.toContain("jugando con");
 
     });
 
