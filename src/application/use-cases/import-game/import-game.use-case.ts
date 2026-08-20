@@ -64,7 +64,7 @@ export class ImportGameUseCase {
             path.resolve("games", gameId);
 
         const metadata =
-            await this.readMetadata(root);
+            await this.readMetadata(root, gameId);
 
         const sourceDir =
             path.join(root, "source");
@@ -274,7 +274,9 @@ export class ImportGameUseCase {
 
     private async readMetadata(
 
-        root: string
+        root: string,
+
+        gameId: string
 
     ): Promise<GameMetadata> {
 
@@ -292,7 +294,35 @@ export class ImportGameUseCase {
 
         }
 
-        return this.fileSystem.readJson<GameMetadata>(metadataPath);
+        const metadata =
+            await this.fileSystem.readJson<GameMetadata>(metadataPath);
+
+        // El "id" de dentro de metadata.json y el nombre de la
+        // carpeta (con el que se ejecuta "npm run import <id>")
+        // tienen que ser exactamente el mismo valor — el juego
+        // se guarda en la base de datos con el id del archivo,
+        // pero los documentos y chunks usan el de la carpeta. Si
+        // no coinciden, el juego se crea con un id y los
+        // documentos intentan apuntar a otro, lo que revienta
+        // más adelante con un error de clave foránea mucho menos
+        // claro que este. Suele pasar al usar "npm run fetch-bgg"
+        // con un id local distinto al que luego se usa para
+        // importar.
+        if (metadata.id !== gameId) {
+
+            throw new Error(
+
+                `El "id" dentro de ${metadataPath} es "${metadata.id}", pero ` +
+                `se ha pedido importar "${gameId}" (el nombre de la carpeta). ` +
+                `Deben coincidir exactamente — corrige el campo "id" del ` +
+                `metadata.json, o vuelve a ejecutar la importación con el id ` +
+                `correcto: npm run import ${metadata.id}`
+
+            );
+
+        }
+
+        return metadata;
 
     }
 

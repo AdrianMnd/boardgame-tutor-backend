@@ -33,6 +33,8 @@ export interface GameRequestInput {
 
     files: GameRequestFile[];
 
+    coverFile?: GameRequestFile;
+
 }
 
 export class GameRequestUseCase {
@@ -124,6 +126,37 @@ export class GameRequestUseCase {
 
         }
 
+        let coverKey: string | undefined;
+
+        let coverLink: string | undefined;
+
+        if (input.coverFile) {
+
+            coverKey =
+                `pending-requests/${requestId}/cover-${input.coverFile.originalName}`;
+
+            await this.storage.upload(
+
+                coverKey,
+
+                input.coverFile.buffer,
+
+                input.coverFile.contentType
+
+            );
+
+            coverLink =
+
+                await this.storage.getSignedDownloadUrl(
+
+                    coverKey,
+
+                    SIGNED_URL_EXPIRES_SECONDS
+
+                );
+
+        }
+
         // Se guarda ANTES de mandar el correo — si el correo
         // fallara (ver la limitación de Resend sin dominio
         // propio en CONFIGURATION.md), la solicitud sigue
@@ -139,7 +172,9 @@ export class GameRequestUseCase {
 
             bggUrl,
 
-            pdfKeys
+            pdfKeys,
+
+            coverKey
 
         });
 
@@ -153,7 +188,9 @@ export class GameRequestUseCase {
 
             bggUrl,
 
-            pdfLinks
+            pdfLinks,
+
+            coverLink
 
         });
 

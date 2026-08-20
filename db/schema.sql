@@ -213,6 +213,10 @@ CREATE TABLE IF NOT EXISTS game_requests (
     -- se lista, a partir de estas rutas).
     pdf_keys        TEXT[] NOT NULL DEFAULT '{}',
 
+    -- Ruta de la portada en B2 (opcional) — igual que pdf_keys,
+    -- una ruta interna, no una URL firmada (esas caducan).
+    cover_key       TEXT,
+
     reviewed        BOOLEAN NOT NULL DEFAULT false,
 
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -221,6 +225,13 @@ CREATE TABLE IF NOT EXISTS game_requests (
 
 CREATE INDEX IF NOT EXISTS idx_game_requests_reviewed
     ON game_requests(reviewed, created_at);
+
+-- Si la tabla ya existía de antes de que se añadiera cover_key
+-- (versión anterior de esta funcionalidad), esto la pone al día
+-- sin perder nada — CREATE TABLE por sí solo no toca una tabla
+-- ya existente.
+ALTER TABLE game_requests
+    ADD COLUMN IF NOT EXISTS cover_key TEXT;
 
 -- ============================================================
 -- Valoración rápida de respuestas (👍/👎)

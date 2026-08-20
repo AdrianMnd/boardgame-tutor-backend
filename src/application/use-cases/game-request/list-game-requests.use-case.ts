@@ -23,6 +23,8 @@ export interface GameRequestListItem {
 
     pdfLinks: string[];
 
+    coverLink?: string;
+
     reviewed: boolean;
 
     createdAt: string;
@@ -78,7 +80,21 @@ export class ListGameRequestsUseCase {
 
                         )
 
-                    )
+                    ),
+
+                coverLink:
+
+                    record.coverKey
+
+                        ? await this.storage.getSignedDownloadUrl(
+
+                            record.coverKey,
+
+                            SIGNED_URL_EXPIRES_SECONDS
+
+                        )
+
+                        : undefined
 
             }))
 
