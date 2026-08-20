@@ -14,6 +14,32 @@ export interface MessageRatingInput {
 
 }
 
+export interface RatingSummaryByGame {
+
+    gameId: string;
+
+    gameName: string;
+
+    up: number;
+
+    down: number;
+
+}
+
+export interface RecentNegativeRating {
+
+    gameId: string;
+
+    gameName: string;
+
+    question: string;
+
+    answer: string;
+
+    createdAt: string;
+
+}
+
 export interface IMessageRatingRepository {
 
     create(
@@ -21,5 +47,13 @@ export interface IMessageRatingRepository {
         input: MessageRatingInput
 
     ): Promise<void>;
+
+    summaryByGame(): Promise<RatingSummaryByGame[]>;
+
+    recentNegative(
+
+        limit: number
+
+    ): Promise<RecentNegativeRating[]>;
 
 }

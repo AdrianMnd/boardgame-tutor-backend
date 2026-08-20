@@ -39,6 +39,7 @@ import { ListGameRequestsUseCase } from "../use-cases/game-request/list-game-req
 import { MarkGameRequestReviewedUseCase } from "../use-cases/game-request/mark-game-request-reviewed.use-case";
 import { AdminResetPasswordUseCase } from "../use-cases/admin/admin-reset-password.use-case";
 import { RateMessageUseCase } from "../use-cases/rating/rate-message.use-case";
+import { GetRatingsSummaryUseCase } from "../use-cases/rating/get-ratings-summary.use-case";
 
 export class ApplicationContainer {
 
@@ -254,6 +255,13 @@ export class ApplicationContainer {
 
     readonly rateMessageUseCase =
         new RateMessageUseCase(
+
+            this.messageRatingRepository
+
+        );
+
+    readonly getRatingsSummaryUseCase =
+        new GetRatingsSummaryUseCase(
 
             this.messageRatingRepository
 

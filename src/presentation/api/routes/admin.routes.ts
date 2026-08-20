@@ -15,7 +15,9 @@ const controller =
 
         container.markGameRequestReviewedUseCase,
 
-        container.adminResetPasswordUseCase
+        container.adminResetPasswordUseCase,
+
+        container.getRatingsSummaryUseCase
 
     );
 
@@ -52,6 +54,14 @@ router.post(
     "/users/reset-password",
 
     controller.resetUserPassword
+
+);
+
+router.get(
+
+    "/ratings/summary",
+
+    controller.getRatingsSummary
 
 );
 
