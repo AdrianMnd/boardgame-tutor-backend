@@ -72,9 +72,13 @@ El origen del frontend no está en la lista permitida. Revisar `FRONTEND_URL` (d
 
 `ADMIN_EMAIL` no está configurada, o no coincide exactamente con el email de la cuenta (la comparación no distingue mayúsculas/minúsculas, pero sí tiene que ser la misma cuenta). Confirmar con `GET /api/auth/me` — la respuesta incluye `isAdmin`, que debe ser `true`.
 
-## `npm run fetch-bgg` falla o devuelve datos incompletos
+## `npm run fetch-bgg` falla con error 401
 
-No se ha podido probar esta integración contra la API real de BoardGameGeek durante el desarrollo (ver el aviso en [`docs/IMPORT.md`](./IMPORT.md)). Si el id/URL es correcto y el juego existe en BGG pero el comando sigue fallando, revisar si BGG ha cambiado el formato de su XML — en ese caso, `metadata.json` se puede seguir rellenando a mano como siempre, este comando es solo una ayuda opcional.
+Estado conocido, no un bug — ver el aviso en [`docs/IMPORT.md`](./IMPORT.md#rellenar-metadatajson-automáticamente-desde-boardgamegeek-opcional). BGG exige aprobación explícita para su API, pendiente en el momento de escribir esto. Mientras tanto, rellena `metadata.json` a mano — el resto del flujo de importación funciona con total normalidad.
+
+## Un juego importado sin errores no aparece en la tabla `games`
+
+Desde la última revisión, esto ya no debería pasar en silencio — el propio comando hace una consulta de verificación tras terminar y falla con un error explícito si la fila no aparece (ver `docs/ARCHITECTURE.md`, sección "Importación de un juego"). Si sigue ocurriendo a pesar de ese error explícito, revisar que `metadata.json` tenga un `id` con forma válida (sin caracteres raros, no vacío) — es el valor real que se usa como clave primaria en `games`, independientemente del nombre de la carpeta.
 
 ## Verificación completa antes de dar por buena una entrega
 

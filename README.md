@@ -21,7 +21,8 @@ API REST en Node.js/Express para **BoardGame Tutor**, una aplicación de pregunt
 - **Historial de conversación por (usuario, juego)**, sincronizado con la cuenta — una conversación activa por juego, con un límite de 30 mensajes por conversación (se recorta solo, sin intervención manual).
 - **Respuestas más útiles cuando no hay una coincidencia exacta**: si el reglamento trata algo relacionado pero no responde de forma específica, la IA lo dice explícitamente y resume lo relacionado, en vez de un simple "no encontrado".
 - **Solicitud de juegos nuevos**: cualquier usuario registrado puede proponer un juego con enlace a BoardGameGeek y PDF del reglamento (opcional); los PDF se suben a Backblaze B2 y llega un correo (Resend) con enlaces de descarga temporales para revisarlos.
-- **Panel de administración**: revisión de solicitudes de juegos, restablecimiento manual de contraseñas (no hay recuperación por correo — ver limitaciones), y un resumen de valoraciones de respuestas para detectar qué reglamentos fallan más.
+- **Panel de administración**: revisión de solicitudes de juegos, restablecimiento manual de contraseñas (no hay recuperación automática por correo — ver limitaciones), solicitudes de restablecimiento recibidas, un resumen de valoraciones de respuestas para detectar qué reglamentos fallan más, y opción de vaciar solicitudes/valoraciones acumuladas.
+- **Monitorización de errores en producción** (opcional, vía Sentry) — sin configurarla, la app funciona exactamente igual.
 - **Valoración rápida de respuestas** (👍/👎), con o sin cuenta — señal de calidad para priorizar qué contenido revisar.
 - **Importación de juegos resiliente**: *checkpoints* para reanudar una importación interrumpida por cuota agotada, embeddings en lote (menos peticiones HTTP), verificación automática de embeddings incompletos, y una integración opcional con la API de BoardGameGeek para autocompletar nombre/año/jugadores al dar de alta un juego nuevo.
 - **Endpoint de salud** (`/health`), pensado para servicios externos de monitorización que reduzcan los arranques en frío del plan gratuito de hosting.
@@ -102,12 +103,18 @@ DELETE /api/conversations/:gameId          Borrar la conversación ("Nueva conve
 
 POST   /api/game-requests                  Solicitar un juego nuevo (con sesión)
 
+POST   /api/password-reset-requests        Solicitar restablecer contraseña (pública)
+
 POST   /api/ratings                        Valorar una respuesta (👍/👎, sesión opcional)
 
 GET    /api/admin/game-requests            Listar solicitudes de juegos (solo admin)
 PATCH  /api/admin/game-requests/:id/reviewed  Marcar solicitud como revisada (solo admin)
+DELETE /api/admin/game-requests            Vaciar todas las solicitudes de juegos (solo admin)
 POST   /api/admin/users/reset-password     Restablecer contraseña de una cuenta (solo admin)
 GET    /api/admin/ratings/summary          Resumen de valoraciones por juego (solo admin)
+DELETE /api/admin/ratings                  Vaciar todas las valoraciones (solo admin)
+GET    /api/admin/password-reset-requests  Listar solicitudes de restablecimiento (solo admin)
+PATCH  /api/admin/password-reset-requests/:id/resolved  Marcar como resuelta (solo admin)
 
 GET    /health                             Comprobación de salud (sin autenticación)
 ```
