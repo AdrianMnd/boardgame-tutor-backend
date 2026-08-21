@@ -16,4 +16,6 @@ export interface IGameRequestRepository {
 
     ): Promise<void>;
 
+    deleteAll(): Promise<void>;
+
 }

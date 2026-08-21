@@ -8,6 +8,7 @@ import multer from "multer";
 import gamesRoutes from "./presentation/api/routes/games.routes";
 import chatRoutes from "./presentation/api/routes/chat.routes";
 import authRoutes from "./presentation/api/routes/auth.routes";
+import passwordResetRequestRoutes from "./presentation/api/routes/passwordResetRequest.routes";
 import favoritesRoutes from "./presentation/api/routes/favorites.routes";
 import categoriesRoutes from "./presentation/api/routes/categories.routes";
 import conversationsRoutes from "./presentation/api/routes/conversations.routes";
@@ -209,6 +210,16 @@ app.use(
     authRateLimiter,
 
     authRoutes
+
+);
+
+app.use(
+
+    "/api/password-reset-requests",
+
+    authRateLimiter,
+
+    passwordResetRequestRoutes
 
 );
 
