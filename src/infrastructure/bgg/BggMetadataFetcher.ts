@@ -21,13 +21,47 @@ export async function fetchBggMetadata(
 
     const response =
 
-        await fetch(`${BGG_API_URL}?id=${bggId}&stats=0`);
+        await fetch(
+
+            `${BGG_API_URL}?id=${bggId}&stats=0`,
+
+            {
+
+                headers: {
+
+                    // Sin esta cabecera, BGG puede rechazar la
+                    // petición (401/403) por tratarla como
+                    // tráfico de bot — fetch() de Node no manda
+                    // un User-Agent "de navegador" por defecto,
+                    // y algunas APIs (BGG entre ellas, al
+                    // parecer) lo exigen para peticiones
+                    // automatizadas.
+                    "User-Agent":
+
+                        "BoardGameTutor/1.0 (+https://boardgametutor.vercel.app)"
+
+                }
+
+            }
+
+        );
 
     if (!response.ok) {
 
+        const hint =
+
+            response.status === 401 || response.status === 403
+
+                ? " (BGG suele devolver este código cuando bloquea la petición " +
+                  "por parecer tráfico automatizado — si esto persiste, puede " +
+                  "que BGG haya reforzado ese bloqueo más allá de la cabecera " +
+                  "User-Agent que ya se manda)"
+
+                : "";
+
         throw new Error(
 
-            `BoardGameGeek respondió con estado ${response.status} para el id ${bggId}.`
+            `BoardGameGeek respondió con estado ${response.status} para el id ${bggId}.${hint}`
 
         );
 

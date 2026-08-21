@@ -94,7 +94,48 @@ async function main() {
 
         );
 
-    await importer.execute(gameId);
+    const dbGameId =
+        await importer.execute(gameId);
+
+    // Comprobación final, totalmente independiente de todo lo
+    // anterior — una consulta nueva, directa, a la tabla games.
+    // No se fía de que el resto del proceso no haya lanzado
+    // ningún error: lee la fila tal cual ha quedado en la base
+    // de datos y la muestra tal cual, para que no quede ninguna
+    // duda de si el juego está realmente ahí.
+    const verification =
+
+        await pool.query(
+
+            "SELECT id, name, min_players, max_players, year FROM games WHERE id = $1",
+
+            [dbGameId]
+
+        );
+
+    if (verification.rowCount === 0) {
+
+        await pool.end();
+
+        console.error("");
+        console.error(
+
+            `ERROR: la importación ha terminado sin lanzar ningún error, ` +
+            `pero al volver a consultar la base de datos, "${dbGameId}" ` +
+            `NO aparece en la tabla "games". Algo no cuadra — copia este ` +
+            `mensaje y compártelo tal cual.`
+
+        );
+        console.error("");
+
+        process.exit(1);
+
+    }
+
+    console.log("");
+    console.log("Confirmado en la base de datos:");
+    console.log(verification.rows[0]);
+    console.log("");
 
     await pool.end();
 

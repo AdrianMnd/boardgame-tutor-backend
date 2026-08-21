@@ -53,7 +53,7 @@ export class ImportGameUseCase {
 
         gameId: string
 
-    ): Promise<void> {
+    ): Promise<string> {
 
         const start =
             Date.now();
@@ -282,6 +282,8 @@ export class ImportGameUseCase {
         this.logger.success("Guardado en la base de datos");
 
         this.logger.footer(Date.now() - start);
+
+        return dbGameId;
 
     }
 
