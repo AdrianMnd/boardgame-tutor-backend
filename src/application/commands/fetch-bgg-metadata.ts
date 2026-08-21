@@ -55,6 +55,37 @@ async function main() {
 
     const bggData = await fetchBggMetadata(bggId);
 
+    // Se muestra tal cual llega de BGG, ANTES de mezclarlo con
+    // valores existentes o por defecto — así, si algún campo
+    // viniera vacío (por ejemplo, si BGG cambiara el formato de
+    // su XML y alguna expresión regular dejara de encajar), se
+    // ve aquí mismo, en vez de quedar oculto detrás de un valor
+    // por defecto silencioso.
+    console.log("");
+    console.log("Datos recibidos de BGG:");
+    console.log(JSON.stringify(bggData, null, 2));
+
+    if (
+
+        bggData.year === undefined &&
+        bggData.minPlayers === undefined &&
+        bggData.maxPlayers === undefined
+
+    ) {
+
+        console.log("");
+        console.log(
+
+            "Aviso: BGG solo ha devuelto el nombre — año y número de " +
+            "jugadores no se han podido leer de la respuesta (puede que " +
+            "el formato del XML de BGG haya cambiado). Se usarán valores " +
+            "por defecto para esos campos; revísalos a mano en el " +
+            "metadata.json generado."
+
+        );
+
+    }
+
     const gameDir = path.join("games", localId);
 
     const metadataPath = path.join(gameDir, "metadata.json");

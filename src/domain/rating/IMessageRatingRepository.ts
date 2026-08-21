@@ -56,4 +56,6 @@ export interface IMessageRatingRepository {
 
     ): Promise<RecentNegativeRating[]>;
 
+    deleteAll(): Promise<void>;
+
 }

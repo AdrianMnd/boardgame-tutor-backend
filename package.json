@@ -32,6 +32,7 @@
     "@aws-sdk/s3-request-presigner": "^3.1111.0",
     "@google/genai": "^2.15.0",
     "@huggingface/transformers": "^4.2.0",
+    "@sentry/node": "^10.70.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",

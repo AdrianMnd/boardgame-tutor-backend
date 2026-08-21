@@ -297,14 +297,31 @@ Petición `multipart/form-data`, no JSON:
 | `gameName` | texto | Sí |
 | `bggUrl` | texto (debe contener `boardgamegeek.com`) | No |
 | `pdfs` | uno o varios archivos PDF | No |
+| `cover` | una imagen (cualquier `image/*`) | No |
 
-Límites: 150MB por archivo, 10 archivos como máximo (`multer`, error `400` con mensaje explicativo si se superan). Solo se aceptan archivos con tipo `application/pdf`.
+Límites: 150MB por archivo PDF, 10 archivos PDF como máximo, 10MB para la portada (`multer`, error `400` con mensaje explicativo si se superan). El campo `cover`, si se manda, debe tener un tipo MIME que empiece por `image/` — cualquier otra cosa se rechaza con `400`.
 
-Al recibirse: cada PDF se sube a B2 bajo `pending-requests/<uuid>/`, se genera un enlace de descarga firmado (válido 7 días), y se manda un correo (Resend) a `NOTIFICATION_EMAIL` con el nombre del juego, el enlace a BGG y los enlaces de descarga. Quien hace la solicitud no recibe ningún correo (ver [`CONFIGURATION.md`](./CONFIGURATION.md) sobre esta limitación) — ve una confirmación directamente en la interfaz.
+Al recibirse: cada PDF (y la portada, si la hay) se sube a B2 bajo `pending-requests/<uuid>/`, se generan enlaces de descarga firmados (válidos 7 días), y se manda un correo (Resend) a `NOTIFICATION_EMAIL` con el nombre del juego, el enlace a BGG, la portada (si la hay) y los enlaces de descarga. Quien hace la solicitud no recibe ningún correo (ver [`CONFIGURATION.md`](./CONFIGURATION.md) sobre esta limitación) — ve una confirmación directamente en la interfaz.
 
 Respuesta `204` sin cuerpo si todo va bien.
 
 Rate limit: `GAME_REQUEST_RATE_LIMIT` peticiones/hora por IP (5 por defecto) — más bajo que el resto, ya que cada petición sube archivos y manda un correo.
+
+---
+
+## Recuperación de contraseña
+
+### `POST /api/password-reset-requests`
+
+**Pública** — quien ha olvidado su contraseña, por definición, no puede autenticarse para pedir el restablecimiento.
+
+```json
+{ "email": "usuario@example.com" }
+```
+
+Respuesta `204` sin cuerpo. **No revela si el email corresponde a una cuenta real** — se guarda la solicitud igual en cualquier caso (mismo motivo por el que `POST /api/auth/login` da el mismo error tanto si el email no existe como si la contraseña es incorrecta). El administrador la ve en `GET /api/admin/password-reset-requests` y decide si actuar, usando `POST /api/admin/users/reset-password`.
+
+Rate limit: comparte límite con `/api/auth` (`AUTH_RATE_LIMIT`, 10 por defecto) — mismo riesgo de abuso que el login.
 
 ---
 
@@ -344,15 +361,22 @@ Lista las solicitudes de juegos nuevos, no revisadas primero. Cada elemento incl
     "gameName": "Wingspan",
     "bggUrl": "https://boardgamegeek.com/boardgame/266192/wingspan",
     "pdfLinks": ["https://..."],
+    "coverLink": "https://...",
     "reviewed": false,
     "createdAt": "..."
   }
 ]
 ```
 
+`coverLink` solo aparece si la solicitud incluyó una imagen de portada (campo opcional, ver `POST /api/game-requests`).
+
 ### `PATCH /api/admin/game-requests/:id/reviewed`
 
 Marca una solicitud como revisada. `204` sin cuerpo. No hay endpoint para "desmarcar" — es intencionado, no un descuido.
+
+### `DELETE /api/admin/game-requests`
+
+Borra **todas** las solicitudes de juegos, revisadas o no. `204` sin cuerpo. Sin confirmación del lado del servidor — la confirmación vive en el frontend (un `window.confirm()` antes de llamar a este endpoint). Pensado para cuando se acumulan demasiadas solicitudes ya gestionadas y el panel empieza a quedar poco práctico.
 
 ### `POST /api/admin/users/reset-password`
 
@@ -388,6 +412,24 @@ No hay recuperación de contraseña por correo (ver la limitación de Resend en 
 ```
 
 `byGame` ordenado con más valoraciones negativas primero. `recentNegative` son las últimas 15 respuestas marcadas con 👎, con la pregunta y la respuesta completas — pensado para detectar de un vistazo qué reglamentos necesitan revisión.
+
+### `DELETE /api/admin/ratings`
+
+Borra **todas** las valoraciones. `204` sin cuerpo. Mismo criterio que borrar solicitudes: sin confirmación del lado del servidor, pensado para no dejar que el panel acumule datos indefinidamente.
+
+### `GET /api/admin/password-reset-requests`
+
+Lista las solicitudes de "olvidé mi contraseña" (ver `POST /api/password-reset-requests` más abajo), no resueltas primero.
+
+```json
+[
+  { "id": "...", "email": "usuario@example.com", "resolved": false, "createdAt": "..." }
+]
+```
+
+### `PATCH /api/admin/password-reset-requests/:id/resolved`
+
+Marca una solicitud de restablecimiento como resuelta. `204` sin cuerpo. No cambia la contraseña por sí solo — es solo una marca de seguimiento; el restablecimiento real se hace por separado con `POST /api/admin/users/reset-password`.
 
 ---
 

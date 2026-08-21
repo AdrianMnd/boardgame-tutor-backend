@@ -1,5 +1,7 @@
 import "dotenv/config";
 
+import { initSentry, attachSentryErrorHandler } from "./config/sentry";
+
 import express from "express";
 import cors from "cors";
 import { rateLimit } from "express-rate-limit";
@@ -8,6 +10,7 @@ import multer from "multer";
 import gamesRoutes from "./presentation/api/routes/games.routes";
 import chatRoutes from "./presentation/api/routes/chat.routes";
 import authRoutes from "./presentation/api/routes/auth.routes";
+import passwordResetRequestRoutes from "./presentation/api/routes/passwordResetRequest.routes";
 import favoritesRoutes from "./presentation/api/routes/favorites.routes";
 import categoriesRoutes from "./presentation/api/routes/categories.routes";
 import conversationsRoutes from "./presentation/api/routes/conversations.routes";
@@ -16,6 +19,8 @@ import adminRoutes from "./presentation/api/routes/admin.routes";
 import ratingRoutes from "./presentation/api/routes/rating.routes";
 
 import { ApiError } from "./presentation/api/errors/ApiError";
+
+initSentry();
 
 const app = express();
 
@@ -214,6 +219,16 @@ app.use(
 
 app.use(
 
+    "/api/password-reset-requests",
+
+    authRateLimiter,
+
+    passwordResetRequestRoutes
+
+);
+
+app.use(
+
     "/api/favorites",
 
     favoritesRoutes
@@ -274,6 +289,13 @@ app.use(
 // de IA) devuelve la página HTML genérica de Express en vez
 // de un JSON que el frontend pueda interpretar.
 // ==========================================================
+
+// Va ANTES del manejador de errores propio, para que Sentry
+// vea el error primero — no sustituye ni cambia en nada la
+// respuesta JSON que recibe el cliente, solo reporta el error
+// a Sentry por el camino. No hace nada si SENTRY_DSN no está
+// configurada.
+attachSentryErrorHandler(app);
 
 app.use(
 

@@ -139,4 +139,10 @@ export class PostgresGameRequestRepository
 
     }
 
+    async deleteAll(): Promise<void> {
+
+        await this.pool.query("DELETE FROM game_requests");
+
+    }
+
 }

@@ -92,6 +92,10 @@ URL pública de este servicio, usada para construir las URLs de las portadas de 
 
 `FRONTEND_URL` añade orígenes permitidos por CORS además del dominio de producción (útil para desarrollo local). `CHAT_RATE_LIMIT` es el máximo de preguntas por IP cada 15 minutos (20 por defecto).
 
+### `SENTRY_DSN` (opcional)
+
+Monitorización de errores en producción — sin esta variable, la aplicación funciona exactamente igual, simplemente sin reportar nada a ningún sitio. Con ella, cualquier error no controlado (un fallo de programación, un proveedor de IA caído de forma inesperada, etc.) se reporta a [Sentry](https://sentry.io) además de devolver la respuesta de error normal al cliente — no cambia nada de lo que ve quien usa la app, solo añade visibilidad de lo que está fallando en producción sin depender de mirar los logs de Render a mano.
+
 ## Puesta en marcha local
 
 ```bash

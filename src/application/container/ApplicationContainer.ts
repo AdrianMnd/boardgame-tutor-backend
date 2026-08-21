@@ -11,6 +11,7 @@ import { PostgresFavoritesRepository } from "../../infrastructure/repositories/P
 import { PostgresCategoryRepository } from "../../infrastructure/repositories/PostgresCategoryRepository";
 import { PostgresGameRequestRepository } from "../../infrastructure/repositories/PostgresGameRequestRepository";
 import { PostgresMessageRatingRepository } from "../../infrastructure/repositories/PostgresMessageRatingRepository";
+import { PostgresPasswordResetRequestRepository } from "../../infrastructure/repositories/PostgresPasswordResetRequestRepository";
 import { PostgresConversationRepository } from "../../infrastructure/repositories/PostgresConversationRepository";
 import { PgVectorRetriever } from "../../infrastructure/database/PgVectorRetriever";
 import { B2FileStorage } from "../../infrastructure/storage/B2FileStorage";
@@ -40,6 +41,11 @@ import { MarkGameRequestReviewedUseCase } from "../use-cases/game-request/mark-g
 import { AdminResetPasswordUseCase } from "../use-cases/admin/admin-reset-password.use-case";
 import { RateMessageUseCase } from "../use-cases/rating/rate-message.use-case";
 import { GetRatingsSummaryUseCase } from "../use-cases/rating/get-ratings-summary.use-case";
+import { ClearRatingsUseCase } from "../use-cases/rating/clear-ratings.use-case";
+import { ClearGameRequestsUseCase } from "../use-cases/game-request/clear-game-requests.use-case";
+import { RequestPasswordResetUseCase } from "../use-cases/password-reset-request/request-password-reset.use-case";
+import { ListPasswordResetRequestsUseCase } from "../use-cases/password-reset-request/list-password-reset-requests.use-case";
+import { MarkPasswordResetRequestResolvedUseCase } from "../use-cases/password-reset-request/mark-password-reset-request-resolved.use-case";
 
 export class ApplicationContainer {
 
@@ -264,6 +270,48 @@ export class ApplicationContainer {
         new GetRatingsSummaryUseCase(
 
             this.messageRatingRepository
+
+        );
+
+    readonly clearRatingsUseCase =
+        new ClearRatingsUseCase(
+
+            this.messageRatingRepository
+
+        );
+
+    readonly clearGameRequestsUseCase =
+        new ClearGameRequestsUseCase(
+
+            this.gameRequestRepository
+
+        );
+
+    readonly passwordResetRequestRepository =
+        new PostgresPasswordResetRequestRepository(
+
+            this.pool
+
+        );
+
+    readonly requestPasswordResetUseCase =
+        new RequestPasswordResetUseCase(
+
+            this.passwordResetRequestRepository
+
+        );
+
+    readonly listPasswordResetRequestsUseCase =
+        new ListPasswordResetRequestsUseCase(
+
+            this.passwordResetRequestRepository
+
+        );
+
+    readonly markPasswordResetRequestResolvedUseCase =
+        new MarkPasswordResetRequestResolvedUseCase(
+
+            this.passwordResetRequestRepository
 
         );
 

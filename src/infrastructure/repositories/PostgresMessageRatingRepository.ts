@@ -149,4 +149,10 @@ export class PostgresMessageRatingRepository
 
     }
 
+    async deleteAll(): Promise<void> {
+
+        await this.pool.query("DELETE FROM message_ratings");
+
+    }
+
 }

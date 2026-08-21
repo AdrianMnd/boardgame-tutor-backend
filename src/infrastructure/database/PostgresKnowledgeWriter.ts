@@ -29,7 +29,9 @@ export class PostgresKnowledgeWriter {
 
     ): Promise<void> {
 
-        await this.pool.query(
+        const result =
+
+            await this.pool.query(
 
             `
             INSERT INTO games (id, name, language, version, min_players, max_players, year, cover_path)
@@ -42,6 +44,7 @@ export class PostgresKnowledgeWriter {
                 max_players = EXCLUDED.max_players,
                 year = EXCLUDED.year,
                 cover_path = COALESCE(EXCLUDED.cover_path, games.cover_path)
+            RETURNING id
             `,
 
             [
@@ -65,6 +68,22 @@ export class PostgresKnowledgeWriter {
             ]
 
         );
+
+        // Defensa explícita, no solo "confiar" en que la query no
+        // haya lanzado — si por lo que sea no se ha devuelto la
+        // fila (no debería pasar nunca con un INSERT normal, pero
+        // así un fallo silencioso se convierte en un error claro
+        // en vez de un "importado correctamente" engañoso).
+        if (result.rowCount !== 1 || result.rows[0]?.id !== metadata.id) {
+
+            throw new Error(
+
+                `No se ha podido confirmar que el juego "${metadata.id}" ` +
+                "se haya guardado correctamente en la tabla \"games\"."
+
+            );
+
+        }
 
     }
 

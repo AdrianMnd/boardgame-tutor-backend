@@ -15,9 +15,17 @@ const controller =
 
         container.markGameRequestReviewedUseCase,
 
+        container.clearGameRequestsUseCase,
+
         container.adminResetPasswordUseCase,
 
-        container.getRatingsSummaryUseCase
+        container.getRatingsSummaryUseCase,
+
+        container.clearRatingsUseCase,
+
+        container.listPasswordResetRequestsUseCase,
+
+        container.markPasswordResetRequestResolvedUseCase
 
     );
 
@@ -49,6 +57,14 @@ router.patch(
 
 );
 
+router.delete(
+
+    "/game-requests",
+
+    controller.clearGameRequests
+
+);
+
 router.post(
 
     "/users/reset-password",
@@ -62,6 +78,30 @@ router.get(
     "/ratings/summary",
 
     controller.getRatingsSummary
+
+);
+
+router.delete(
+
+    "/ratings",
+
+    controller.clearRatings
+
+);
+
+router.get(
+
+    "/password-reset-requests",
+
+    controller.listPasswordResetRequests
+
+);
+
+router.patch(
+
+    "/password-reset-requests/:id/resolved",
+
+    controller.markPasswordResetRequestResolved
 
 );
 

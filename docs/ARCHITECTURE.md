@@ -126,13 +126,23 @@ Ambas se recortan/validan en el servidor sin importar lo que mande el cliente: e
 POST /api/game-requests (multipart/form-data, requiere sesión)
     ├─ valida nombre del juego y (si viene) el enlace a BGG
     ├─ sube cada PDF a B2 bajo pending-requests/<uuid>/
+    ├─ si se manda una portada (campo "cover", opcional), la sube igual
     ├─ genera un enlace de descarga firmado por archivo (7 días)
     ├─ guarda la solicitud en Postgres (game_requests) — ANTES de mandar el correo,
     │  para que la solicitud no se pierda si el correo llegara a fallar
     └─ EmailService.sendGameRequestNotification() (Resend)
 ```
 
-Se guarda en Postgres (a diferencia de una versión anterior de este mismo diseño, que deliberadamente no lo hacía) porque ahora existe un panel de administración que necesita poder **listar** las solicitudes, no solo recibir un correo puntual por cada una. Se guarda la *ruta* de cada PDF en B2 (`pdf_keys`), no una URL firmada — las firmadas caducan a los 7 días, así que el panel regenera enlaces frescos cada vez que se lista (ver `ListGameRequestsUseCase`). Ver [`docs/CONFIGURATION.md`](./CONFIGURATION.md) sobre por qué el correo de confirmación solo llega a la cuenta propia, no a quien hace la solicitud.
+Se guarda en Postgres (a diferencia de una versión anterior de este mismo diseño, que deliberadamente no lo hacía) porque ahora existe un panel de administración que necesita poder **listar** las solicitudes, no solo recibir un correo puntual por cada una. Se guarda la *ruta* de cada PDF en B2 (`pdf_keys`) y de la portada (`cover_key`, opcional), no URLs firmadas — las firmadas caducan a los 7 días, así que el panel regenera enlaces frescos cada vez que se lista (ver `ListGameRequestsUseCase`). Ver [`docs/CONFIGURATION.md`](./CONFIGURATION.md) sobre por qué el correo de confirmación solo llega a la cuenta propia, no a quien hace la solicitud.
+
+## Recuperación de contraseña
+
+No hay recuperación por correo — misma limitación de Resend que las solicitudes de juegos. En su lugar, un flujo de dos pasos parecido al de las propias solicitudes de juegos:
+
+1. `POST /api/password-reset-requests` (**pública** — quien ha olvidado su contraseña no puede autenticarse para pedir el restablecimiento) guarda el email en `password_reset_requests`, **sin comprobar si corresponde a una cuenta real** — hacerlo revelaría qué emails están registrados, el mismo motivo por el que el login da el mismo error tanto si el email no existe como si la contraseña es incorrecta.
+2. El administrador ve la lista en el panel (`GET /api/admin/password-reset-requests`), y si decide actuar, usa la herramienta de restablecimiento manual ya existente (`POST /api/admin/users/reset-password`) — que sí descubre si la cuenta existe de verdad, con un `404` si no.
+
+Las solicitudes se pueden marcar como resueltas (`PATCH .../resolved`), un simple seguimiento visual, sin ningún efecto sobre la contraseña en sí.
 
 ## Valoración de respuestas
 
@@ -144,11 +154,13 @@ Se guarda en Postgres (a diferencia de una versión anterior de este mismo dise�
 
 Un único administrador, identificado por email (`ADMIN_EMAIL`) — no hay roles ni permisos más finos porque no hacen falta todavía. `requireAdmin` (que va después de `requireAuth` en la cadena de *middlewares*) consulta el email **actual** del usuario en la base de datos en cada petición, no uno guardado en el token — así, si el administrador cambiara de email, el cambio se aplica sin esperar a que caduquen los tokens ya emitidos.
 
-Tres funciones, todas bajo `/api/admin`:
+Cinco funciones, todas bajo `/api/admin`:
 
 - **Revisar solicitudes de juegos**: listar (con enlaces de descarga regenerados en el momento) y marcar como revisada.
-- **Restablecer contraseñas manualmente**: como no hay recuperación de contraseña por correo (la misma limitación de Resend que afecta a las solicitudes de juegos), el panel genera una contraseña temporal aleatoria que el administrador comunica por su propio canal personal — nunca por la app.
+- **Restablecer contraseñas manualmente**: como no hay recuperación de contraseña por correo, el panel genera una contraseña temporal aleatoria que el administrador comunica por su propio canal personal — nunca por la app.
+- **Ver solicitudes de restablecimiento**: quién ha pedido recuperar su contraseña, para poder actuar con la herramienta anterior.
 - **Resumen de valoraciones**: agregado de 👍/👎 por juego, más las últimas respuestas peor valoradas con su pregunta y respuesta completas, para detectar de un vistazo qué reglamentos necesitan revisión.
+- **Vaciar solicitudes de juegos y valoraciones**: `DELETE /api/admin/game-requests` y `DELETE /api/admin/ratings` — pensado para cuando se acumulan demasiadas ya gestionadas y el panel deja de ser práctico. Sin confirmación en el servidor (esa vive en el frontend); es una operación deliberadamente destructiva, no algo que deba tener una vía de deshacer.
 
 ## Importación de un juego
 
@@ -167,3 +179,11 @@ Dos protecciones importantes en el paso de embeddings:
 
 - **Checkpoint de progreso**: si la importación falla a mitad (típicamente por cuota agotada), el progreso se guarda en un archivo temporal local. Al reintentar, se retoma donde se quedó — pero solo si el proveedor de hoy genera la misma dimensión que el checkpoint de ayer; si no coincide, se descarta y se regenera todo desde cero.
 - **Lotes con auto-recuperación**: los chunks se agrupan en lotes (`IMPORT_EMBEDDING_BATCH_SIZE`) para reducir peticiones HTTP. Si un proveedor no soporta pedir varios embeddings a la vez (algunos aceptan el lote sin error, pero devuelven solo 1 resultado), el sistema lo detecta y cae automáticamente a pedirlos uno a uno para ese lote.
+
+**El nombre de la carpeta solo sirve para localizar archivos en disco.** Para todo lo que se escribe en Postgres y B2 (el juego, los documentos, los chunks) se usa siempre el `id` de dentro de `metadata.json`, nunca el nombre de la carpeta — antes no era así, y un desajuste entre ambos (típicamente al rellenar `metadata.json` con `npm run fetch-bgg` usando un nombre local distinto al de la carpeta) rompía la importación con un error de clave foránea confuso. Si aun así no coinciden, ahora solo se avisa (no se bloquea nada): el `id` real siempre gana.
+
+Tras terminar, el propio comando (`import-game.ts`, no el caso de uso) hace una **consulta de verificación independiente** — lee de vuelta la fila recién escrita en `games` y la muestra en la terminal. No se fía de que ninguna otra parte del proceso no haya fallado en silencio; si la fila no aparece, termina con un error explícito en vez de un "importado con éxito" engañoso.
+
+## Monitorización de errores
+
+`SENTRY_DSN` (opcional, ver [`CONFIGURATION.md`](./CONFIGURATION.md)) activa [Sentry](https://sentry.io). `initSentry()` se llama al principio de `index.ts`, antes de construir la app de Express — así Sentry puede capturar errores incluso durante el propio arranque. El *middleware* de captura (`attachSentryErrorHandler(app)`) se monta justo antes del manejador de errores propio de la aplicación, para que Sentry vea el error primero y la respuesta JSON al cliente siga funcionando exactamente igual que hasta ahora. Sin la variable, ninguna de estas funciones hace nada — verificado explícitamente, no solo asumido.

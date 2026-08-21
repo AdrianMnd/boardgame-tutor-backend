@@ -262,3 +262,27 @@ CREATE TABLE IF NOT EXISTS message_ratings (
 
 CREATE INDEX IF NOT EXISTS idx_message_ratings_game_rating
     ON message_ratings(game_id, rating);
+
+-- ============================================================
+-- Solicitudes de "olvidé mi contraseña"
+--
+-- No se valida que el email corresponda a una cuenta real al
+-- crear la solicitud (evita revelar qué emails están
+-- registrados) — el propio administrador lo descubre al
+-- intentar restablecer la contraseña desde el panel.
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS password_reset_requests (
+
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    email       TEXT NOT NULL,
+
+    resolved    BOOLEAN NOT NULL DEFAULT false,
+
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+
+);
+
+CREATE INDEX IF NOT EXISTS idx_password_reset_requests_resolved
+    ON password_reset_requests(resolved, created_at);
