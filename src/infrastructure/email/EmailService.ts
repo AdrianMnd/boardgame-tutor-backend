@@ -14,6 +14,8 @@ export interface GameRequestEmailDetails {
 
     pdfLinks: string[];
 
+    coverLink?: string;
+
 }
 
 function escapeHtml(
@@ -81,6 +83,14 @@ export class EmailService {
 
                 : "<p><em>No se indicó ningún enlace a BoardGameGeek.</em></p>";
 
+        const coverHtml =
+
+            details.coverLink
+
+                ? `<p><strong>Portada:</strong> <a href="${details.coverLink}">Ver imagen (enlace válido 7 días)</a></p>`
+
+                : "";
+
         await this.resend.emails.send({
 
             from: "BoardGame Tutor <onboarding@resend.dev>",
@@ -94,6 +104,7 @@ export class EmailService {
                 <p><strong>Juego:</strong> ${escapeHtml(details.gameName)}</p>
                 <p><strong>Solicitado por:</strong> ${escapeHtml(details.requesterName)} (${escapeHtml(details.requesterEmail)})</p>
                 ${bggHtml}
+                ${coverHtml}
                 <p><strong>PDF adjuntos:</strong></p>
                 ${pdfListHtml}
             `

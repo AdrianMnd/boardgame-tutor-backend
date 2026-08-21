@@ -12,7 +12,13 @@ import type { AuthenticatedRequest } from "../middleware/requireAuth";
 
 interface RequestWithFiles extends Request {
 
-    files?: Express.Multer.File[];
+    files?: {
+
+        pdfs?: Express.Multer.File[];
+
+        cover?: Express.Multer.File[];
+
+    };
 
 }
 
@@ -68,7 +74,10 @@ export class GameRequestController {
         }
 
         const files =
-            (request as RequestWithFiles).files ?? [];
+            (request as RequestWithFiles).files?.pdfs ?? [];
+
+        const coverFile =
+            (request as RequestWithFiles).files?.cover?.[0];
 
         await this.useCase.execute({
 
@@ -94,7 +103,23 @@ export class GameRequestController {
 
                     contentType: file.mimetype
 
-                }))
+                })),
+
+            coverFile:
+
+                coverFile
+
+                    ? {
+
+                        originalName: coverFile.originalname,
+
+                        buffer: coverFile.buffer,
+
+                        contentType: coverFile.mimetype
+
+                    }
+
+                    : undefined
 
         });
 

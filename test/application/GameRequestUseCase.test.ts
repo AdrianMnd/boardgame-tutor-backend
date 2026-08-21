@@ -378,4 +378,100 @@ describe("GameRequestUseCase", () => {
 
     });
 
+    it("sube la portada a B2 y la incluye en el repositorio y el correo, solo cuando se manda", async () => {
+
+        const storage = makeFakeStorage();
+
+        const emailService = makeFakeEmailService();
+
+        const repository = makeFakeRepository();
+
+        const useCase = new GameRequestUseCase(storage, emailService, repository);
+
+        await useCase.execute({
+
+            requesterName: "Ana",
+
+            requesterEmail: "ana@example.com",
+
+            gameName: "Wingspan",
+
+            files: [],
+
+            coverFile: {
+
+                originalName: "portada.jpg",
+
+                buffer: Buffer.from("imagen"),
+
+                contentType: "image/jpeg"
+
+            }
+
+        });
+
+        expect(storage.upload).toHaveBeenCalledWith(
+
+            expect.stringContaining("cover-portada.jpg"),
+
+            expect.any(Buffer),
+
+            "image/jpeg"
+
+        );
+
+        expect(repository.create).toHaveBeenCalledWith(
+
+            expect.objectContaining({
+
+                coverKey: expect.stringContaining("cover-portada.jpg")
+
+            })
+
+        );
+
+        expect(emailService.sendGameRequestNotification).toHaveBeenCalledWith(
+
+            expect.objectContaining({ coverLink: "https://ejemplo.com/firmado" })
+
+        );
+
+    });
+
+    it("sin portada, no se sube nada de imagen ni se incluye coverKey", async () => {
+
+        const storage = makeFakeStorage();
+
+        const emailService = makeFakeEmailService();
+
+        const repository = makeFakeRepository();
+
+        const useCase = new GameRequestUseCase(storage, emailService, repository);
+
+        await useCase.execute({
+
+            requesterName: "Ana",
+
+            requesterEmail: "ana@example.com",
+
+            gameName: "Wingspan",
+
+            files: []
+
+        });
+
+        expect(repository.create).toHaveBeenCalledWith(
+
+            expect.objectContaining({ coverKey: undefined })
+
+        );
+
+        expect(emailService.sendGameRequestNotification).toHaveBeenCalledWith(
+
+            expect.objectContaining({ coverLink: undefined })
+
+        );
+
+    });
+
 });

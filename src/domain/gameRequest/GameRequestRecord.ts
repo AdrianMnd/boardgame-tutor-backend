@@ -12,6 +12,8 @@ export interface GameRequestRecord {
 
     pdfKeys: string[];
 
+    coverKey?: string;
+
     reviewed: boolean;
 
     createdAt: string;

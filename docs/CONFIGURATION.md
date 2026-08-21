@@ -54,6 +54,14 @@ Sin estas dos variables, el resto de la aplicación funciona con normalidad — 
 
 Máximo de solicitudes de juegos nuevos por IP cada hora (5 por defecto) — más bajo que el resto de límites, porque cada solicitud sube archivos potencialmente grandes y manda un correo.
 
+## Panel de administración (opcional)
+
+### `ADMIN_EMAIL`
+
+El email de la única cuenta con acceso a `/api/admin/*` (revisar solicitudes de juegos, restablecer contraseñas, ver el resumen de valoraciones) — tiene que coincidir exactamente (sin distinguir mayúsculas/minúsculas) con el email de una cuenta ya registrada en la app. Sin esta variable, nadie tiene acceso al panel — no falla el arranque, simplemente no hay administrador.
+
+Como no hay recuperación de contraseña por correo (ver la limitación de Resend arriba), el propio panel de administración incluye una forma de restablecer manualmente la contraseña de cualquier cuenta — pensado para que, si alguien olvida la suya, el administrador se la comunique por su propio correo personal, sin pasar por Resend.
+
 ## Proveedor de embeddings (obligatoria)
 
 ### `AI_EMBEDDING_PROVIDER`

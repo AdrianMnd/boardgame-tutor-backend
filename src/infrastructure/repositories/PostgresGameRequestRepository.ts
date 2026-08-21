@@ -17,6 +17,8 @@ interface GameRequestRow {
 
     pdf_keys: string[];
 
+    cover_key: string | null;
+
     reviewed: boolean;
 
     created_at: string;
@@ -42,6 +44,8 @@ function toRecord(
         bggUrl: row.bgg_url ?? undefined,
 
         pdfKeys: row.pdf_keys,
+
+        coverKey: row.cover_key ?? undefined,
 
         reviewed: row.reviewed,
 
@@ -72,10 +76,10 @@ export class PostgresGameRequestRepository
 
                 `
                 INSERT INTO game_requests
-                    (requester_name, requester_email, game_name, bgg_url, pdf_keys)
-                VALUES ($1, $2, $3, $4, $5)
+                    (requester_name, requester_email, game_name, bgg_url, pdf_keys, cover_key)
+                VALUES ($1, $2, $3, $4, $5, $6)
                 RETURNING id, requester_name, requester_email, game_name,
-                          bgg_url, pdf_keys, reviewed, created_at
+                          bgg_url, pdf_keys, cover_key, reviewed, created_at
                 `,
 
                 [
@@ -88,7 +92,9 @@ export class PostgresGameRequestRepository
 
                     input.bggUrl ?? null,
 
-                    input.pdfKeys
+                    input.pdfKeys,
+
+                    input.coverKey ?? null
 
                 ]
 
@@ -106,7 +112,7 @@ export class PostgresGameRequestRepository
 
                 `
                 SELECT id, requester_name, requester_email, game_name,
-                       bgg_url, pdf_keys, reviewed, created_at
+                       bgg_url, pdf_keys, cover_key, reviewed, created_at
                 FROM game_requests
                 ORDER BY reviewed ASC, created_at DESC
                 `

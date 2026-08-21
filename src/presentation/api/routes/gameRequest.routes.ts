@@ -24,7 +24,7 @@ const upload =
 
             fileSize: MAX_FILE_SIZE_BYTES,
 
-            files: MAX_FILES
+            files: MAX_FILES + 1
 
         },
 
@@ -37,6 +37,30 @@ const upload =
             callback
 
         ) => {
+
+            if (file.fieldname === "cover") {
+
+                if (!file.mimetype.startsWith("image/")) {
+
+                    callback(
+
+                        new BadRequestError(
+
+                            "La portada debe ser una imagen."
+
+                        )
+
+                    );
+
+                    return;
+
+                }
+
+                callback(null, true);
+
+                return;
+
+            }
 
             if (file.mimetype !== "application/pdf") {
 
@@ -76,7 +100,13 @@ router.post(
 
     requireAuth(container.jwtService),
 
-    upload.array("pdfs", MAX_FILES),
+    upload.fields([
+
+        { name: "pdfs", maxCount: MAX_FILES },
+
+        { name: "cover", maxCount: 1 }
+
+    ]),
 
     controller.submit
 

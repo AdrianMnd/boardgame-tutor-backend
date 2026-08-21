@@ -16,12 +16,18 @@ API REST en Node.js/Express para **BoardGame Tutor**, una aplicación de pregunt
 - **Consistencia de embeddings garantizada por diseño**: a diferencia del chat (donde varios proveedores son intercambiables), los embeddings usan siempre un único proveedor fijo — mezclar proveedores distintos rompería la búsqueda por similitud, así que el sistema se niega a arrancar si no está configurado de forma inequívoca.
 - **Cuentas de usuario** (JWT, contraseñas con `bcrypt`): registro, login, edición de perfil (nombre/email/contraseña, cada uno con su propia validación).
 - **Favoritos y categorías personalizadas** por cuenta — sincronizados entre dispositivos si hay sesión iniciada; el frontend sigue funcionando igual sin cuenta, guardando solo en local.
-- **Historial de conversación por (usuario, juego)**, sincronizado con la cuenta — una conversación activa por juego, igual que ya funcionaba en local.
+- **Memoria conversacional**: entiende preguntas de seguimiento ("¿y con 5 jugadores?") usando los últimos turnos de la conversación como contexto — sin inflar el *prompt* ni volver más lenta cada pregunta nueva, gracias a un límite fijo de turnos recientes.
+- **Modo de número de jugadores**: si el reglamento distingue reglas según cuántos jugéis, la respuesta las aplica específicamente — completamente opcional, no cambia nada si no se indica.
+- **Historial de conversación por (usuario, juego)**, sincronizado con la cuenta — una conversación activa por juego, con un límite de 30 mensajes por conversación (se recorta solo, sin intervención manual).
+- **Respuestas más útiles cuando no hay una coincidencia exacta**: si el reglamento trata algo relacionado pero no responde de forma específica, la IA lo dice explícitamente y resume lo relacionado, en vez de un simple "no encontrado".
 - **Solicitud de juegos nuevos**: cualquier usuario registrado puede proponer un juego con enlace a BoardGameGeek y PDF del reglamento (opcional); los PDF se suben a Backblaze B2 y llega un correo (Resend) con enlaces de descarga temporales para revisarlos.
-- **Importación de juegos resiliente**: *checkpoints* para reanudar una importación interrumpida por cuota agotada, embeddings en lote (menos peticiones HTTP), y verificación automática de que no queden fragmentos con embeddings incompletos o inconsistentes.
+- **Panel de administración**: revisión de solicitudes de juegos, restablecimiento manual de contraseñas (no hay recuperación por correo — ver limitaciones), y un resumen de valoraciones de respuestas para detectar qué reglamentos fallan más.
+- **Valoración rápida de respuestas** (👍/👎), con o sin cuenta — señal de calidad para priorizar qué contenido revisar.
+- **Importación de juegos resiliente**: *checkpoints* para reanudar una importación interrumpida por cuota agotada, embeddings en lote (menos peticiones HTTP), verificación automática de embeddings incompletos, y una integración opcional con la API de BoardGameGeek para autocompletar nombre/año/jugadores al dar de alta un juego nuevo.
+- **Endpoint de salud** (`/health`), pensado para servicios externos de monitorización que reduzcan los arranques en frío del plan gratuito de hosting.
 - **Rate limiting** por IP, con límites distintos según el coste real de cada endpoint (preguntas de chat, intentos de login, solicitudes de juegos con archivos).
 - Arquitectura por capas (dominio / aplicación / infraestructura / presentación), con inyección de dependencias manual.
-- **91 tests unitarios** (Vitest) — repositorios, casos de uso y controladores, todos con dependencias externas simuladas (nunca tocan Postgres/B2/IA de verdad).
+- **138 tests unitarios** (Vitest) — repositorios, casos de uso y controladores, todos con dependencias externas simuladas (nunca tocan Postgres/B2/IA de verdad).
 
 ## Almacenamiento
 
@@ -95,9 +101,18 @@ POST   /api/conversations/:gameId/messages  Añadir un mensaje
 DELETE /api/conversations/:gameId          Borrar la conversación ("Nueva conversación")
 
 POST   /api/game-requests                  Solicitar un juego nuevo (con sesión)
+
+POST   /api/ratings                        Valorar una respuesta (👍/👎, sesión opcional)
+
+GET    /api/admin/game-requests            Listar solicitudes de juegos (solo admin)
+PATCH  /api/admin/game-requests/:id/reviewed  Marcar solicitud como revisada (solo admin)
+POST   /api/admin/users/reset-password     Restablecer contraseña de una cuenta (solo admin)
+GET    /api/admin/ratings/summary          Resumen de valoraciones por juego (solo admin)
+
+GET    /health                             Comprobación de salud (sin autenticación)
 ```
 
-Todos los de `/api/favorites`, `/api/categories`, `/api/conversations` y `/api/game-requests` requieren sesión (cabecera `Authorization: Bearer <token>`). Referencia completa, con formato de peticiones/respuestas y el protocolo SSE, en [`docs/API.md`](docs/API.md).
+Todos los de `/api/favorites`, `/api/categories`, `/api/conversations` y `/api/game-requests` requieren sesión (cabecera `Authorization: Bearer <token>`). Los de `/api/admin/*` requieren además que el email de la cuenta coincida con `ADMIN_EMAIL`. Referencia completa, con formato de peticiones/respuestas y el protocolo SSE, en [`docs/API.md`](docs/API.md).
 
 ## Tecnologías
 
