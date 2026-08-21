@@ -48,20 +48,27 @@ export async function fetchBggMetadata(
 
     if (!response.ok) {
 
+        // El cuerpo de la respuesta puede explicar el motivo
+        // real (BGG a veces devuelve un mensaje concreto, no
+        // solo un código) — mostrarlo es la única forma de
+        // avanzar sin acceso directo a la API para probarlo.
+        const body =
+
+            await response.text().catch(() => "");
+
         const hint =
 
             response.status === 401 || response.status === 403
 
-                ? " (BGG suele devolver este código cuando bloquea la petición " +
-                  "por parecer tráfico automatizado — si esto persiste, puede " +
-                  "que BGG haya reforzado ese bloqueo más allá de la cabecera " +
-                  "User-Agent que ya se manda)"
+                ? " (suele significar que BGG está bloqueando la petición " +
+                  "por parecer tráfico automatizado)"
 
                 : "";
 
         throw new Error(
 
-            `BoardGameGeek respondió con estado ${response.status} para el id ${bggId}.${hint}`
+            `BoardGameGeek respondió con estado ${response.status} para el id ${bggId}.${hint}` +
+            (body ? `\nCuerpo de la respuesta:\n${body.slice(0, 500)}` : "")
 
         );
 
