@@ -7,17 +7,34 @@ const BGG_API_URL = "https://boardgamegeek.com/xmlapi2/thing";
 /**
  * Única pieza de esta integración que toca la red de verdad —
  * separada de BggParser.ts (lógica pura, testeable sin red) a
- * propósito. No se ha podido probar contra la API real de BGG
- * durante el desarrollo (entorno sin acceso a
- * boardgamegeek.com) — el formato del XML se basa en la
- * documentación pública de /xmlapi2/thing, pero conviene
- * probarlo contra un id real antes de confiar en él del todo.
+ * propósito.
+ *
+ * Requiere un token de autorización (BGG_API_TOKEN) desde que
+ * BGG empezó a exigir registro de aplicaciones — se manda como
+ * cabecera "Authorization: Bearer <token>", el único formato que
+ * aceptan (ver https://boardgamegeek.com/using_the_xml_api). Sin
+ * esta variable, la petición fallará con 401 igual que antes de
+ * tener el token.
  */
 export async function fetchBggMetadata(
 
     bggId: string
 
 ): Promise<BggGameData> {
+
+    const token = process.env.BGG_API_TOKEN;
+
+    if (!token) {
+
+        throw new Error(
+
+            "Falta BGG_API_TOKEN — genera un token en " +
+            "https://boardgamegeek.com/applications (pestaña \"Tokens\" " +
+            "de tu aplicación aprobada) y añádelo a tu .env."
+
+        );
+
+    }
 
     const response =
 
@@ -29,16 +46,17 @@ export async function fetchBggMetadata(
 
                 headers: {
 
-                    // Sin esta cabecera, BGG puede rechazar la
-                    // petición (401/403) por tratarla como
-                    // tráfico de bot — fetch() de Node no manda
-                    // un User-Agent "de navegador" por defecto,
-                    // y algunas APIs (BGG entre ellas, al
-                    // parecer) lo exigen para peticiones
-                    // automatizadas.
+                    // Sigue siendo buena práctica mandarla, aunque
+                    // el token ya identifique la aplicación —
+                    // algunas capas intermedias de BGG podrían
+                    // seguir fijándose en ella.
                     "User-Agent":
 
-                        "BoardGameTutor/1.0 (+https://boardgametutor.vercel.app)"
+                        "BoardGameTutor/1.0 (+https://boardgametutor.vercel.app)",
+
+                    // El único formato que acepta BGG: "Bearer",
+                    // un espacio, y el token — sin dos puntos.
+                    "Authorization": `Bearer ${token}`
 
                 }
 
@@ -58,12 +76,17 @@ export async function fetchBggMetadata(
 
         const hint =
 
-            response.status === 401 || response.status === 403
+            response.status === 401
 
-                ? " (suele significar que BGG está bloqueando la petición " +
-                  "por parecer tráfico automatizado)"
+                ? " (revisa que BGG_API_TOKEN esté bien configurado — un token " +
+                  "ausente, caducado, o mal copiado dan este mismo error)"
 
-                : "";
+                : response.status === 403
+
+                    ? " (BGG puede estar bloqueando la petición por otro motivo " +
+                      "no relacionado con el token)"
+
+                    : "";
 
         throw new Error(
 

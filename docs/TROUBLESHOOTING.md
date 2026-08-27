@@ -74,7 +74,7 @@ El origen del frontend no está en la lista permitida. Revisar `FRONTEND_URL` (d
 
 ## `npm run fetch-bgg` falla con error 401
 
-Estado conocido, no un bug — ver el aviso en [`docs/IMPORT.md`](./IMPORT.md#rellenar-metadatajson-automáticamente-desde-boardgamegeek-opcional). BGG exige aprobación explícita para su API, pendiente en el momento de escribir esto. Mientras tanto, rellena `metadata.json` a mano — el resto del flujo de importación funciona con total normalidad.
+Casi siempre significa que falta `BGG_API_TOKEN`, o que el token no es válido — desde que BGG exige aplicaciones aprobadas y token propio (ver [`docs/IMPORT.md`](./IMPORT.md#rellenar-metadatajson-automáticamente-desde-boardgamegeek-opcional)), cualquier petición sin un token correcto se rechaza. El propio comando muestra un mensaje explícito indicando que falta la variable, en vez de un 401 sin más contexto. Comprueba también que el token no tenga espacios de más al copiarlo, y que la aplicación siga aprobada en `https://boardgamegeek.com/applications`. Mientras tanto, rellena `metadata.json` a mano — el resto del flujo de importación funciona con total normalidad.
 
 ## Un juego importado sin errores no aparece en la tabla `games`
 

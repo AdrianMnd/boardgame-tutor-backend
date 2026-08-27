@@ -59,6 +59,12 @@ Ninguno depende del resultado del otro — validar que el juego existe es una co
 
 Hubo un paso intermedio (`LLMContextRefiner`) que reordenaba los chunks recuperados por relevancia con una llamada de IA extra, antes de generar la respuesta — llegó a fusionar dos pasos en uno (reordenar + recortar) para bajar de tres llamadas de IA por pregunta a dos. Se eliminó por completo: `ContextBuilder` siempre incluía **todos** los chunks recuperados en el contexto final, reordenados o no, así que ese paso no cambiaba qué información llegaba a la respuesta — solo el orden en que la IA la leía, un efecto sutil. El coste, en cambio, era una llamada de IA completa y sin streaming que bloqueaba el inicio de cualquier respuesta, notándose en tiempos de espera de 30+ segundos en reglamentos densos. Ahora la generación empieza en cuanto termina la recuperación por vectores (que ya devuelve los chunks ordenados por similitud), sin ese paso intermedio.
 
+### Cuántos fragmentos se recuperan, y por qué hay un índice HNSW
+
+`MAX_RETRIEVED_CHUNKS` (12 por defecto) controla cuántos fragmentos se le pasan a la IA como contexto. Subirlo no penaliza el tiempo de respuesta — la consulta ya compara la pregunta contra **todos** los fragmentos del juego para poder ordenarlos por similitud; el límite solo decide cuántos de los primeros se devuelven, no cuántos se comparan.
+
+Lo que sí afecta al tiempo es precisamente esa comparación exhaustiva: sin ningún índice vectorial, cada pregunta compara contra todos los fragmentos del juego, uno a uno — con juegos de varios documentos extensos, eso se nota. Un índice aproximado (HNSW/IVFFlat) sería la solución obvia, pero **no es viable tal cual con este proyecto**: `pgvector` limita ambos tipos a 2000 dimensiones, y los embeddings aquí tienen 3072 — ver `ENGINEERING-NOTES.md` para el detalle completo y las alternativas reales (ninguna trivial).
+
 ## El sistema de proveedores de IA
 
 Hay dos necesidades muy distintas que fácilmente se confunden si no se piensa con cuidado:
