@@ -100,6 +100,10 @@ URL pública de este servicio, usada para construir las URLs de las portadas de 
 
 Monitorización de errores en producción — sin esta variable, la aplicación funciona exactamente igual, simplemente sin reportar nada a ningún sitio. Con ella, cualquier error no controlado (un fallo de programación, un proveedor de IA caído de forma inesperada, etc.) se reporta a [Sentry](https://sentry.io) además de devolver la respuesta de error normal al cliente — no cambia nada de lo que ve quien usa la app, solo añade visibilidad de lo que está fallando en producción sin depender de mirar los logs de Render a mano.
 
+### `BGG_API_TOKEN` (opcional — solo para `npm run fetch-bgg`)
+
+Token de autorización de una aplicación aprobada en BoardGameGeek, necesario desde que BGG exige registro para usar su API. Se genera en `https://boardgamegeek.com/applications` (pestaña "Tokens"), y se manda como cabecera `Authorization: Bearer <token>` — el único formato que aceptan. Sin esta variable, solo falla `npm run fetch-bgg` (la ayuda opcional para rellenar `metadata.json` automáticamente); el resto de la aplicación no se ve afectado en absoluto. Ver [`docs/IMPORT.md`](./IMPORT.md) para el detalle completo, incluida la obligación de mostrar el logo "Powered by BGG" en el frontend si se usan estos datos.
+
 ## Puesta en marcha local
 
 ```bash
