@@ -82,6 +82,10 @@ Modelo de embeddings local (`transformers.js`, gratis, sin límite de peticiones
 
 Controlan cuántos chunks se agrupan por petición al importar un juego (40 por defecto), cuántos lotes en paralelo (1), y la espera entre peticiones (500 ms). Lotes más grandes = menos peticiones = menos riesgo de agotar límites de cuota, pero algunos proveedores devuelven silenciosamente menos resultados de los pedidos en lotes muy grandes (ver `ENGINEERING-NOTES.md`).
 
+### `MAX_RETRIEVED_CHUNKS`
+
+Cuántos fragmentos del reglamento se le pasan a la IA como contexto en cada pregunta (12 por defecto, antes 5). Subirlo mejora la completitud de las respuestas (menos casos de "no encontrado" cuando la respuesta está repartida en varios sitios del reglamento) sin apenas coste de tiempo — la búsqueda ya compara la pregunta contra todos los fragmentos del juego para poder ordenarlos; este número solo decide cuántos de los primeros se devuelven.
+
 ## Servidor
 
 ### `API_PUBLIC_URL`

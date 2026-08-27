@@ -39,3 +39,23 @@ La solución adoptada: el *fallback* solo se aplica si el proveedor falla **ante
 ## Renombrar el proyecto de Vercel sin romper CORS
 
 Al renombrar el proyecto del frontend en Vercel (cambia la URL `.vercel.app` asignada), el origen permitido por CORS en el backend queda apuntando a la URL antigua — las peticiones del frontend nuevo empiezan a fallar con un error de CORS, no de conexión, que puede confundirse con otro tipo de problema si no se sabe qué buscar. La lista de orígenes permitidos vive en `src/index.ts`; hay que actualizarla a mano cada vez que cambie la URL de producción del frontend.
+
+## Por qué no hay (ni puede haber fácilmente) un índice vectorial
+
+Con juegos de varios documentos extensos, el tiempo de respuesta se resiente — sin ningún índice sobre `embedding`, cada pregunta compara contra *todos* los fragmentos del juego, uno a uno, sin ningún atajo. La solución obvia parece un índice aproximado (HNSW o IVFFlat), que es justo lo que se intentó.
+
+Falló al primer intento, con un error claro de Postgres:
+
+```
+ERROR: column cannot have more than 2000 dimensions for hnsw index
+```
+
+`pgvector` limita **ambos** tipos de índice aproximado a 2000 dimensiones como máximo. Los embeddings de este proyecto tienen 3072 (la dimensión fija de `gemini-embedding-001` — ver la sección de por qué `AI_EMBEDDING_PROVIDER` no tiene *fallback*). No es un límite de configuración ni de la versión de Neon: es un límite estructural del propio algoritmo con vectores de este tamaño.
+
+Caminos reales para resolver esto, ninguno trivial:
+
+- **`halfvec`** (tipo de media precisión de `pgvector`, en versiones recientes): dobla el límite práctico de dimensiones para estos índices, lo que sí cubriría 3072. Requiere migrar la columna existente (no es solo crear un índice nuevo) y comprobar que la pérdida de precisión no empeora la calidad de las respuestas — no probado aquí.
+- **Cambiar de proveedor de embeddings** a uno con una dimensión menor a 2000: cambio mucho más invasivo, obligaría a reimportar *todos* los juegos ya existentes desde cero.
+- **Aceptar la búsqueda exacta como está**: sigue siendo perfectamente viable para la mayoría de juegos (los de un único documento no notan el problema); el coste solo se nota en los casos con más volumen de fragmentos.
+
+De momento se ha quedado en la última opción, por descarte — las otras dos tienen un coste de migración que no está justificado sin antes medir de verdad cuánto pesa el problema en producción.

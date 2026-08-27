@@ -71,10 +71,11 @@ CREATE TABLE IF NOT EXISTS chunks (
 -- Índices para las consultas que hace la aplicación:
 -- - listar/filtrar chunks de un juego concreto antes de comparar
 --   por similitud (la comparación en sí no lleva índice HNSW/IVF
---   a propósito — con el volumen de esta app, una búsqueda
---   exacta sobre "los chunks de este juego" ya es rapidísima, y
---   evita la complejidad y las aproximaciones de un índice
---   vectorial que aquí no hace falta).
+--   — pgvector limita ambos a 2000 dimensiones como máximo, y los
+--   embeddings de este proyecto tienen 3072 (dimensión fija de
+--   gemini-embedding-001), así que un índice aproximado
+--   simplemente no es posible aquí sin cambiar de proveedor de
+--   embeddings o de tipo de columna — ver ENGINEERING-NOTES.md).
 CREATE INDEX IF NOT EXISTS idx_chunks_game_id
     ON chunks(game_id);
 

@@ -56,7 +56,20 @@ export const IMPORT_CONFIGURATION: ImportConfiguration = {
 
     retryDelay: 1000,
 
-    maxRetrievedChunks: 5,
+    // Antes en 5 — con fragmentos de 600 caracteres, eso deja un
+    // contexto real bastante corto (~2500 caracteres), lo que
+    // hacía que preguntas que necesitaban combinar información
+    // de varios sitios distintos del reglamento cayeran con
+    // demasiada frecuencia en el mensaje de "no encontrado" (la
+    // IA respondía correctamente según lo que recibía — el
+    // problema era que recibía poco). Subir este número no
+    // empeora el tiempo de respuesta: la consulta SQL ya tiene
+    // que comparar la pregunta contra TODOS los fragmentos del
+    // juego para poder ordenarlos — LIMIT solo decide cuántos de
+    // los primeros se devuelven, no cuántos se comparan.
+    maxRetrievedChunks:
+
+        Number(process.env.MAX_RETRIEVED_CHUNKS) || 12,
 
     minimumSimilarity: 0.70
 
